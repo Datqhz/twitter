@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "136662625797",
+    "project_id": "twitter-a10b3",
+    "storage_bucket": "twitter-a10b3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136662625797:android:b29284d24e6c4ffe97766c",
+        "android_client_info": {
+          "package_name": "com.ros.twitter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgzMMQCYoQXs4z43ZuH-0edQ_B4cRJ2GY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

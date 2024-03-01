@@ -1,11 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:twitter/screens/home/home.dart';
+import 'package:twitter/screens/home/post_tweet.dart';
 import 'package:twitter/screens/messages/message.dart';
 import 'package:twitter/screens/notification/notification.dart';
 import 'package:twitter/screens/search/search.dart';
 import 'package:twitter/shared/drawer.dart';
+import '../models/tweet.dart';
+import '../services/database_service.dart';
+import '../services/storage.dart';
 import '../shared/global_variable.dart';
 import 'community/community.dart';
 
@@ -19,7 +25,8 @@ class AuthNavigation extends StatefulWidget {
 class _AuthNavigationState extends State<AuthNavigation> {
 
   int _currentPage = 0;
-
+  bool isShowBottomBar = true;
+  DatabaseService databaseService = DatabaseService();
 
   Widget _bottomNavigateBar(){
     return Container(
@@ -108,29 +115,107 @@ class _AuthNavigationState extends State<AuthNavigation> {
       case 1:
         return const SearchPage();
       case 2:
-        return const Community();
+        return Community(callback: setShowBottomBar,);
       case 3:
         return const NotificationPage();
       default:
         return const MessagePage();
     }
   }
+  void setShowBottomBar(bool isShow){
+    setState((){
+      isShowBottomBar = isShow;
+    });
+  }
+  Future<void> getUserInfo()async{
+    databaseService.getUserInfo();
+  }
+
+  void postTweet(List<XFile> images, Tweet tweet)async{
+    List<String> imageNames = [];
+    try{
+      // upload image to the cloud if have
+      if(images.length!=0){
+        for(XFile image in images){
+          String name = await Storage().putImage(image);
+          if(name != ""){
+            imageNames.add(name);
+          }
+        }
+      }
+      tweet.imgLinks = imageNames;
+      bool result = await databaseService.postTweet(tweet);
+      if(result){
+        print("post tweet successful!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // backgroundColor: Colors.transparent,
+            // padding: EdgeInsets.symmetric(horizontal: 12),
+            width: 2.3*MediaQuery.of(context).size.width/4,
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Your tweet is posted success!!'),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }else {
+        print("error");
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _switchPage(),
-          Positioned(
-              bottom: 0,
-              right: 0,
-              left: 0,
-              child: _bottomNavigateBar()
-          ),
-        ],
-      ),
-      drawer: MyDrawer(),
-    );
+      return FutureBuilder(
+          future: getUserInfo(),
+          builder: (context, snapshot){
+            if(snapshot.connectionState == ConnectionState.done){
+              return Scaffold(
+                backgroundColor: Colors.black,
+                body: Stack(
+                  children: [
+                    _switchPage(),
+                    AnimatedPositioned(
+                        duration: Duration(milliseconds: 200),
+                        bottom: isShowBottomBar?70:-50,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>PostTweetScreen(postTweet: postTweet)));
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(50)
+                            ),
+                            child: Icon(FontAwesomeIcons.featherPointed),
+                          ),
+                        )
+                    ),
+                    AnimatedPositioned(
+                        bottom: isShowBottomBar?0:-50,
+                        right: 0,
+                        left: 0,
+                        duration: Duration(milliseconds: 200),
+                        child: _bottomNavigateBar()
+                    ),
+                  ],
+                ),
+                drawer: MyDrawer(),
+              );
+            }else {
+              return SpinKitPulse(
+                size: 50,
+                color: Colors.white,
+              );
+            }
+          }
+      );
   }
 }

@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:indexed/indexed.dart';
+
+import '../screens/search/search_view.dart';
+import 'global_variable.dart';
 
 class MyAppBar extends StatefulWidget{
   MyAppBar({super.key, required this.currentPage});
@@ -23,9 +28,9 @@ class _MyAppBarState extends State<MyAppBar> {
       case 2:
         return _appBarCommunities();
       case 3:
-        return _appBarSearch("Seach Direct Messages");
-      default:
         return _appBarNotifications();
+      default:
+        return _appBarSearch("Seach Direct Messages");
     }
   }
 
@@ -54,7 +59,11 @@ class _MyAppBarState extends State<MyAppBar> {
           // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                if(placeholder == "Search X"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>SearchView()));
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(30, 36, 41, 1),
                 foregroundColor: const Color.fromRGBO(101, 119, 134, 1),
@@ -148,7 +157,7 @@ class _MyAppBarState extends State<MyAppBar> {
       decoration: BoxDecoration(
         color: Colors.black,
           border: Border(
-              bottom: BorderSide(color: Theme.of(context).dividerColor, width: 0.1))),
+              bottom: BorderSide(color: Theme.of(context).dividerColor, width: 0.3))),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Indexer(
         children: [
@@ -167,7 +176,19 @@ class _MyAppBarState extends State<MyAppBar> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  child: Image.asset("assets/images/patty.png"),
+                  child: FutureBuilder<String?>(
+                    future: GlobalVariable.avatar,
+                    builder: (context, snapshot){
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        if (snapshot.hasError || snapshot.data == null) {
+                          return Text("Error");
+                        } else {
+                          return Image.network(snapshot.data!);
+                        }
+                      }
+                      return SizedBox(height: 1,);
+                    },
+                  )
                 ),
               ),
               onTap: (){Scaffold.of(context).openDrawer();},

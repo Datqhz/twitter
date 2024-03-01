@@ -48,6 +48,10 @@ dependencies:
   provider: ^6.0.5
   chewie: ^1.7.1
   video_player: ^2.8.1
+  avatar_stack: ^1.2.0
+  firebase_storage: ^11.6.0
+  image_picker: ^1.0.7
+  image_size_getter: ^2.1.2
 
 
 dev_dependencies:

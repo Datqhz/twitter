@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twitter/screens/wrapper.dart';
@@ -10,6 +11,7 @@ import 'auth/user_auth.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  GestureBinding.instance.resamplingEnabled = true;
   runApp(const MyApp());
 }
 

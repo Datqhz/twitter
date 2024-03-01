@@ -35,6 +35,7 @@ class AuthFirebaseService{
     try{
       UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
+      print(user?.getIdToken());
       return _userFromFirebase(user!);
     }catch(e){
       print(e.toString());

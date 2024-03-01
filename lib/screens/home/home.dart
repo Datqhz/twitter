@@ -1,5 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:twitter/widgets/tweet.dart';
+import 'package:twitter/models/tweet.dart';
+import 'package:twitter/services/database_service.dart';
+import 'package:twitter/services/storage.dart';
+import 'package:twitter/shared/global_variable.dart';
+import 'package:twitter/widgets/tweet_view.dart';
+import 'package:twitter/widgets/tweet_widget.dart';
 
 import '../../shared/app_bar.dart';
 
@@ -13,17 +19,43 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
   late TabController _tabController;
-
+  Storage storage = Storage();
+  DatabaseService _databaseService = DatabaseService();
+  List<Tweet> tweets=[];
   @override
-  void initState() {
+  void initState(){
+
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    fetchData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> fetchData()async{
+    try{
+      List<Tweet> data =  await _databaseService.getTweet();
+      setState(() {
+        tweets = data;
+      });
+    }catch(e){
+      print("Lỗi:");
+    }
+
+  }
+  List<Widget> buildListTweet(){
+    List<Widget> items = [];
+    if(tweets.length>0){
+      for(Tweet t in tweets){
+        items.add(TweetWidget(tweet: t));
+      }
+    }
+    items.add(SizedBox(height: 50,));
+    return items;
   }
 
   @override
@@ -35,17 +67,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
                 children: [
                     Container(
                       height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
                       color: Colors.black,
                       padding: EdgeInsets.only(top: 88),
                       child: ListView(
-                        children: [
-                          Tweet(),
-                          // Tweet(),
-                          // Tweet(),
-                          // Tweet(),
-                          SizedBox(height: 50,)
-                        ],
-                      ),
+                        children: buildListTweet(),
+                       )
                     ),
                     Center(
                         child: Text('following', style: TextStyle(color: Colors.black))

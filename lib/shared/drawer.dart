@@ -1,6 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:twitter/screens/profile/profile.dart';
+import 'package:twitter/services/auth_firebase.dart';
+
+import 'global_variable.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -43,9 +49,23 @@ class MyDrawer extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: Image.asset("assets/images/patty.png"),
+                          child: FutureBuilder<String?>(
+                            future: GlobalVariable.avatar,
+                            builder: (context, snapshot){
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.hasError || snapshot.data == null) {
+                                  return Text("Error");
+                                } else {
+                                  return Image.network(snapshot.data!);
+                                }
+                              }
+                              return SizedBox(height: 1,);
+                            },
+                          )
                       ),
-                      onTap: (){},
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile()));
+                      },
                     ),
                     GestureDetector(
                       child: const Icon(FontAwesomeIcons.ellipsisVertical, size: 14,),
@@ -53,8 +73,8 @@ class MyDrawer extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8,),
-                const Text(
-                  'Sorphin Jie',
+                Text(
+                  GlobalVariable.currentUser!.displayName,
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
@@ -62,8 +82,8 @@ class MyDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6,),
-                const Text(
-                  '@roBiN125',
+                Text(
+                  GlobalVariable.currentUser!.username,
                   style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
@@ -71,11 +91,11 @@ class MyDrawer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12,),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      '0',
+                      GlobalVariable.numOfFollowing.toString(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 13,
@@ -92,7 +112,7 @@ class MyDrawer extends StatelessWidget {
                     ),
                     SizedBox(width: 6,),
                     Text(
-                      '0',
+                      GlobalVariable.numOfFollowed.toString(),
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 13,
@@ -223,6 +243,26 @@ class MyDrawer extends StatelessWidget {
               minLeadingWidth: 24,
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+          ),
+          SizedBox(
+            height: 50,
+            child: ListTile(
+              leading: const Icon(FontAwesomeIcons.moneyBill1, color: Colors.white, weight: 600,size: 26,),
+              title: const Text(
+                'Log out',
+                style:TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    color: Colors.white
+                ) ,
+              ),
+              titleAlignment: ListTileTitleAlignment.center,
+              minLeadingWidth: 24,
+              onTap: () {
+                Navigator.pop(context);
+                AuthFirebaseService().signOut();
               },
             ),
           ),

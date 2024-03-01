@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/app_bar.dart';
@@ -10,16 +11,64 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+
+  Widget trending(){
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Trending in Vietnam",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white.withOpacity(0.6),
+                  fontWeight: FontWeight.w500
+                ),
+              ),
+              GestureDetector(
+                onTap: (){},
+                child: Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white,size: 14,),
+              )
+            ],
+          ),
+          SizedBox(height: 3,),
+          Text(
+            "Expansion Pack",
+            style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+                fontWeight: FontWeight.w500
+            ),
+          ),
+          SizedBox(height: 3,),
+          Text(
+            "8,845 posts",
+            style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.6),
+            ),
+          ),
+          SizedBox(height: 24,)
+        ],
+      )
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(
           children: [
-            Center(
-              child: Text(
-                "Message",
-                style: TextStyle(
-                    color: Colors.white
-                ),
+            Container(
+              margin: EdgeInsets.only(top: 80),
+              child: ListView.builder(
+                itemCount: 4,
+              itemBuilder: (BuildContext context, int index) {
+                return trending();
+              },
               ),
             ),
             Positioned(

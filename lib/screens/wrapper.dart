@@ -9,7 +9,7 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserAuth?>(context);
-    print(user);
+/*    print(user);*/
     return user==null? SignIn() : AuthNavigation();
   }
 }

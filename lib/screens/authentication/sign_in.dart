@@ -3,7 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twitter/auth/user_auth.dart';
 import 'package:twitter/services/auth_firebase.dart';
 import 'package:twitter/services/firebase_database.dart';
+import 'package:twitter/shared/global_variable.dart';
+import 'package:twitter/services/storage.dart';
 
+import '../../services/database_service.dart';
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
 
@@ -387,6 +390,7 @@ class _SignInStep2State extends State<SignInStep2> {
   final _formKey = GlobalKey<FormState>();
   String _password = "";
   bool _isObscure = true;
+  DatabaseService _databaseService = DatabaseService();
   @override
   void initState() {
     super.initState();
@@ -573,7 +577,9 @@ class _SignInStep2State extends State<SignInStep2> {
                                 ),
                               );
                             }else {
+                              _databaseService.getUserInfo();
                               Navigator.pop(context);
+
                             }
                           }
                         }: null,

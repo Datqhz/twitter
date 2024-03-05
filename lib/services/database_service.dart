@@ -9,7 +9,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.14:8080';
+  String url = 'http://192.168.1.21:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -80,6 +80,7 @@ class DatabaseService{
     }
     return false;
   }
+
   Future<String> getUserInfo() async{
     var token = await extractToken();
     Map<String, String> headers = {
@@ -95,8 +96,68 @@ class DatabaseService{
     GlobalVariable.currentUser = MyUser.fromJson(data['user']);
     GlobalVariable.numOfFollowed = data['numOfFollowed'];
     GlobalVariable.numOfFollowing = data['numOfFollowing'];
-    GlobalVariable.avatar = Storage().downloadAvatarURL(GlobalVariable.currentUser!.avatarLink);
-    GlobalVariable.wall = Storage().downloadWallULR(GlobalVariable.currentUser!.wallLink);
+    GlobalVariable.avatar = (await Storage().downloadAvatarURL(GlobalVariable.currentUser!.avatarLink))!;
+    print(GlobalVariable.avatar);
+    GlobalVariable.wall = (await Storage().downloadWallULR(GlobalVariable.currentUser!.wallLink))!;
     return response.body.toString();
+  }
+
+  Future<List<MyUser>> findUserByUsername(String s)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    Response response = await get(Uri.parse("$url/api/v1/user/"+s), headers: headers);
+    int statusCode = response.statusCode;
+
+    if(statusCode != 200){
+      print("error");
+    }
+    List<MyUser> result = (json.decode(response.body) as List<dynamic>)
+        .map((data) => MyUser.fromJson(data))
+        .toList();
+    print(result.length);
+    return result;
+  }
+
+  Future<bool> likeTweet(String tweetId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await post(
+        Uri.parse("$url/api/v1/like"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          'tweetId': tweetId,
+          'uid':GlobalVariable.currentUser?.uid,
+          // Add any other data you want to send in the body
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> unlikeTweet(String tweetId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await delete(
+        Uri.parse("$url/api/v1/like/"+tweetId),
+        headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
   }
 }

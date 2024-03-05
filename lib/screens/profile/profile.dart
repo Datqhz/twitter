@@ -26,12 +26,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   bool showTabbar = false;
   late TabController _tabController;
   late ScrollController scrollController;
-
+  List<GlobalKey<ScrollableState>> tabKeys = List.generate(5, (index) => GlobalKey<ScrollableState>());
   @override
   void initState() {
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
-        print("current scroll " + scrollController.offset.toString());
+        // print("current scroll " + scrollController.offset.toString());
     });
     imageSize = 0;
     scrollController = ScrollController()
@@ -39,7 +39,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
         imageSize = -scrollController.offset;
         avatarSize = 100 - scrollController.offset;
         top = 0 - scrollController.offset;
-        print("Scroll " + scrollController.offset.toString());
+        // print("Scroll " + scrollController.offset.toString());
         if(top < -265){
           top = -265;
         }
@@ -69,30 +69,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
               children: [
                 TabBarView(
                       controller: _tabController,
-                      physics: BouncingScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       children: [
-                        Container(
-                          padding: EdgeInsets.only(top: 360+top),
-                          child: _buildTabContent("post"),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: 360+top),
-                          child: _buildTabContent("reply"),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: 360+top),
-                          child: _buildTabContent("highlight"),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: 360+top),
-                          child: _buildTabContent("media"),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: 360+top),
-                          child: _buildTabContent("like"),
-                        )
+                        _buildTabContent("post"),
+                        _buildTabContent("reply"),
+                        _buildTabContent("highlight"),
+                        _buildTabContent("media"),
+                        _buildTabContent("media"),
+                        // Container(
+                        //   padding: EdgeInsets.only(top: 360+top),
+                        //   child: _buildTabContent("like"),
+                        // )
                       ]
                 ),
+                //user info and tabbar
                 Positioned(
                   top: top,
                   left: 0,
@@ -100,35 +90,22 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                   child: SizedBox(
                     height: 360+avatarSize,
                     child: Column(
-
                         children: [
-                          FutureBuilder<String?>(
-                            future: GlobalVariable.wall,
-                            builder: (context, snapshot){
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasError || snapshot.data == null) {
-                                  return Text("Error");
-                                } else {
-                                  return Container(
-                                    height: 150,
-                                    width:  MediaQuery.of(context).size.width,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(snapshot.data!),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                              return SizedBox(height: 1,);
-                            },
+                          Container(
+                            height: 150,
+                            width:  MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(GlobalVariable.wall),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                           Container(
                               transform: Matrix4.translationValues(0, 50-avatarSize, 0),
                               width: MediaQuery.of(context).size.width,
                               padding: EdgeInsets.symmetric(horizontal: 14),
-                              color: Colors.transparent,
+                              color: Colors.black,
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -140,29 +117,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                 children: [
                                   Padding(
                                     padding: EdgeInsets.symmetric(horizontal: (100-avatarSize)/2),
-                                    child: Container(
+                                    child:  Container(
+                                      alignment: Alignment.centerLeft,
                                       height: avatarSize,
                                       width: avatarSize,
                                       clipBehavior: Clip.antiAlias,
                                       decoration: BoxDecoration(
-                                        // borderRadius: BorderRadius.circular(50),
-                                          shape: BoxShape.circle,
-                                          color: Colors.black,
-                                          border: Border.all(width:2,color: Colors.black)
+                                        borderRadius: BorderRadius.circular(50),
                                       ),
-                                      child:  FutureBuilder<String?>(
-                                        future: GlobalVariable.avatar,
-                                        builder: (context, snapshot){
-                                          if (snapshot.connectionState == ConnectionState.done) {
-                                            if (snapshot.hasError || snapshot.data == null) {
-                                              return Text("Error");
-                                            } else {
-                                              return Image.network(snapshot.data!);
-                                            }
-                                          }
-                                          return SizedBox(height: 1,);
-                                        },
-                                      )
+                                      child: Image.network(GlobalVariable.avatar),
+
                                     ),
                                   ),
                                   OutlinedButton(
@@ -273,6 +237,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                 TabBar(
                                   unselectedLabelColor: Color.fromRGBO(170, 184, 194, 1),
                                   indicatorSize: TabBarIndicatorSize.label,
+                                  padding: EdgeInsets.only(bottom: 12),
                                   indicatorWeight: 3,
                                   isScrollable: true,
                                   controller: _tabController,
@@ -398,17 +363,26 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
       ),
     );
   }
+  List<Widget>_loadList(String text){
+    List<Widget> rs = [];
+    for(int i in List.generate(20, (index) =>index)){
+      rs.add(ListTile(
+        title: Container(
+          color: Colors.blue,
+          width: 100,
+          height: 100,
+          child: Text(i.toString() + text),
+        ),
+      ));
+    }
+    return rs;
+  }
   Widget _buildTabContent(String text) {
-    return ListView.builder(
+    return ListView(
       controller: scrollController,
-      key: PageStorageKey<String>(text),
-      itemCount: 50,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          // title: TweetWidget(tweet: Tweet()),
-          title: Text("twwwww"),
-        );
-      },
+      // key: PageStorageKey<String>(text),
+      children: _loadList(text),
+
     );
   }
 }

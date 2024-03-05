@@ -12,8 +12,8 @@ import '../models/user.dart';
 class GlobalVariable{
 
   static double paddingScreen = 15;
-  static late Future<String?> avatar;
-  static late Future<String?> wall;
+  static String avatar = "https://firebasestorage.googleapis.com/v0/b/twitter-a10b3.appspot.com/o/avatar%2Fblack.jpg?alt=media&token=ab719234-3771-4309-b004-c464e0ed2281";
+  static late String wall;
   static late MyUser? currentUser = null;
   static int numOfFollowing = 0;
   static int numOfFollowed = 0;

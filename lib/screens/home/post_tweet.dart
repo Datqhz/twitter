@@ -108,19 +108,20 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(50),
                           ),
-                          child: FutureBuilder<String?>(
-                            future: GlobalVariable.avatar,
-                            builder: (context, snapshot){
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasError || snapshot.data == null) {
-                                  return Text("Error");
-                                } else {
-                                  return Image.network(snapshot.data!);
-                                }
-                              }
-                              return SizedBox(height: 1,);
-                            },
-                          )
+                          child: Image.network(GlobalVariable.avatar),
+                          // child: FutureBuilder<String?>(
+                          //   future: GlobalVariable.avatar,
+                          //   builder: (context, snapshot){
+                          //     if (snapshot.connectionState == ConnectionState.done) {
+                          //       if (snapshot.hasError || snapshot.data == null) {
+                          //         return Text("Error");
+                          //       } else {
+                          //         return Image.network(snapshot.data!);
+                          //       }
+                          //     }
+                          //     return SizedBox(height: 1,);
+                          //   },
+                          // )
                       ),
                       SizedBox(width: 12,),
                       // content and media
@@ -190,7 +191,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                       TextButton(
                         onPressed: _canPost?(){
                           Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
-                            uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal );
+                            uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal , isLike: false);
                           print(tweet);
                           widget.postTweet(imagePicked, tweet);
                           Navigator.pop(context);

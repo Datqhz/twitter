@@ -116,7 +116,7 @@ class _CommunityState extends State<Community> {
                       isShow = true;
                       tempHeight = 0;
                     }
-                    this.widget.callback(isShow);
+                    // this.widget.callback(isShow);
                   });
                   return true;
                 },

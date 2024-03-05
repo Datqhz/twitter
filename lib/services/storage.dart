@@ -33,7 +33,6 @@ class Storage{
 
     // Get the download URL for the image
     String downloadURL = await storageReference.getDownloadURL();
-
     return downloadURL;
   }
   Future<Uint8List> getVideoTweetUint8List(String videoUrl) async {
@@ -70,7 +69,8 @@ class Storage{
   Future<String> putImage(XFile image)async{
     try{
       String randomName = getRandomString(10);
-      tweetImgRef.child(randomName+".jpg").putFile(File(image.path));
+      final metadata = SettableMetadata(contentType: 'image/jpeg');
+      tweetImgRef.child(randomName+".jpg").putFile(File(image.path),metadata);
       return randomName+".jpg";
     }catch(e){
       return "";

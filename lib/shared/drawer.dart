@@ -49,19 +49,20 @@ class MyDrawer extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                         ),
-                          child: FutureBuilder<String?>(
-                            future: GlobalVariable.avatar,
-                            builder: (context, snapshot){
-                              if (snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasError || snapshot.data == null) {
-                                  return Text("Error");
-                                } else {
-                                  return Image.network(snapshot.data!);
-                                }
-                              }
-                              return SizedBox(height: 1,);
-                            },
-                          )
+                          child: Image.network(GlobalVariable.avatar),
+                          // child: FutureBuilder<String?>(
+                          //   future: GlobalVariable.avatar,
+                          //   builder: (context, snapshot){
+                          //     if (snapshot.connectionState == ConnectionState.done) {
+                          //       if (snapshot.hasError || snapshot.data == null) {
+                          //         return Text("Error");
+                          //       } else {
+                          //         return Image.network(snapshot.data!);
+                          //       }
+                          //     }
+                          //     return SizedBox(height: 1,);
+                          //   },
+                          // )
                       ),
                       onTap: (){
                         Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile()));

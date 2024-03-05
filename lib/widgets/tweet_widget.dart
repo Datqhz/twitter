@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twitter/models/tweet.dart';
+import 'package:twitter/services/database_service.dart';
 import 'package:twitter/widgets/ImageGridView.dart';
 import 'package:twitter/widgets/tweet_view.dart';
 
@@ -20,28 +21,12 @@ class TweetWidget extends StatefulWidget {
 class _TweetWidgetState extends State<TweetWidget> {
 
   bool _isRepost = false;
-  bool _isLike = false;
+  late bool _isLike;
   bool _isExtend = false;
   bool _isShowMore = false;
 
   Widget action(int number, bool isActive, Color? colorActive, IconData icon){
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: isActive == false? const Color.fromRGBO(170, 184, 194, 1): colorActive,
-        ),
-        const SizedBox(width: 4,),
-        Text(
-          number != 0 ?number.toString(): '',
-          style: TextStyle(
-              fontSize: 14,
-              color: isActive == false? const Color.fromRGBO(170, 184, 194, 1): colorActive,
-          ),
-        )
-      ],
-    );
+  return Container();
   }
 
   @override
@@ -52,19 +37,21 @@ class _TweetWidgetState extends State<TweetWidget> {
         _isShowMore = true;
       });
     }
+    _isLike = widget.tweet.isLike;
   }
 
   Widget buildMediaView(){
     return Container(
       color: Colors.black,
+        width: double.infinity,
         constraints: BoxConstraints(
           minHeight: 100,
           maxHeight: 400
         ),
         child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: widget.tweet.imgLinks.length + widget.tweet.videoLinks.length == 1? AspectRatio(
-              aspectRatio: 16/9,
+            borderRadius: BorderRadius.circular(12),
+            child: widget.tweet.imgLinks.length + widget.tweet.videoLinks.length == 1? Card(
+              clipBehavior: Clip.antiAlias,
               child: FutureBuilder<String?>(
                 future: Storage().getImageTweetURL(widget.tweet.imgLinks[0]),
                 builder: (context, snapshot) {
@@ -72,7 +59,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                     if (snapshot.hasError || snapshot.data == null) {
                       return Text("Error");
                     } else {
-                      return Image.network(snapshot.data!);
+                      return Image.network(snapshot.data!, fit: BoxFit.cover,);
                     }
                   }
                   return SpinKitPulse(
@@ -176,15 +163,6 @@ class _TweetWidgetState extends State<TweetWidget> {
                     ],
                   ),
                   const SizedBox(height: 4,),
-                  /*const Text(
-                    'When a child is scrolled out of view, the associated element subtree, states and render objects are destroyed. A new child at the same position in the list will be lazily recreated along with new elements, states and render objects when it is scrolled back.',
-                    style:TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      overflow: TextOverflow.ellipsis
-                    ),
-                    maxLines: 10,
-                  ),*/
                   Text.rich(
                     TextSpan(
                       text: _isShowMore?(_isExtend? widget.tweet.content:widget.tweet.content.substring(0, 200)+"..."):widget.tweet.content,
@@ -234,25 +212,21 @@ class _TweetWidgetState extends State<TweetWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      action(widget.tweet.totalComment ,false, null, CupertinoIcons.chat_bubble ),
-                      GestureDetector(
-                          onTap: (){
-                            setState(() {
-                              _isRepost = !_isRepost;
-                            });
-                          },
-                          child: action(1045 , _isRepost, const Color.fromRGBO(84, 209, 130, 1), CupertinoIcons.arrow_2_squarepath )
-                      ),
-                      GestureDetector(
-                          onTap: (){
-                              setState(() {
-                                _isLike = !_isLike;
-                              });
-                          },
-                          child: action(widget.tweet.totalLike ,_isLike, Colors.pink, CupertinoIcons.heart )
-                      ),
-                      action(0 ,false, null, CupertinoIcons.chart_bar_alt_fill ),
-                      action(0 ,false, null, Icons.share_outlined ),
+                      // comment
+                      TweetAction(number: widget.tweet.totalComment, isActive: false,
+                          colorActive: null,  icon:CupertinoIcons.chat_bubble, tweetId: widget.tweet.idAsString, type: 1),
+                      //re-post
+                      TweetAction(number: 123, isActive: false,
+                          colorActive: const Color.fromRGBO(84, 209, 130, 1), icon:CupertinoIcons.arrow_2_squarepath, tweetId: widget.tweet.idAsString, type: 2),
+                      // like
+                      TweetAction(number: widget.tweet.totalLike, isActive: widget.tweet.isLike,
+                           colorActive: Colors.pink, icon:CupertinoIcons.heart, tweetId: widget.tweet.idAsString, type: 3),
+                      //view
+                      TweetAction(number: 0, isActive: false,
+                          colorActive: null, icon:CupertinoIcons.chart_bar_alt_fill, tweetId: widget.tweet.idAsString, type: 4),
+                      //share
+                      TweetAction(number: 0, isActive: false,
+                          colorActive: null, icon:Icons.share_outlined, tweetId: widget.tweet.idAsString, type: 6),
                     ],
                   )
                 ],
@@ -264,5 +238,76 @@ class _TweetWidgetState extends State<TweetWidget> {
     );
   }
 }
+
+class TweetAction extends StatefulWidget {
+  TweetAction({super.key, required this.number, required this.isActive, required this.colorActive, required this.icon, required this.tweetId, required this.type});
+  int number;
+  bool isActive;
+  Color? colorActive;
+  IconData icon;
+  String tweetId;
+  int type; // what kind action is
+  @override
+  State<TweetAction> createState() => _TweetActionState();
+}
+
+class _TweetActionState extends State<TweetAction> {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: ()async{
+        switch (widget.type){
+          case 1: // action is comment
+            break;
+          case 2: // action is re-post
+            break;
+          case 3: // action is like
+            if(widget.isActive){
+              await DatabaseService().unlikeTweet(widget.tweetId);
+            }else {
+              await DatabaseService().likeTweet(widget.tweetId);
+            }
+            setState(() {
+              if(widget.isActive){
+                widget.number -=1;
+              }else {
+                widget.number +=1;
+              }
+              widget.isActive = !widget.isActive;
+            });
+            break;
+          case 4: //view
+            break;
+          case 5: //bookmark
+            break;
+          default: //share
+            break;
+
+        }
+
+    },
+      child: Row(
+        children: [
+          Icon(
+            widget.icon,
+            size: 16,
+            color: widget.isActive == false? const Color.fromRGBO(170, 184, 194, 1): widget.colorActive,
+          ),
+          const SizedBox(width: 4,),
+          Text(
+            widget.number != 0 ?widget.number.toString(): '',
+            style: TextStyle(
+              fontSize: 14,
+              color: widget.isActive == false? const Color.fromRGBO(170, 184, 194, 1): widget.colorActive,
+            ),
+          )
+        ],
+      ),
+    );;
+  }
+}
+
 
 

@@ -6,13 +6,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twitter/models/tweet.dart';
 import 'package:twitter/services/database_service.dart';
+import 'package:twitter/shared/global_variable.dart';
 import 'package:twitter/widgets/ImageGridView.dart';
 import 'package:twitter/widgets/tweet_view.dart';
 
 import '../services/storage.dart';
 
 class TweetWidget extends StatefulWidget {
-  TweetWidget({super.key, required this.tweet});
+  TweetWidget({ super.key, required this.tweet});
   Tweet tweet;
   @override
   State<TweetWidget> createState() => _TweetWidgetState();
@@ -25,9 +26,6 @@ class _TweetWidgetState extends State<TweetWidget> {
   bool _isExtend = false;
   bool _isShowMore = false;
 
-  Widget action(int number, bool isActive, Color? colorActive, IconData icon){
-  return Container();
-  }
 
   @override
   void initState() {
@@ -101,17 +99,10 @@ class _TweetWidgetState extends State<TweetWidget> {
               width: 32,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: FutureBuilder<String?>(
-                  future: Storage().downloadAvatarURL(widget.tweet.user!.avatarLink),
-                  builder: (context, snapshot){
-                    if(snapshot.connectionState == ConnectionState.done){
-                      return Image.network(snapshot.data!);
-                    }
-                    return Container(color: Colors.black,);
-                  }
-              ),
+              child: Image.network(GlobalVariable.avatar)
             ),
             const SizedBox(width: 10,),
             Expanded(

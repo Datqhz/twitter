@@ -1,6 +1,7 @@
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:twitter/screens/community/group_profile.dart';
 
 import '../../shared/app_bar.dart';
 class Community extends StatefulWidget {
@@ -145,7 +146,12 @@ class _CommunityState extends State<Community> {
                       ),
                     ),
                     SizedBox(height: 16,),
-                    communities(context),
+                    GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=> GroupScreen()));
+                        },
+                        child: communities(context)
+                    ),
                     SizedBox(height: 16,),
                     communities(context),
                     SizedBox(height: 16,),

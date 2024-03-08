@@ -81,7 +81,7 @@ class ImageGridView extends StatelessWidget {
           builder: (context,snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError || snapshot.data == null) {
-                return Text("Error");
+                return const Text("Error");
               } else {
                 return Image(
                   fit: BoxFit.cover,
@@ -89,7 +89,7 @@ class ImageGridView extends StatelessWidget {
                 );
               }
             } else {
-              return Center(
+              return const Center(
                 child: SpinKitPulse(
                   color: Colors.blue,
                   size: 25.0,

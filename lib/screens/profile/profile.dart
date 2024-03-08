@@ -28,17 +28,19 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   List<Tweet> tweets = [];
   // late ScrollController scrollController;
   List<ScrollController> tabScrollControllers = List.generate(5, (index) => ScrollController());
+  List<PageStorageKey<int>> pageKeys = List.generate(5, (index) => PageStorageKey<int>(index));
   List<double> currentOffset = [280, 280, 280, 280, 280];
   @override
-  void initState() {
+  void initState(){
     _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
-      currentOffset[_tabController.previousIndex] = tabScrollControllers[_tabController.previousIndex].offset;
-      if(top>-280){
-        tabScrollControllers[_tabController.index].jumpTo(-top);
-        currentOffset[_tabController.index] = -top;
-      }
-      tabScrollControllers[_tabController.index].jumpTo(currentOffset[_tabController.index]);
+      // currentOffset[_tabController.previousIndex] = tabScrollControllers[_tabController.previousIndex].offset;
+      // if(top>-280){
+      //   tabScrollControllers[_tabController.index].jumpTo(-top);
+      //   currentOffset[_tabController.index] = -top;
+      // }else {
+      //   tabScrollControllers[_tabController.index].jumpTo(currentOffset[_tabController.index]);
+      // }
     });
     for(ScrollController scroll in tabScrollControllers){
       scroll.addListener(() {
@@ -58,41 +60,40 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
         setState(() {});
       });
     }
-    // scrollController = ScrollController()
-    //   ..addListener(() {
-    //     avatarSize = 100 - scrollController.offset;
-    //     top = - scrollController.offset;
-    //     if(top < -265){
-    //       top = -265;
-    //     }
-    //     if(avatarSize < 50){
-    //       avatarSize = 50;
-    //     }
-    //     if (scrollController.offset > 100) {
-    //       showAppbar = true;
-    //     } else {
-    //       showAppbar = false;
-    //     }
-    //     setState(() {});
-    //   });
     super.initState();
     fetchData();
   }
   Future<void> fetchData()async{
     try{
-      List<Tweet> data =  await _databaseService.getTweet();
+      tweets =  await _databaseService.getTweetWithCurrentUID();
+      print(tweets);
       setState(() {
-        tweets = data;
       });
     }catch(e){
-      print("Lỗi:");
+      print(e);
     }
 
   }
-  List<Widget> buildListTweet(){
+  List<Tweet> filterListTweetForTab(int index){
+    List<Tweet> rs = [];
+    switch(index){
+      case 0:
+        rs = tweets;
+      case 1:
+        rs = tweets;
+      case 2:
+        rs = tweets;
+      case 3:
+        rs = tweets.where((element) => (element.imgLinks.length + element.videoLinks.length )!=0).toList();
+      default:
+
+    }
+    return rs;
+  }
+  List<Widget> buildListTweet(int index){
     List<Widget> items = [SizedBox(height: 380,)];
     if(tweets.length>0){
-      for(Tweet t in tweets){
+      for(Tweet t in filterListTweetForTab(index)){
         items.add(TweetWidget(tweet: t));
       }
     }
@@ -410,9 +411,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   }
   Widget _buildTabContent(String text, int tabIndex) {
     return ListView(
+      key: pageKeys[tabIndex],
       controller: tabScrollControllers[tabIndex],
-      children: buildListTweet(),
-
+      children: buildListTweet(tabIndex),
     );
   }
 }

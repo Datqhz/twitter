@@ -3,13 +3,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
 
+import '../../models/group.dart';
 import '../../models/tweet.dart';
+import '../../services/storage.dart';
 
 class GroupScreen extends StatefulWidget {
-  const GroupScreen({super.key});
+  GroupScreen({super.key, required this.group});
+  Group group;
 
   @override
   State<GroupScreen> createState() => _GroupScreenState();
@@ -65,7 +69,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                 controller: _tabController,
                   children: [
                     FutureBuilder(
-                        future: DatabaseService().getTweet(),
+                        future: DatabaseService().getTweetOfGroup(widget.group.groupIdAsString),
                         builder: (context, snapshot){
                           if(snapshot.connectionState == ConnectionState.done){
                             return ListView(
@@ -84,7 +88,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                         }
                     ),
 
-                    AboutGroupView(controller: _scrollControllers[1],),
+                    AboutGroupView(controller: _scrollControllers[1],group: widget.group),
                     // Container(
                     //   child: Text(
                     //       "tweet"
@@ -102,16 +106,35 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            height: 190,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        "assets/images/group.jpg"
+                          FutureBuilder(
+                              future: Storage().downloadGroupULR(widget.group.groupImg),
+                              builder:(context, snapshot){
+                                if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                                  return Container(
+                                    height: 190,
+                                    decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                snapshot.data!
+                                            ),
+                                            fit: BoxFit.cover
+                                        )
                                     ),
-                                    fit: BoxFit.cover
-                                )
-                            ),
+                                  );
+                                }else {
+                                  return Container(
+                                    height: 190,
+                                    decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                "assets/images/black.jpg"
+                                            ),
+                                            fit: BoxFit.cover
+                                        )
+                                    ),
+                                  );
+                                }
+                              }
                           ),
                           Container(
                             width: double.infinity,
@@ -121,7 +144,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "The Design Sphere",
+                                  widget.group.groupName,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
@@ -148,7 +171,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                         ),
                                         SizedBox(width: 4,),
                                         Text(
-                                          "149k Members",
+                                         widget.group.groupMembers.length.toString() + " Members",
                                           style: TextStyle(
                                               fontSize: 15,
                                               color: Colors.white.withOpacity(0.8)
@@ -263,7 +286,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                             children: [
                               GestureDetector(
                                 onTap: (){
-
+                                  Navigator.pop(context);
                                 },
                                 child: Container(
                                     height: 34,
@@ -278,7 +301,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                               ),
                               SizedBox(width: 14,),
                               Text(
-                                "The Design Sphere",
+                                widget.group.groupName,
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(value),
                                   fontWeight: FontWeight.w500,
@@ -345,8 +368,9 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
 }
 
 class AboutGroupView extends StatelessWidget {
-  AboutGroupView({super.key, required this.controller});
+  AboutGroupView({super.key, required this.controller, required this.group});
   ScrollController controller;
+  Group group;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -378,9 +402,9 @@ class AboutGroupView extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 26,),
+                  //review group
                   Text(
-                    "Welcome to The Design Sphere,"
-                        " where designers from around the world showcase their work, share feedback, and collaborate on fresh ideas",
+                    group.review,
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -448,7 +472,7 @@ class AboutGroupView extends StatelessWidget {
                             SizedBox(width: 16,),
                             Container(
                               child: Text(
-                                "Create 29 Oct 21 by @retromauro",
+                                "Create " +DateFormat('dd-MM-yyyy').format(group.createDate) +  " by " + group.groupOwner.username,
                                 style:TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
@@ -499,139 +523,7 @@ class AboutGroupView extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: Column(
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width:26,
-                              height: 26,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(17)
-                              ),
-                              child: Text("1", style: TextStyle(
-                                  color: Colors.blue.shade100.withOpacity(0.5)
-                              ),),
-                            ),
-                            SizedBox(width: 16,),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Be Respectful.",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color:Colors.white.withOpacity(0.9)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                  Text(
-                                    "We encourage constructive criticism delivered in a kind and productive way",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color:Colors.white.withOpacity(0.7)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 18,),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width:26,
-                              height: 26,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(17)
-                              ),
-                              child: Text("1", style: TextStyle(
-                                  color: Colors.blue.shade100.withOpacity(0.5)
-                              ),),
-                            ),
-                            SizedBox(width: 16,),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Be Respectful.",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color:Colors.white.withOpacity(0.9)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                  Text(
-                                    "We encourage constructive criticism delivered in a kind and productive way",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color:Colors.white.withOpacity(0.7)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 18,),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width:26,
-                              height: 26,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(17)
-                              ),
-                              child: Text("1", style: TextStyle(
-                                  color: Colors.blue.shade100.withOpacity(0.5)
-                              ),),
-                            ),
-                            SizedBox(width: 16,),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Be Respectful.",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color:Colors.white.withOpacity(0.9)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                  Text(
-                                    "We encourage constructive criticism delivered in a kind and productive way",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color:Colors.white.withOpacity(0.7)
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ],
+                      children: buildRules(),
                     ),
                   )
                 ],
@@ -703,7 +595,7 @@ class AboutGroupView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "210168 Community Members",
+                        "${group.groupMembers.length} Community Members",
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
@@ -721,6 +613,59 @@ class AboutGroupView extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  List<Widget> buildRules(){
+    List<Widget> rs = [];
+    for(int i in List.generate(group.rulesName.length, (index) => index)){
+      rs.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width:26,
+              height: 26,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(17)
+              ),
+              child: Text((i+1).toString(), style: TextStyle(
+                  color: Colors.blue.shade100.withOpacity(0.5)
+              ),),
+            ),
+            SizedBox(width: 16,),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.rulesName[i],
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color:Colors.white.withOpacity(0.9)
+                    ),
+                    softWrap: true,
+                  ),
+                  Text(
+                    group.rulesContent[i],
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        color:Colors.white.withOpacity(0.7)
+                    ),
+                    softWrap: true,
+                  ),
+                ],
+              ),
+            )
+          ],
+        )
+      );
+      rs.add(SizedBox(height: 18));
+    }
+    return rs.sublist(0, rs.length-1);
   }
 }
 

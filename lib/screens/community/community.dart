@@ -1,8 +1,12 @@
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:twitter/screens/community/group_profile.dart';
+import 'package:twitter/services/database_service.dart';
 
+import '../../models/group.dart';
+import '../../services/storage.dart';
 import '../../shared/app_bar.dart';
 class Community extends StatefulWidget {
   Community({super.key, required this.callback});
@@ -19,72 +23,137 @@ class _CommunityState extends State<Community> {
   double tempHeight = 0;
   bool isShow = true;
 
-  Widget communities(context){
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      child: IntrinsicHeight(
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 90,
-              width: 90,
-              decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage("assets/images/wall.jpg"), fit: BoxFit.cover),
-                borderRadius: BorderRadius.circular(10)
+  Widget communities(context, Group group){
+    return GestureDetector(
+      onTap:(){
+        Navigator.push(context,MaterialPageRoute(builder: (context)=> GroupScreen(group: group)));
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 90,
+                width: 90,
+                child: FutureBuilder<String?>(
+                    future: Storage().downloadGroupULR(group.groupImg), // Replace with your function to load the image
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image(
+                            image: NetworkImage(snapshot.data!),
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      }else {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            "assets/images/black.jpg", // Replace with your placeholder image
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      }
+                    },
+                ),
               ),
-            ),
-            SizedBox(width: 12,),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Cooking",
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15
+              SizedBox(width: 12,),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          group.groupName,
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4,),
-                      Text(
-                        "149K Members",
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 15
+                        SizedBox(height: 4,),
+                        Text(
+                          group.groupMembers.length.toString() + " Members",
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontWeight: FontWeight.w400,
+                              fontSize: 14
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: 120,
-                    child: AvatarStack(
-                      borderColor: Colors.black,
-                      height: 30,
-                      width: 30,
-                      avatars: [
-                        for (var n = 0; n < 5; n++)
-                          AssetImage('assets/images/wall.jpg'),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                    SizedBox(
+                      width: 140,
+                      child: AvatarStack(
+                        borderColor: Colors.black,
+                        height: 36,
+                        width: 36,
+                        avatars: [
+                          for (var n = 0; n < 5; n++)
+                            AssetImage('assets/images/wall.jpg'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
-
+  List<Widget> loadGroups(List<Group> groups){
+    List<Widget> rs = [SizedBox(height: 10,),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Discover new Communities",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500
+              ),
+            ),
+            GestureDetector(
+              child: Icon(CupertinoIcons.ellipsis_vertical, size: 14, color: Colors.white,),
+            )
+          ],
+        ),
+      ),];
+    rs.add(SizedBox(height: 16,));
+    groups.forEach((element) {
+      rs.add(communities(context, element));
+      rs.add(SizedBox(height: 16,));
+    });
+    rs.add(SizedBox(height: 10,));
+    rs.add(Container(
+          padding: EdgeInsets.only(top: 12, bottom: 12),
+          decoration: BoxDecoration(
+              border: Border(
+                  top: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 0.4
+                  )
+              )
+          ),
+          child: Icon(CupertinoIcons.circle_fill, size: 5,),
+        ));
+    rs.add(SizedBox(height: 50));
+    return rs;
+  }
   @override
   void initState() {
     // _scrollController = ScrollController()..addListener(() {
@@ -121,84 +190,20 @@ class _CommunityState extends State<Community> {
                   });
                   return true;
                 },
-                child: ListView(
-                  controller: _scrollController,
-                  children: [
-                    SizedBox(height: 10,),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Discover new Communities",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500
-                            ),
-                          ),
-                          GestureDetector(
-                            child: Icon(CupertinoIcons.ellipsis_vertical, size: 14, color: Colors.white,),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16,),
-                    GestureDetector(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> GroupScreen()));
-                        },
-                        child: communities(context)
-                    ),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    communities(context),
-                    SizedBox(height: 16,),
-                    GestureDetector(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Text(
-                          "Show more",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10,),
-                    Container(
-                      padding: EdgeInsets.only(top: 12, bottom: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: Theme.of(context).dividerColor,
-                            width: 0.4
-                          )
-                        )
-                      ),
-                      child: Icon(CupertinoIcons.circle_fill, size: 5,),
-                    ),
-                    SizedBox(height: 50)
-                  ],
+                child: FutureBuilder<List<Group>>(
+                  future: DatabaseService().getAllGroup(),
+                  builder: (context, snapshot){
+                      if(snapshot.connectionState == ConnectionState.done){
+                        return ListView(
+                          controller: _scrollController,
+                          children: loadGroups(snapshot.data!),
+                        );
+                      }else {
+                        return SpinKitPulse(
+                          color: Colors.blue,
+                        );
+                      }
+                  },
                 ),
               ) ,
             ),

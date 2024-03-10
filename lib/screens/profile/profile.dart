@@ -125,10 +125,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                 ValueListenableBuilder(
                   valueListenable: top,
                   builder: (context, value, child){
-                    return Positioned(
+                    return AnimatedPositioned(
                       top: value,
                       left: 0,
                       right:0,
+                      duration: Duration(milliseconds: 10),
                       child: SizedBox(
                         height: 360+avatarSize.value,
                         child: Column(
@@ -165,6 +166,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                               width: avatarSize.value,
                                               clipBehavior: Clip.antiAlias,
                                               decoration: BoxDecoration(
+                                                color: Colors.black,
                                                 borderRadius: BorderRadius.circular(50),
                                               ),
                                               child: Image.network(GlobalVariable.avatar),
@@ -319,30 +321,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                     );
                   },
                 ),
-                // image appbar +blur
-                // ValueListenableBuilder(
-                //   valueListenable: showAppbar,
-                //   builder: (context, value, child){
-                //     return Visibility(
-                //       visible: value,
-                //       child: Positioned(
-                //         top: 0,
-                //         left: 0,
-                //         right: 0,
-                //         height: 50,
-                //         child: Container(
-                //
-                //           // child: BackdropFilter(
-                //           //   filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                //           //   child: Container(
-                //           //     color: Colors.black.withOpacity(0.4),
-                //           //   ),
-                //           // ),
-                //         ),
-                //       ),
-                //     );
-                //   },
-                // ),
+
                 //button appbar
                 ValueListenableBuilder(
                   valueListenable: showAppbar,
@@ -374,13 +353,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     visible: value,
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           GlobalVariable.currentUser!.displayName,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,
-                                              fontWeight: FontWeight.w500,
+                                              fontWeight: FontWeight.w600,
                                               overflow: TextOverflow.ellipsis
                                           ),
                                         ),

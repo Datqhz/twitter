@@ -11,6 +11,7 @@ class Storage{
   final wallRef = FirebaseStorage.instance.ref().child("wall");
   final tweetImgRef = FirebaseStorage.instance.ref().child("tweet/images");
   final tweetVideoRef = FirebaseStorage.instance.ref().child("tweet/video");
+  final groupImgRef = FirebaseStorage.instance.ref().child("group");
 
   Future<String?> downloadAvatarURL(String link) async {
     try {
@@ -56,6 +57,20 @@ class Storage{
     try {
       // Download the image to memory
       Reference storageReference = wallRef.child(link);
+
+      // Get the download URL for the image
+      String downloadURL = await storageReference.getDownloadURL();
+
+      return downloadURL;
+    } on FirebaseException catch (e) {
+      print("Cannot download file from Firebase Storage: $e");
+      return null;
+    }
+  }
+  Future<String?> downloadGroupULR(String link) async {
+    try {
+      // Download the image to memory
+      Reference storageReference = groupImgRef.child(link);
 
       // Get the download URL for the image
       String downloadURL = await storageReference.getDownloadURL();

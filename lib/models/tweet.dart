@@ -11,6 +11,7 @@ class Tweet {
   late MyUser? user;
   late int totalComment;
   late int totalLike;
+  late String groupId;
   late int personal;
   late bool isLike;
 
@@ -19,7 +20,7 @@ class Tweet {
   Tweet(
   {required this.idAsString, required this.content, required this.uid,
     required this.imgLinks, required this.videoLinks, required this.uploadDate,
-    required this.user,required this.totalComment, required this.totalLike,required this.personal, required this.isLike});
+    required this.user,required this.totalComment, required this.totalLike,required this.personal, required this.groupId,required this.isLike});
 
   factory Tweet.fromJson(Map<String, dynamic> json){
     return Tweet(
@@ -32,6 +33,7 @@ class Tweet {
         user: MyUser.fromJson(json['user']),
         totalLike: json["totalLike"],
         totalComment: json["totalComment"],
+        groupId: json['groupId'],
         personal: json['personal'],
         isLike: json['like']
     );

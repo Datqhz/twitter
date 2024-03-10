@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:twitter/services/storage.dart';
 import 'package:twitter/shared/global_variable.dart';
 
+import '../models/group.dart';
 import '../models/tweet.dart';
 import '../models/user.dart';
 
@@ -179,6 +180,41 @@ class DatabaseService{
     print(result.length);
     return result;
   }
+  //// Group /////
+  //get list group
+  Future<List<Group>> getAllGroup()async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    Response response = await get(Uri.parse("$url/api/v1/group"), headers: headers);
+    int statusCode = response.statusCode;
 
-
+    if(statusCode != 200){
+      print("error");
+    }
+    List<Group> result = (json.decode(response.body) as List<dynamic>)
+        .map((data) => Group.fromJson(data))
+        .toList();
+    print(result.length);
+    return result;
+  }
+  // get tweets of group
+  Future<List<Tweet>> getTweetOfGroup(String groupId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/group/"+ groupId), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    return result;
+  }
 }

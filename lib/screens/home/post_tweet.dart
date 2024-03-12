@@ -191,7 +191,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                       TextButton(
                         onPressed: _canPost?(){
                           Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
-                            uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal , isLike: false,groupId: "");
+                            uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal , isLike: false,groupName: "");
                           print(tweet);
                           widget.postTweet(imagePicked, tweet);
                           Navigator.pop(context);

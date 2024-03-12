@@ -118,7 +118,7 @@ class _SearchViewState extends State<SearchView> {
                 focusedBorder: InputBorder.none,
               ),
               style: const TextStyle(
-                color: Colors.blue,
+                color: Colors.white,
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
                 decoration: TextDecoration.none,

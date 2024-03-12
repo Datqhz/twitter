@@ -13,8 +13,9 @@ import 'package:twitter/widgets/tweet_view.dart';
 import '../services/storage.dart';
 
 class TweetWidget extends StatefulWidget {
-  TweetWidget({ super.key, required this.tweet});
+  TweetWidget({ super.key, required this.tweet, required this.showDetail});
   Tweet tweet;
+  bool showDetail;
   @override
   State<TweetWidget> createState() => _TweetWidgetState();
 }
@@ -90,139 +91,165 @@ class _TweetWidgetState extends State<TweetWidget> {
                 )
             )
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              //alignment: Alignment.centerLeft,
-              height: 32,
-              width: 32,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Image.network(GlobalVariable.avatar)
-            ),
-            const SizedBox(width: 10,),
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            if(widget.showDetail)...[
+              Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(width: 26,),
+                Icon(widget.tweet.groupName.isNotEmpty? CupertinoIcons.person_2_fill: FontAwesomeIcons.retweet, color: Colors.white.withOpacity(0.5), size: 14,),
+                SizedBox(width: 12,),
+                Text(
+                  widget.tweet.groupName,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.5)
+                  ),
+                ),
+              ],
+            ), SizedBox(height: 4,),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  //alignment: Alignment.centerLeft,
+                  height: 38,
+                  width: 38,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Image.network(GlobalVariable.avatar)
+                ),
+                const SizedBox(width: 10,),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            widget.tweet.user!.displayName,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white
-                            ),
-                          ),
-                          SizedBox(width: 8,),
-                          Text(
-                            widget.tweet.user!.username,
-                            style: TextStyle(
-                                fontSize: 14,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.tweet.user!.displayName,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white
+                                ),
+                              ),
+                              SizedBox(width: 8,),
+                              Text(
+                                widget.tweet.user!.username,
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromRGBO(170, 184, 194, 1),
+                                    overflow: TextOverflow.ellipsis
+                                ),
+                              ),
+                              SizedBox(width: 4,),
+                              Icon(
+                                FontAwesomeIcons.solidCircle,
+                                size: 2.5,
                                 color: Color.fromRGBO(170, 184, 194, 1),
-                                overflow: TextOverflow.ellipsis
-                            ),
+                              ),
+                              SizedBox(width: 4,),
+                              Text(
+                                '3h',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color.fromRGBO(170, 184, 194, 1)
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 4,),
-                          Icon(
-                            FontAwesomeIcons.solidCircle,
-                            size: 2.5,
-                            color: Color.fromRGBO(170, 184, 194, 1),
-                          ),
-                          SizedBox(width: 4,),
-                          Text(
-                            '3h',
-                            style: TextStyle(
-                                fontSize: 14,
-                                color: Color.fromRGBO(170, 184, 194, 1)
-                            ),
-                          ),
+                          Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white, size: 14,)
                         ],
                       ),
-                      Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white, size: 14,)
-                    ],
-                  ),
-                  const SizedBox(height: 4,),
-                  Text.rich(
-                    TextSpan(
-                      text: _isShowMore?(_isExtend? widget.tweet.content:widget.tweet.content.substring(0, 200)+"..."):widget.tweet.content,
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.white
-                      ),
-                      children: <TextSpan>[
-                        if(_isShowMore)
-                          if(!_isExtend)
-                            TextSpan(
-                              text: ' more',
-                              style: TextStyle(
-                                color: Colors.blue,
+                      if(widget.tweet.content.isNotEmpty)...[
+                        const SizedBox(height: 4,),
+                        Text.rich(
+                          TextSpan(
+                            text: _isShowMore?(_isExtend? widget.tweet.content:widget.tweet.content.substring(0, 200)+"..."):widget.tweet.content,
+                            style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.white
+                            ),
+                            children: <TextSpan>[
+                              if(_isShowMore)
+                                if(!_isExtend)
+                                  TextSpan(
+                                    text: ' more',
+                                    style: TextStyle(
+                                      color: Colors.blue,
 
-                              ),
-                              // Xử lý khi nhấn vào "Xem thêm"
-                              recognizer: TapGestureRecognizer()..onTap = () {
-                                setState(() {
-                                  _isExtend = !_isExtend;
-                                });
-                              },
-                            )
-                          else
-                            TextSpan(
-                              text: ' brief',
-                              style: TextStyle(
-                                color: Colors.blue,
+                                    ),
+                                    // Xử lý khi nhấn vào "Xem thêm"
+                                    recognizer: TapGestureRecognizer()..onTap = () {
+                                      setState(() {
+                                        _isExtend = !_isExtend;
+                                      });
+                                    },
+                                  )
+                                else
+                                  TextSpan(
+                                    text: ' brief',
+                                    style: TextStyle(
+                                      color: Colors.blue,
 
-                              ),
-                              // Xử lý khi nhấn vào "Thu gọn"
-                              recognizer: TapGestureRecognizer()..onTap = () {
-                                setState(() {
-                                  _isExtend = !_isExtend;
-                                });
-                              },
-                            )
-                      ],
-                    ),
+                                    ),
+                                    // Xử lý khi nhấn vào "Thu gọn"
+                                    recognizer: TapGestureRecognizer()..onTap = () {
+                                      setState(() {
+                                        _isExtend = !_isExtend;
+                                      });
+                                    },
+                                  )
+                            ],
+                          ),
 /*                  maxLines: _isExtend?1000:4,
-                    overflow: TextOverflow.ellipsis,*/
-                  ),
-                  widget.tweet.imgLinks.length!=0 ?const SizedBox(height: 8,):const SizedBox(height: 0,),
-                  widget.tweet.imgLinks.length!=0 ? buildMediaView(): const SizedBox(height: 1,),
-                  const SizedBox(height: 12,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // comment
-                      TweetAction(number: widget.tweet.totalComment, isActive: false,
-                          colorActive: null,  icon:CupertinoIcons.chat_bubble, tweetId: widget.tweet.idAsString, type: 1),
-                      //re-post
-                      TweetAction(number: 123, isActive: false,
-                          colorActive: const Color.fromRGBO(84, 209, 130, 1), icon:CupertinoIcons.arrow_2_squarepath, tweetId: widget.tweet.idAsString, type: 2),
-                      // like
-                      TweetAction(number: widget.tweet.totalLike, isActive: widget.tweet.isLike,
-                           colorActive: Colors.pink, icon:CupertinoIcons.heart, tweetId: widget.tweet.idAsString, type: 3),
-                      //view
-                      TweetAction(number: 0, isActive: false,
-                          colorActive: null, icon:CupertinoIcons.chart_bar_alt_fill, tweetId: widget.tweet.idAsString, type: 4),
-                      //share
-                      TweetAction(number: 0, isActive: false,
-                          colorActive: null, icon:Icons.share_outlined, tweetId: widget.tweet.idAsString, type: 6),
+                        overflow: TextOverflow.ellipsis,*/
+                        ),
+                      ],
+                      widget.tweet.imgLinks.length!=0 ?const SizedBox(height: 8,):const SizedBox(height: 0,),
+                      widget.tweet.imgLinks.length!=0 ? buildMediaView(): const SizedBox(height: 1,),
+                      const SizedBox(height: 12,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // comment
+                          TweetAction(number: widget.tweet.totalComment, isActive: false,
+                              colorActive: null,  icon:CupertinoIcons.chat_bubble, tweetId: widget.tweet.idAsString, type: 1),
+                          //re-post
+                          TweetAction(number: 123, isActive: false,
+                              colorActive: const Color.fromRGBO(84, 209, 130, 1), icon:CupertinoIcons.arrow_2_squarepath, tweetId: widget.tweet.idAsString, type: 2),
+                          // like
+                          TweetAction(number: widget.tweet.totalLike, isActive: widget.tweet.isLike,
+                               colorActive: Colors.pink, icon:CupertinoIcons.heart, tweetId: widget.tweet.idAsString, type: 3),
+                          //view
+                          TweetAction(number: 0, isActive: false,
+                              colorActive: null, icon:CupertinoIcons.chart_bar_alt_fill, tweetId: widget.tweet.idAsString, type: 4),
+                          //share
+                          TweetAction(number: 0, isActive: false,
+                              colorActive: null, icon:Icons.share_outlined, tweetId: widget.tweet.idAsString, type: 6),
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
-            )
+                  ),
+                )
+              ],
+            ),
           ],
         ),
       ),

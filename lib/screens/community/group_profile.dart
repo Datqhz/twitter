@@ -24,6 +24,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   ValueNotifier<double> top = ValueNotifier(0);
   ValueNotifier<double> opacity = ValueNotifier(0);
   late TabController _tabController;
+  late Future<String?> _groupImg;
   List<ScrollController> _scrollControllers = List.generate(2, (index) => ScrollController());
   @override
   void initState() {
@@ -48,13 +49,14 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
       });
     });
     super.initState();
+    _groupImg = Storage().downloadGroupULR(widget.group.groupImg);
   }
 
 
   List<Widget> loadTweet(List<Tweet>? tweets){
     List<Widget> widgets =[SizedBox(height: 360,)];
     tweets?.forEach((element) {
-      widgets.add(TweetWidget(tweet: element));
+      widgets.add(TweetWidget(tweet: element, showDetail: false,));
     });
     return widgets;
   }
@@ -99,15 +101,16 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
               ValueListenableBuilder<double>(
                 valueListenable: top,
                 builder: (context, value, child){
-                  return Positioned(
+                  return AnimatedPositioned(
                       top: value,
                       left: 0,
                       right: 0,
+                      duration: Duration(milliseconds: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           FutureBuilder(
-                              future: Storage().downloadGroupULR(widget.group.groupImg),
+                              future: _groupImg,
                               builder:(context, snapshot){
                                 if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
                                   return Container(

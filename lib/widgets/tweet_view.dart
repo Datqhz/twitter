@@ -29,10 +29,10 @@ class _TweetViewState extends State<TweetView> {
           ),
         ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0.1), // Chiều cao của đường viền
+          preferredSize: Size.fromHeight(0), // Chiều cao của đường viền
           child: Divider(
             color: Theme.of(context).dividerColor, // Màu sắc của đường viền
-            thickness: 0.4, // Độ dày của đường viền
+            thickness: 0.2, // Độ dày của đường viền
           ),
         ),
         backgroundColor: Colors.black,

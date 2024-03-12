@@ -98,7 +98,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
     List<Widget> items = [SizedBox(height: 380,)];
     if(tweets.length>0){
       for(Tweet t in filterListTweetForTab(index)){
-        items.add(TweetWidget(tweet: t));
+        items.add(TweetWidget(tweet: t, showDetail: false));
       }
     }
     items.add(SizedBox(height: 50,));

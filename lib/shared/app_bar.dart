@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:indexed/indexed.dart';
+import 'package:twitter/screens/community/search_commutities.dart';
 
 import '../screens/search/search_view.dart';
 import 'global_variable.dart';
@@ -106,10 +107,15 @@ class _MyAppBarState extends State<MyAppBar> {
                     style: Theme.of(context).textTheme.displayLarge)),
             Row(
               children: [
-                Icon(
-                  CupertinoIcons.search,
-                  color: Theme.of(context).iconTheme.color,
-                  size: 24,
+                GestureDetector(
+                  onTap:(){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCommutitiesScreen()));
+                  },
+                  child: Icon(
+                    CupertinoIcons.search,
+                    color: Theme.of(context).iconTheme.color,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(
                   width: 18,

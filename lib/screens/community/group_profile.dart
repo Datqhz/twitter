@@ -56,7 +56,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   List<Widget> loadTweet(List<Tweet>? tweets){
     List<Widget> widgets =[SizedBox(height: 360,)];
     tweets?.forEach((element) {
-      widgets.add(TweetWidget(tweet: element, showDetail: false,));
+      widgets.add(TweetWidget(tweet: element));
     });
     return widgets;
   }

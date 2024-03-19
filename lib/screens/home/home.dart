@@ -51,7 +51,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
     List<Widget> items = [];
     if(tweets.length>0){
       for(Tweet t in tweets){
-        items.add(TweetWidget(tweet: t, showDetail: true,));
+        items.add(TweetWidget(tweet: t));
       }
     }
     items.add(SizedBox(height: 50,));

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:twitter/screens/community/community_item.dart';
 
 import '../../models/group.dart';
@@ -19,25 +20,34 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
   TextEditingController _textEditingController = TextEditingController();
   bool isShowX = false; // button clear text
   Timer _debounce = Timer(Duration(seconds: 2), (){});
-  List<Group> groups = [];
+  late Future<List<Group>> futureGroups;
   DatabaseService databaseService = DatabaseService();
+
+
+  @override
+  void initState() {
+    futureGroups = databaseService.getAllGroup();
+    super.initState();
+  }
 
   void _loadGroupContainRegex(String value) {
     if (_debounce != null && _debounce.isActive) {
       _debounce.cancel();
     }
-    _debounce = Timer(const Duration(seconds: 2), () async{
+    _debounce = Timer(const Duration(seconds: 2), () {
+      print("my search: "  + value);
       if(value.isNotEmpty){
-        groups = await databaseService.getAllGroupContainS(value);
+        futureGroups = databaseService.getAllGroupContainS(value);
       }else {
-        groups = await databaseService.getAllGroup();
+        futureGroups = databaseService.getAllGroup();
+        print("search all ");
       }
       setState(() {
       });
     });
   }
 
-  List<Widget> buildGroupItem(){
+  List<Widget> buildGroupItem(List<Group> groups){
     List<Widget> rs = [];
     groups.forEach((element) {
       rs.add(CommunitiesItem(group: element));
@@ -96,17 +106,29 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
               onPressed: isShowX?(){
                 _textEditingController.clear();
                 isShowX = false;
-                setState(() {
-                });
+                _loadGroupContainRegex("");
               }:null,
               color: isShowX? Colors.white: Colors.transparent,
               icon: Icon(CupertinoIcons.multiply)
           )
         ],
       ),
-      body:ListView(
-        children: buildGroupItem(),
-      )
+      body:FutureBuilder(
+        future: futureGroups,
+        builder: (context, snapshot){
+          if(snapshot.connectionState == ConnectionState.done &&snapshot.hasData){
+            return ListView(children: buildGroupItem(snapshot.data!));
+          }else {
+            return const Center(child: SpinKitPulse(color: Colors.blue,));
+          }
+        },
+        ),
     );
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
   }
 }

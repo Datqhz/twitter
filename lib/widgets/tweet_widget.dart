@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:twitter/models/tweet.dart';
+import 'package:twitter/screens/home/comment_tweet.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/shared/global_variable.dart';
 import 'package:twitter/widgets/ImageGridView.dart';
@@ -13,17 +14,14 @@ import 'package:twitter/widgets/tweet_view.dart';
 import '../services/storage.dart';
 
 class TweetWidget extends StatefulWidget {
-  TweetWidget({ super.key, required this.tweet, required this.showDetail});
+  TweetWidget({ super.key, required this.tweet});
   Tweet tweet;
-  bool showDetail;
   @override
   State<TweetWidget> createState() => _TweetWidgetState();
 }
 
 class _TweetWidgetState extends State<TweetWidget> {
 
-  bool _isRepost = false;
-  late bool _isLike;
   bool _isExtend = false;
   bool _isShowMore = false;
 
@@ -36,7 +34,6 @@ class _TweetWidgetState extends State<TweetWidget> {
         _isShowMore = true;
       });
     }
-    _isLike = widget.tweet.isLike;
   }
 
   Widget buildMediaView(){
@@ -94,7 +91,7 @@ class _TweetWidgetState extends State<TweetWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if(widget.showDetail)...[
+            if(widget.tweet.repost!= null || widget.tweet.groupName.isNotEmpty)...[
               Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,7 +100,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                 Icon(widget.tweet.groupName.isNotEmpty? CupertinoIcons.person_2_fill: FontAwesomeIcons.retweet, color: Colors.white.withOpacity(0.5), size: 14,),
                 SizedBox(width: 12,),
                 Text(
-                  widget.tweet.groupName,
+                  widget.tweet.groupName.isNotEmpty?widget.tweet.groupName: widget.tweet.user!.displayName + " repost",
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -176,6 +173,34 @@ class _TweetWidgetState extends State<TweetWidget> {
                           Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white, size: 14,)
                         ],
                       ),
+                      if(widget.tweet.replyTo!=null)...[
+                        //Navigate to replied user profile
+                        GestureDetector(
+                          onTap: (){
+
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Reply to ',
+                                ),
+                                TextSpan(
+                                  text: widget.tweet.replyTo?.username,
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 14
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       if(widget.tweet.content.isNotEmpty)...[
                         const SizedBox(height: 4,),
                         Text.rich(
@@ -230,19 +255,19 @@ class _TweetWidgetState extends State<TweetWidget> {
                         children: [
                           // comment
                           TweetAction(number: widget.tweet.totalComment, isActive: false,
-                              colorActive: null,  icon:CupertinoIcons.chat_bubble, tweetId: widget.tweet.idAsString, type: 1),
+                              colorActive: null,  icon:CupertinoIcons.chat_bubble, tweet: widget.tweet, type: 1),
                           //re-post
                           TweetAction(number: 123, isActive: false,
-                              colorActive: const Color.fromRGBO(84, 209, 130, 1), icon:CupertinoIcons.arrow_2_squarepath, tweetId: widget.tweet.idAsString, type: 2),
+                              colorActive: const Color.fromRGBO(84, 209, 130, 1), icon:CupertinoIcons.arrow_2_squarepath, tweet: widget.tweet, type: 2),
                           // like
                           TweetAction(number: widget.tweet.totalLike, isActive: widget.tweet.isLike,
-                               colorActive: Colors.pink, icon:CupertinoIcons.heart, tweetId: widget.tweet.idAsString, type: 3),
+                               colorActive: Colors.pink, icon:CupertinoIcons.heart, tweet: widget.tweet, type: 3),
                           //view
                           TweetAction(number: 0, isActive: false,
-                              colorActive: null, icon:CupertinoIcons.chart_bar_alt_fill, tweetId: widget.tweet.idAsString, type: 4),
+                              colorActive: null, icon:CupertinoIcons.chart_bar_alt_fill, tweet: widget.tweet, type: 4),
                           //share
                           TweetAction(number: 0, isActive: false,
-                              colorActive: null, icon:Icons.share_outlined, tweetId: widget.tweet.idAsString, type: 6),
+                              colorActive: null, icon:Icons.share_outlined, tweet: widget.tweet, type: 6),
                         ],
                       )
                     ],
@@ -258,12 +283,12 @@ class _TweetWidgetState extends State<TweetWidget> {
 }
 
 class TweetAction extends StatefulWidget {
-  TweetAction({super.key, required this.number, required this.isActive, required this.colorActive, required this.icon, required this.tweetId, required this.type});
+  TweetAction({super.key, required this.number, required this.isActive, required this.colorActive, required this.icon, required this.tweet, required this.type});
   int number;
   bool isActive;
   Color? colorActive;
   IconData icon;
-  String tweetId;
+  Tweet tweet;
   int type; // what kind action is
   @override
   State<TweetAction> createState() => _TweetActionState();
@@ -278,14 +303,15 @@ class _TweetActionState extends State<TweetAction> {
       onTap: ()async{
         switch (widget.type){
           case 1: // action is comment
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> CommentTweetScreen(reply: widget.tweet)));
             break;
           case 2: // action is re-post
             break;
           case 3: // action is like
             if(widget.isActive){
-              await DatabaseService().unlikeTweet(widget.tweetId);
+              await DatabaseService().unlikeTweet(widget.tweet.idAsString);
             }else {
-              await DatabaseService().likeTweet(widget.tweetId);
+              await DatabaseService().likeTweet(widget.tweet.idAsString);
             }
             setState(() {
               if(widget.isActive){

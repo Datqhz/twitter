@@ -10,7 +10,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.21:8080';
+  String url = 'http://192.168.1.22:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -52,8 +52,28 @@ class DatabaseService{
     }
     final List<dynamic> data = json.decode(response.body);
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+
     return result;
 
+  }
+  // Get comment
+  Future<List<Tweet>> getCommentOfTweet(String tweetId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/comment/"+tweetId), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    print("begin map");
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    print("comment: " + result.length.toString());
+    return result;
   }
   //Post tweet
   Future<bool> postTweet(Tweet tweet)async{
@@ -72,7 +92,12 @@ class DatabaseService{
           'imageLinks': tweet.imgLinks,
           'videoLinks': tweet.videoLinks,
           'uploadDate': tweet.uploadDate.toIso8601String(),
-          'personal': tweet.personal
+          'personal': tweet.personal,
+          'groupId': tweet.groupName,
+          'replyTo': tweet.replyTo?.uid,
+          'repost': tweet.repost?.idAsString,
+          'commentTweetId': tweet.commentTweetId,
+          'usersLike': []
           // Add any other data you want to send in the body
         })
     );
@@ -90,17 +115,12 @@ class DatabaseService{
       "Authorization" :"Bearer " + token!
     };
 
-    Response response = await post(
-        Uri.parse("$url/api/v1/like"),
+    Response response = await get(
+        Uri.parse("$url/api/v1/tweet/like/"+tweetId),
         headers: headers,
-        body:  jsonEncode(<String, dynamic>{
-          'tweetId': tweetId,
-          'uid':GlobalVariable.currentUser?.uid,
-          // Add any other data you want to send in the body
-        })
     );
     int statusCode = response.statusCode;
-    if(statusCode == 201){
+    if(statusCode == 200){
       return true;
     }
     return false;
@@ -113,8 +133,8 @@ class DatabaseService{
       "Authorization" :"Bearer " + token!
     };
 
-    Response response = await delete(
-      Uri.parse("$url/api/v1/like/"+tweetId),
+    Response response = await get(
+      Uri.parse("$url/api/v1/tweet/unlike/"+tweetId),
       headers: headers,
     );
     int statusCode = response.statusCode;

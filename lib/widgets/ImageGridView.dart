@@ -6,10 +6,21 @@ import '../services/storage.dart';
 import 'package:flutter/material.dart';
 
 class ImageGridView extends StatelessWidget {
-  ImageGridView({super.key, required this.imageLinks});
+  ImageGridView({super.key, required this.imageLinks, required this.isSquare});
+
+  late bool isSquare;
 
   List<String> imageLinks;
   Widget buildGrid(BuildContext context){
+    double ratio4 = ((MediaQuery.of(context).size.width-64)/2)/97;
+    double ratiolr = ((MediaQuery.of(context).size.width-64)/2)/200;
+    if(isSquare){
+      ratio4 = 1;
+      ratiolr = 1;
+    }else {
+      ratio4 = ((MediaQuery.of(context).size.width-64)/2)/97;
+      ratiolr = ((MediaQuery.of(context).size.width-64)/2)/200;
+    }
     List<Widget> results = [];
     if(imageLinks.length== 1){
       return Container(
@@ -56,7 +67,7 @@ class ImageGridView extends StatelessWidget {
             crossAxisSpacing: 6,
             mainAxisSpacing: 6,
             crossAxisCount: 1,
-            childAspectRatio: ((MediaQuery.of(context).size.width-64)/2)/97,//((MediaQuery.of(context).size.width-64)/2)/97
+            childAspectRatio: ratio4,//((MediaQuery.of(context).size.width-64)/2)/97
             children: temp
         ));
       }
@@ -64,44 +75,47 @@ class ImageGridView extends StatelessWidget {
           primary: false,
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
           crossAxisCount: 2,
-          childAspectRatio: imageLinks.length == 4? ((MediaQuery.of(context).size.width-64)/2)/97 :((MediaQuery.of(context).size.width-64)/2)/200,
+          childAspectRatio: imageLinks.length == 4? ratio4 :ratiolr,
           children: results
       );
     }
 
   }
 
-  Widget buildImageItem(Future<String> image){
-    return Container(
-      child: FutureBuilder<String?>(
-          future: image,
-          builder: (context,snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError || snapshot.data == null) {
-                return const Text("Error");
-              } else {
-                return Image(
-                  fit: BoxFit.cover,
-                  image: NetworkImage(snapshot.data!),
-                );
-              }
-            } else {
-              return const Center(
-                child: SpinKitPulse(
-                  color: Colors.blue,
-                  size: 25.0,
-                ),
-              );
-            }
-          },
-      ),
-    );
-  }
+
   @override
   Widget build(BuildContext context) {
     return buildGrid(context);
   }
+}
+
+
+Widget buildImageItem(Future<String> image){
+  return Container(
+    child: FutureBuilder<String?>(
+      future: image,
+      builder: (context,snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError || snapshot.data == null) {
+            return const Text("Error");
+          } else {
+            return Image(
+              fit: BoxFit.cover,
+              image: NetworkImage(snapshot.data!),
+            );
+          }
+        } else {
+          return const Center(
+            child: SpinKitPulse(
+              color: Colors.blue,
+              size: 25.0,
+            ),
+          );
+        }
+      },
+    ),
+  );
 }

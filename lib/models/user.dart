@@ -22,7 +22,7 @@ class MyUser{
       avatarLink: json['avatarLink'],
       bio: json['bio'],
       wallLink: json['wallLink'],
-      phoneNumber: json['phoneNumber'],
+      phoneNumber: json['phoneNumber']??"",
       email: json['email'],
     );
   }

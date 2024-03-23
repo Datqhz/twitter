@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../models/tweet.dart';
 import '../services/storage.dart';
@@ -37,11 +38,24 @@ class BriefTweet extends StatelessWidget {
                 },
               ),
             )
-                :ImageGridView(imageLinks: tweet.imgLinks)
+                :ImageGridView(imageLinks: tweet.imgLinks, isSquare: true,)
         )
     );
   }
-
+  String caculateUploadDate(DateTime date){
+    DateTime currentDate = DateTime.now();
+    // Calculate the absolute difference
+    Duration difference = currentDate.difference(date).abs();
+    if (difference.inDays > 0 ) {
+      if(difference.inDays>365){
+        return DateFormat.yMMMMd("en_US").parse(date.toString()).toString();
+      }else {
+        return DateFormat.MMMMd("en_US").format(date).toString();
+      }
+    }else {
+      return "${difference.inHours}h";
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -111,7 +125,7 @@ class BriefTweet extends StatelessWidget {
                         ),
                         //post time
                         Text(
-                          '3h',
+                          caculateUploadDate(tweet.uploadDate),
                           style: TextStyle(
                               fontSize: 13,
                               color: Colors.white.withOpacity(0.5)

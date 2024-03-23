@@ -261,7 +261,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                         onPressed: _canPost?(){
                           Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
                             uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal ,
-                            isLike: false,groupName: "", repost: null, commentTweetId: widget.reply.idAsString, replyTo: widget.reply.user, );
+                            isLike: false,groupName: "", repost: null, commentTweetId: widget.reply.idAsString, replyTo: widget.reply.user, totalRepost: 0, isRepost: false, );
                           print(tweet);
                           postTweet(imagePicked, tweet);
                           Navigator.pop(context);

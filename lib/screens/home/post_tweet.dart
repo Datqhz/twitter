@@ -8,36 +8,39 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
+import 'package:twitter/widgets/quote_tweet.dart';
 import '../../models/tweet.dart';
 import '../../shared/global_variable.dart';
 
 class PostTweetScreen extends StatefulWidget {
-  PostTweetScreen({super.key, required this.postTweet});
+  PostTweetScreen({super.key, required this.postTweet, this.quote});
   late Function postTweet;
+  late Tweet? quote;
   @override
   State<PostTweetScreen> createState() => _PostTweetScreenState();
 }
 
 class _PostTweetScreenState extends State<PostTweetScreen> {
 
-  late List<XFile> imagePicked = [];
+  ValueNotifier<List<XFile>> imagePicked = ValueNotifier([]);
   final TextEditingController _controller = TextEditingController();
-  int numOfWord = 0;
-  bool _canPost = false;
-  String content = "";
-  int personal = 1;
+  ValueNotifier<int> numOfWord = ValueNotifier(0);
+  final ValueNotifier<bool> _canPost = ValueNotifier(false);
+  final ValueNotifier<bool> _brief = ValueNotifier(false);
+  ValueNotifier<String> content = ValueNotifier("");
+  ValueNotifier<int> personal = ValueNotifier(1);
 
   @override
   void initState() {
     super.initState();
   } // build view for imagePicked
-  Widget buildListImage(){
-    if(imagePicked.length>1){
+  Widget buildListImage(List<XFile> images){
+    if(images.length >1){
       List<Widget> result = [];
-      imagePicked.forEach((element) {
+      for (var element in images) {
         Size size = ImageSizeGetter.getSize(FileInput(File(element.path)));
         result.add(ImagePicked(image: element, removeImage: removeImage,));
-      });
+      }
       return Container(
         height: 160,
         child: ListView(
@@ -45,23 +48,28 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
           children: result,
         ),
       );
-    }else{
-      return ImagePicked(image: imagePicked[0], removeImage: removeImage,);
+    }else if (images.length == 1){
+      return ImagePicked(image: images[0], removeImage: removeImage,);
     }
+    return const SizedBox(height: 0,);
   }
   //remove image in imagePicked
   void removeImage(XFile file){
-    imagePicked.remove(file);
-    setState(() {
-    });
+    List<XFile> temp = List.from(imagePicked.value);
+    temp.remove(file);
+    imagePicked.value= temp;
+    if(imagePicked.value.isEmpty && _brief.value){
+      _brief.value = false;
+    }
+    print("image length: " + imagePicked.value.length.toString());
   }
-  Widget buildPickPersonalView(){
+  Widget buildPickPersonalView(int value){
     String content = "";
     late Icon icon;
-    if(personal == 1){
+    if(value == 1){
       content = "Everyone can reply";
       icon = Icon(FontAwesomeIcons.earth, color: Colors.blue, size: 13,);
-    }else if(personal == 2){
+    }else if(value == 2){
       content = "Anyone follow you can reply";
       icon = Icon(FontAwesomeIcons.user, color: Colors.blue, size: 13,);
     }else {
@@ -92,7 +100,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
             Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(top: 65, left: 15, right: 15, bottom: 84),
+              padding: EdgeInsets.only(top: 65, left: 15, right: 15),
               child: ListView(
                 scrollDirection: Axis.vertical,
                 children: [
@@ -109,19 +117,6 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: Image.network(GlobalVariable.avatar),
-                          // child: FutureBuilder<String?>(
-                          //   future: GlobalVariable.avatar,
-                          //   builder: (context, snapshot){
-                          //     if (snapshot.connectionState == ConnectionState.done) {
-                          //       if (snapshot.hasError || snapshot.data == null) {
-                          //         return Text("Error");
-                          //       } else {
-                          //         return Image.network(snapshot.data!);
-                          //       }
-                          //     }
-                          //     return SizedBox(height: 1,);
-                          //   },
-                          // )
                       ),
                       SizedBox(width: 12,),
                       // content and media
@@ -131,7 +126,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                             TextFormField(
                               controller:_controller ,
                               decoration: InputDecoration(
-                                hintText: imagePicked.length != 0 ? "Add a comment...":"What's happening?",
+                                hintText: imagePicked.value.length != 0 ? "Add a comment...":"What's happening?",
                                 hintStyle: TextStyle(
                                     color: Colors.white.withOpacity(0.5),
                                     fontSize: 16
@@ -145,28 +140,43 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                   decoration: TextDecoration.none
                               ),
                               onChanged: (value){
-                                setState(() {
-                                  numOfWord = value.length;
-                                  content = value;
+                                  numOfWord.value = value.length;
+                                  content.value = value;
                                   if(value.length >300){
-                                    _canPost = false;
-                                  }else if(value.length >0 || imagePicked.length!=0){
-                                    _canPost = true;
+                                    _canPost.value = false;
+                                  }else if(value.length >0 || imagePicked.value.length!=0){
+                                    _canPost.value = true;
                                   }else {
-                                    _canPost = false;
+                                    _canPost.value = false;
                                   }
-                                  setState(() {
-
-                                  });
-                                });
+                                ;
                               },
                             ),
-                            imagePicked.length!=0? buildListImage(): Container()
+                            if(imagePicked.value.length!=0)...[
+                              ValueListenableBuilder(
+                                  valueListenable: imagePicked,
+                                  builder: (context, value, child) {
+                                    print("builded");
+                                    return buildListImage(value);
+                                  },
+                              ),
+                              SizedBox(height: 12,)
+                            ],
+                            if(widget.quote != null)...[
+                              ValueListenableBuilder(
+                                  valueListenable: _brief,
+                                  builder: (context, value, child){
+                                    return QuoteTweet(quote: widget.quote, brief: value);
+                                  },
+
+                              )
+                            ]
                           ],
                         ),
                       ),
                     ],
                   ),
+                  SizedBox(height: 100,)
                 ],
               ),
             ),
@@ -188,31 +198,37 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                         },
                         child: Icon(FontAwesomeIcons.close, size: 24,),
                       ),
-                      TextButton(
-                        onPressed: _canPost?(){
-                          Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
-                            uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal , isLike: false,groupName: "", repost: null, commentTweetId: '', replyTo: null, );
-                          print(tweet);
-                          widget.postTweet(imagePicked, tweet);
-                          Navigator.pop(context);
-                        }:null,
-                        child: Text(
-                            "Post"
-                        ),
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.blue.withOpacity(0.6),
-                            disabledForegroundColor: Colors.white.withOpacity(0.6),
-                            textStyle: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15
+                      ValueListenableBuilder(
+                        valueListenable: _canPost,
+                        builder: (context, value, child){
+                          return TextButton(
+                            onPressed: value?(){
+                              Tweet tweet = Tweet(idAsString: "", content: content.value, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
+                                uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal.value ,
+                                isLike: false,groupName: "", repost: widget.quote, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
+                              print(tweet);
+                              widget.postTweet(imagePicked.value, tweet);
+                              Navigator.pop(context);
+                            }:null,
+                            child: Text(
+                                "Post"
                             ),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)
-                            )
-                        ),
+                            style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.blue.withOpacity(0.6),
+                                disabledForegroundColor: Colors.white.withOpacity(0.6),
+                                textStyle: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15
+                                ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)
+                                )
+                            ),
+                          );
+                        },
                       )
                     ],
                   ),
@@ -293,9 +309,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                       GestureDetector(
                                         onTap: (){
                                           Navigator.pop(context);
-                                          personal = 1;
-                                          setState(() {
-                                          });
+                                          personal.value = 1;
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(horizontal:20 ),
@@ -316,7 +330,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                         child: Icon(FontAwesomeIcons.earth, size: 20),
                                                       ),
                                                       Visibility(
-                                                          visible: personal == 1,
+                                                          visible: personal.value == 1,
                                                           child: Positioned(
                                                             right: 0,
                                                             bottom: 0,
@@ -354,9 +368,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                       GestureDetector(
                                         onTap: (){
                                           Navigator.pop(context);
-                                          personal = 2;
-                                          setState(() {
-                                          });
+                                          personal.value = 2;
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(horizontal:20 ),
@@ -377,7 +389,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                         child: Icon(FontAwesomeIcons.user, size: 20),
                                                       ),
                                                       Visibility(
-                                                          visible: personal == 2,
+                                                          visible: personal.value == 2,
                                                           child: Positioned(
                                                             right: 0,
                                                             bottom: 0,
@@ -415,9 +427,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                       GestureDetector(
                                         onTap: (){
                                           Navigator.pop(context);
-                                          personal = 3;
-                                          setState(() {
-                                          });
+                                          personal.value = 3;
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(horizontal:20 ),
@@ -438,7 +448,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                         child: Icon(FontAwesomeIcons.at, size: 20),
                                                       ),
                                                       Visibility(
-                                                          visible: personal == 3,
+                                                          visible: personal.value == 3,
                                                           child: Positioned(
                                                             right: 0,
                                                             bottom: 0,
@@ -477,7 +487,12 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                 );
                               });
                         },
-                        child: buildPickPersonalView(),
+                        child: ValueListenableBuilder(
+                          valueListenable: personal,
+                          builder: (context,value, child) {
+                            return buildPickPersonalView(value);
+                          }
+                        ),
                       ),
                     ),
                     Container(
@@ -496,7 +511,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                         children: [
                           GestureDetector(
                               onTap:()async{
-                                if(imagePicked.length < 4){
+                                if(imagePicked.value.length < 4){
                                   List<XFile> images = await ImagePicker().pickMultiImage(
                                       maxWidth: 1920,
                                       maxHeight: 1080,
@@ -516,27 +531,36 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                           duration: const Duration(seconds: 3),
                                         ),
                                       );
-                                      imagePicked = images.sublist(0, 4);
+                                      imagePicked.value = images.sublist(0, 4);
                                     }else {
-                                      imagePicked = images;
+                                      imagePicked.value = images;
                                     }
+                                    if(!_brief.value){
+                                      _brief.value = true;
+                                    }
+                                    _canPost.value = true;
                                     setState(() {
-                                      _canPost = true;
+
                                     });
                                   }
                                 }
                               },
-                              child: Icon(FontAwesomeIcons.image, color: imagePicked.length == 4 ? Colors.blue.withOpacity(0.7):Colors.blue, size: 20,)
+                              child: Icon(FontAwesomeIcons.image, color: imagePicked.value.length == 4 ? Colors.blue.withOpacity(0.7):Colors.blue, size: 20,)
                           ),
-                          Container(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              backgroundColor: Colors.white.withOpacity(0.4),
-                              strokeWidth: numOfWord/300 >1 ? 3: 2,
-                              value: (numOfWord/300).clamp(0, 1), // Set the value between 0.0 and 1.0
-                              valueColor: AlwaysStoppedAnimation<Color>(numOfWord/300>1 ? Colors.red: Colors.blue), // Set the color
-                            ),
+                          ValueListenableBuilder(
+                            valueListenable: numOfWord,
+                            builder: (context, value, child) {
+                              return Container(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  backgroundColor: Colors.white.withOpacity(0.4),
+                                  strokeWidth: value/300 >1 ? 3: 2,
+                                  value: (value/300).clamp(0, 1), // Set the value between 0.0 and 1.0
+                                  valueColor: AlwaysStoppedAnimation<Color>(value/300>1 ? Colors.red: Colors.blue), // Set the color
+                                ),
+                              );
+                            }
                           )
                         ],
                       ),

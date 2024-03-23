@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:twitter/models/tweet.dart";
 import "package:twitter/widgets/ImageGridView.dart";
+import "package:twitter/widgets/quote_tweet.dart";
 import "package:twitter/widgets/tweet_widget.dart";
 
 import "../screens/home/comment_tweet.dart";
@@ -20,7 +21,9 @@ class _TweetViewState extends State<TweetView> {
   bool _isRepost = false;
   bool _isBookmark = false;
   late Future<List<Tweet>> tweets;
-  List<Widget> buildComment(List<Tweet> comment){
+  List<Widget> buildComment(List<Tweet
+
+  > comment){
     List<Widget> rs = [];
     comment.forEach((element) {
       rs.add(TweetWidget(tweet: element));
@@ -196,12 +199,18 @@ class _TweetViewState extends State<TweetView> {
                           fontWeight: FontWeight.w400
                       ),
                     ),
-                    widget.tweet.imgLinks.length!=0 ? SizedBox(height: 8,): SizedBox(height: 0,),
+                    if(widget.tweet.imgLinks.isNotEmpty)...[const SizedBox(height: 8,)],
+                    // image view
                     ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child:ImageGridView(imageLinks: widget.tweet.imgLinks,)
+                        child:ImageGridView(imageLinks: widget.tweet.imgLinks, isSquare: false,)
                     ),
+                    if(widget.tweet.repost!= null && widget.tweet.content.isNotEmpty)...[
+                      const SizedBox(height: 10,),
+                      QuoteTweet(quote:widget.tweet.repost ,brief: false)
+                    ],
                     const SizedBox(height: 12,),
+                    //action
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -362,6 +371,7 @@ class _TweetViewState extends State<TweetView> {
                   ],
                 ),
               ),
+              //comment
               FutureBuilder(
                   future: tweets,
                   builder: (context, snapshot){

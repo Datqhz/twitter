@@ -43,9 +43,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
         tweets = data;
       });
     }catch(e){
-      print("Lỗi:");
+      print(e);
     }
-
   }
   List<Widget> buildListTweet(){
     List<Widget> items = [];

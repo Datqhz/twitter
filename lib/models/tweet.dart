@@ -11,9 +11,11 @@ class Tweet {
   late MyUser? user;
   late int totalComment;
   late int totalLike;
+  late int totalRepost;
   late String groupName;
   late int personal;
   late bool isLike;
+  late bool isRepost;
   late Tweet? repost;
   late String commentTweetId;
   late MyUser? replyTo;
@@ -23,24 +25,26 @@ class Tweet {
   Tweet(
   {required this.idAsString, required this.content, required this.uid,
     required this.imgLinks, required this.videoLinks, required this.uploadDate,
-    required this.user,required this.totalComment, required this.totalLike,
-    required this.personal, required this.groupName,required this.isLike,
+    required this.user,required this.totalComment, required this.totalLike, required this.totalRepost,
+    required this.personal, required this.groupName,required this.isLike,required this.isRepost,
     required this.repost, required this.commentTweetId, required this.replyTo});
 
   factory Tweet.fromJson(Map<String, dynamic> json){
     return Tweet(
         idAsString:json["idAsString"] ,
-        content: json["content"],
+        content: json['content']??"",
         uid: json["uid"],
         imgLinks: List<String>.from(json["imageLinks"]),
         videoLinks: List<String>.from(json["videoLinks"]),
-        uploadDate: DateFormat('dd-MM-yyyy').parse(json['uploadDate']),
+        uploadDate: DateTime.parse(json['uploadDate']),
         user: MyUser.fromJson(json['user']),
         totalLike: json["totalLike"],
         totalComment: json["totalComment"],
+        totalRepost: json["totalRepost"],
         groupName: json['groupName'] ?? "",
         personal: json['personal'],
         isLike: json['like'],
+        isRepost: json['repost'],
         replyTo: json['replyToUser'] != null ?MyUser.fromJson(json['replyToUser']): null,
         repost: json['repostTweet'] != null?Tweet.fromJson(json['repostTweet']): null,
         commentTweetId: json['commentTweetId']??""

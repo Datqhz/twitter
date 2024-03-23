@@ -10,7 +10,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.22:8080';
+  String url = 'http://192.168.1.8:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -52,7 +52,7 @@ class DatabaseService{
     }
     final List<dynamic> data = json.decode(response.body);
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
-
+    print("getd tweet: "  + result.length.toString());
     return result;
 
   }
@@ -135,6 +135,24 @@ class DatabaseService{
 
     Response response = await get(
       Uri.parse("$url/api/v1/tweet/unlike/"+tweetId),
+      headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
+  }
+  //undo repost tweet
+  Future<bool> undoRepost(String repostId) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await get(
+      Uri.parse("$url/api/v1/tweet/undo-repost/"+repostId),
       headers: headers,
     );
     int statusCode = response.statusCode;

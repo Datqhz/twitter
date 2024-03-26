@@ -62,7 +62,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 8,),
                 Text(
-                  GlobalVariable.currentUser!.displayName,
+                  GlobalVariable.currentUser!.myUser.displayName,
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
@@ -71,7 +71,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 6,),
                 Text(
-                  GlobalVariable.currentUser!.username,
+                  GlobalVariable.currentUser!.myUser.username,
                   style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 13,

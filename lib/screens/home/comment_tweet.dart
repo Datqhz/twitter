@@ -155,7 +155,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                                 text: 'Replying to ',
                               ),
                               TextSpan(
-                                text: widget.reply.replyTo?.username,
+                                text: widget.reply.replyTo?.myUser.username,
                                 style: TextStyle(
                                     color: Colors.blue,
                                     fontSize: 14
@@ -259,7 +259,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                       ),
                       TextButton(
                         onPressed: _canPost?(){
-                          Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
+                          Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                             uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal ,
                             isLike: false,groupName: "", repost: null, commentTweetId: widget.reply.idAsString, replyTo: widget.reply.user, totalRepost: 0, isRepost: false, );
                           print(tweet);

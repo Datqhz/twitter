@@ -1,44 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:twitter/services/database_service.dart';
+import 'package:twitter/shared/global_variable.dart';
 
-class Follow extends StatefulWidget {
-  Follow({super.key});
+import '../../models/follow.dart';
+import '../../services/storage.dart';
 
+class FollowView extends StatefulWidget {
+  FollowView({super.key, required this.uid, required this.isFollowing});
+  String uid;
+  bool isFollowing;
   @override
-  State<Follow> createState() => _FollowState();
+  State<FollowView> createState() => _FollowViewState();
 }
 
-class _FollowState extends State<Follow> with SingleTickerProviderStateMixin{
-  late TabController _tabController;
-  late ScrollController _scrollController;
-  double top = 0;
-  double previousScroll = 0;
-  bool isShow = true;
+class _FollowViewState extends State<FollowView> with SingleTickerProviderStateMixin{
+
   @override
   void initState() {
-    _scrollController = ScrollController()..addListener(() {
-      if(previousScroll>_scrollController.offset){
-        top = top - (_scrollController.offset - previousScroll);
-        if(top >= -20){
-          top = -0;
-          isShow = true;
-        }
-      }else {
-        top = top + (previousScroll - _scrollController.offset);
-        if(top< -20){
-          top = -40;
-          isShow = false;
-        }
-      }
-      previousScroll = _scrollController.offset;
-      setState(() {
-      });
-      print("scroll" + _scrollController.offset.toString());
-    });
-    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
-    _tabController.addListener(() {setState(() {
-    });});
-
     super.initState();
   }
 
@@ -61,7 +41,7 @@ class _FollowState extends State<Follow> with SingleTickerProviderStateMixin{
             backgroundColor: Colors.black,
             elevation: 0,
             title:Text(
-              "Following"
+              widget.isFollowing?"Following":"Followers"
             ),
             actions: [
               IconButton(
@@ -72,85 +52,166 @@ class _FollowState extends State<Follow> with SingleTickerProviderStateMixin{
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          Container(
-            padding: EdgeInsets.only(top:40 +top),
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTabContent('Content for Tab 1'),
-                _buildTabContent('Content for Tab 2'),
-              ],
-            ),
-          ),
-          // SingleChildScrollView(
-          //   child: Column(
-          //     mainAxisSize: MainAxisSize.min,
-          //     children: [
-          //       Flexible(
-          //         flex: 1,
-          //           child: _getTabView(_tabController.index)
-          //       )
-          //     ],
-          //   ),
-          // ),
-          // TabBarView(
-          //     controller: _tabController,
-          //     physics: BouncingScrollPhysics(),
-          //     children: [
-          //       Center(
-          //           child: Text('Replies', style: TextStyle(color: Colors.white))
-          //       ),
-          //       Center(
-          //           child: Text('Highlights', style: TextStyle(color: Colors.white))
-          //       ),
-          //     ]
-          // ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 200),
-              left: 0,
-              top: top,
-              right: 0,
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color:Colors.black,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                      width: 0.1
-                    )
-                  )
-                ),
-                child: TabBar(
-                  unselectedLabelColor: Color.fromRGBO(170, 184, 194, 1),
-                  indicatorSize: TabBarIndicatorSize.label,
-                  indicatorWeight: 3,
-                  isScrollable: false,
-                  controller: _tabController,
-                  tabs: const [
-                    Text('Verified'),
-                    Text('All')
-                  ],
-                ),
-              ),
-          )
-        ]
-
+      body: FutureBuilder(
+        future: widget.isFollowing?DatabaseService().getFollowing(widget.uid):DatabaseService().getFollowed(widget.uid),
+        builder: (context, snapshot){
+          if(snapshot.connectionState == ConnectionState.done){
+            if(snapshot.hasData){
+              return ListView(
+                children: _buildFollowList(snapshot.data!),
+              );
+            }else {
+              return Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.isFollowing?"Be in the know":"Looking for followers?",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 28
+                        ),
+                      ),
+                      Text(
+                        widget.isFollowing
+                            ?"Following accounts is an easy way to curate your timeline and know what's happening with the topics and people you're interested in."
+                            :"When someone follows this account, they'll show up here. posting and interaction with others helps boots followers",
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 15
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              );
+            }
+          }else{
+            return Center(child: SpinKitPulse(size: 50, color: Colors.blue,));
+          }
+        },
       )
     );
   }
-  Widget _buildTabContent(String text) {
-    return ListView.builder(
-      controller: _scrollController,
-      key: PageStorageKey<String>(text),
-      itemCount: 50,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title: Text('$text - Item $index', style: TextStyle(color: Colors.white),),
-        );
-      },
+  List<Widget> _buildFollowList(List<Follow> follows) {
+    List<Widget> rs = [];
+    follows.forEach((element) {
+      rs.add(FollowItem(follow: element, followers: !widget.isFollowing));
+    });
+    return rs;
+  }
+}
+
+class FollowItem extends StatelessWidget {
+  FollowItem({super.key, required this.follow, required this.followers});
+  Follow follow;
+  bool followers;
+  late ValueNotifier<bool> _isFollow = ValueNotifier(false);
+  @override
+  Widget build(BuildContext context) {
+    if(followers){
+      _isFollow.value = follow.userFollow.isFollow;
+    }else {
+      _isFollow.value = follow.userFollowed.isFollow;
+    }
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        border: Border(
+          bottom: BorderSide(
+            width: 0.2,
+            color: Colors.white.withOpacity(0.5)
+          )
+        )
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 40,
+                child: FutureBuilder<String?>(
+                    future: Storage().downloadAvatarURL(!followers?follow.userFollowed.myUser.avatarLink:follow.userFollow.myUser.avatarLink),
+                    builder: (context, snapshot) {
+                      if(snapshot.connectionState == ConnectionState.done){
+                        return CircleAvatar(
+                          backgroundImage: NetworkImage(snapshot.data!),
+                          backgroundColor: Colors.black ,
+                          radius: 20,
+                        );
+                      }else {
+                        return SizedBox(height: 0,);
+                      }
+                    }
+                ),
+              ),
+              SizedBox(width: 8,),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    !followers?follow.userFollowed.myUser.displayName:follow.userFollow.myUser.displayName,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    !followers?follow.userFollowed.myUser.username:follow.userFollow.myUser.username,
+                    style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                ],
+              ),
+            ],
+          ),
+          ValueListenableBuilder(
+              valueListenable: _isFollow,
+              builder: (context, value, child){
+                return SizedBox(
+                  height: 30,
+                  child: TextButton(
+                    onPressed: (){
+                      _isFollow.value = !_isFollow.value;
+                    },
+                    child: Text(
+                        value?"Following":"Follow"
+                    ),
+                    style: TextButton.styleFrom(
+                      textStyle: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500
+                      ),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                        backgroundColor: value?Colors.black:Colors.white,
+                        foregroundColor: value?Colors.white:Colors.black,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side: BorderSide(
+                              width: 0.8,
+                              color: Theme.of(context).dividerColor
+                            )
+                        )
+                    ),
+                  ),
+                );
+              }
+          )
+
+        ],
+      ),
     );
   }
 }

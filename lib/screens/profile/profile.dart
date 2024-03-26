@@ -199,7 +199,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        GlobalVariable.currentUser!.displayName,
+                                        GlobalVariable.currentUser!.myUser.displayName,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 22,
@@ -212,7 +212,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        GlobalVariable.currentUser!.username,
+                                        GlobalVariable.currentUser!.myUser.username,
                                         style: TextStyle(
                                           color: Color.fromRGBO(170, 184, 194, 1),
                                           fontSize: 14,
@@ -258,7 +258,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                           ),
                                           GestureDetector(
                                             onTap: (){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>Follow()));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: true,)));
                                             },
                                             child: Text(
                                               " Following",
@@ -279,12 +279,17 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                             ),
                                           ),
                                           SizedBox(width: 8,),
-                                          Text(
-                                            "Followed",
-                                            style: TextStyle(
-                                              color: Color.fromRGBO(170, 184, 194, 1),
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
+                                          GestureDetector(
+                                            onTap: (){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: false)));
+                                            },
+                                            child: Text(
+                                              "Followed",
+                                              style: TextStyle(
+                                                color: Color.fromRGBO(170, 184, 194, 1),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -356,7 +361,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          GlobalVariable.currentUser!.displayName,
+                                          GlobalVariable.currentUser!.myUser.displayName,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,

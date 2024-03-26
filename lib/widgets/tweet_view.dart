@@ -2,6 +2,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:twitter/models/tweet.dart";
+import "package:twitter/shared/global_variable.dart";
 import "package:twitter/widgets/ImageGridView.dart";
 import "package:twitter/widgets/quote_tweet.dart";
 import "package:twitter/widgets/tweet_widget.dart";
@@ -21,9 +22,7 @@ class _TweetViewState extends State<TweetView> {
   bool _isRepost = false;
   bool _isBookmark = false;
   late Future<List<Tweet>> tweets;
-  List<Widget> buildComment(List<Tweet
-
-  > comment){
+  List<Widget> buildComment(List<Tweet> comment){
     List<Widget> rs = [];
     comment.forEach((element) {
       rs.add(TweetWidget(tweet: element));
@@ -100,7 +99,7 @@ class _TweetViewState extends State<TweetView> {
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               child: FutureBuilder<String?>(
-                                  future: Storage().downloadAvatarURL(widget.tweet.user!.avatarLink),
+                                  future: Storage().downloadAvatarURL(widget.tweet.user!.myUser.avatarLink),
                                   builder: (context, snapshot){
                                     if(snapshot.connectionState == ConnectionState.done){
                                       return Image.network(snapshot.data!);
@@ -113,7 +112,7 @@ class _TweetViewState extends State<TweetView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.tweet.user!.displayName,
+                                  widget.tweet.user!.myUser.displayName,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -121,7 +120,7 @@ class _TweetViewState extends State<TweetView> {
                                   ),
                                 ),
                                 Text(
-                                  widget.tweet.user!.username,
+                                  widget.tweet.user!.myUser.username,
                                   style: TextStyle(
                                       color: Color.fromRGBO(170, 184, 194, 1),
                                       fontSize: 14
@@ -134,25 +133,29 @@ class _TweetViewState extends State<TweetView> {
                         ),
                         Row(
                           children: [
-                            SizedBox(
+                            if(widget.tweet.user?.myUser.uid!=GlobalVariable.currentUser?.myUser.uid)...[SizedBox(
                               height: 26,
                               width: 110,
                               child: TextButton(
                                 onPressed: (){
                                 },
                                 child: Text(
-                                  "Subcribe",
+                                  widget.tweet.user!.isFollow?"Following": "Follow",
                                 ),
                                 style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
+                                    backgroundColor: widget.tweet.user!.isFollow?Colors.black:Colors.white,
+                                    foregroundColor: widget.tweet.user!.isFollow?Colors.white:Colors.black,
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30)
+                                        borderRadius: BorderRadius.circular(30),
+                                        side: BorderSide(
+                                          width: 0.8,
+                                          color: Theme.of(context).dividerColor
+                                        )
                                     )
                                 ),
                               ),
-                            ),
+                            )],
                             const SizedBox(width: 12,),
                             GestureDetector(
                               child: const Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white,size: 14,),
@@ -179,7 +182,7 @@ class _TweetViewState extends State<TweetView> {
                                 text: 'Reply to ',
                               ),
                               TextSpan(
-                                text: widget.tweet.replyTo?.username,
+                                text: widget.tweet.replyTo?.myUser.username,
                                 style: TextStyle(
                                     color: Colors.blue,
                                     fontSize: 15
@@ -322,7 +325,7 @@ class _TweetViewState extends State<TweetView> {
                               child: Icon(
                                 CupertinoIcons.arrow_2_squarepath ,
                                 size: 22,
-                                color: _isRepost? Color.fromRGBO(84, 209, 130, 1):Color.fromRGBO(170, 184, 194, 1),
+                                color: widget.tweet.isRepost? Color.fromRGBO(84, 209, 130, 1):Color.fromRGBO(170, 184, 194, 1),
                               ),
                             ),
                             GestureDetector(

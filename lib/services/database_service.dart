@@ -2,15 +2,17 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
+import 'package:twitter/models/user_info_with_follow.dart';
 import 'package:twitter/services/storage.dart';
 import 'package:twitter/shared/global_variable.dart';
 
+import '../models/follow.dart';
 import '../models/group.dart';
 import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.8:8080';
+  String url = 'http://192.168.1.19:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -94,7 +96,7 @@ class DatabaseService{
           'uploadDate': tweet.uploadDate.toIso8601String(),
           'personal': tweet.personal,
           'groupId': tweet.groupName,
-          'replyTo': tweet.replyTo?.uid,
+          'replyTo': tweet.replyTo?.myUser.uid,
           'repost': tweet.repost?.idAsString,
           'commentTweetId': tweet.commentTweetId,
           'usersLike': []
@@ -192,12 +194,12 @@ class DatabaseService{
       return "Could not get input from server";
     }
     final Map<String, dynamic> data = json.decode(response.body);
-    GlobalVariable.currentUser = MyUser.fromJson(data['user']);
+    GlobalVariable.currentUser = MyUserWithFollow.fromJson(data);
     GlobalVariable.numOfFollowed = data['numOfFollowed'];
     GlobalVariable.numOfFollowing = data['numOfFollowing'];
-    GlobalVariable.avatar = (await Storage().downloadAvatarURL(GlobalVariable.currentUser!.avatarLink))!;
+    GlobalVariable.avatar = (await Storage().downloadAvatarURL(GlobalVariable.currentUser!.myUser.avatarLink))!;
     print(GlobalVariable.avatar);
-    GlobalVariable.wall = (await Storage().downloadWallULR(GlobalVariable.currentUser!.wallLink))!;
+    GlobalVariable.wall = (await Storage().downloadWallULR(GlobalVariable.currentUser!.myUser.wallLink))!;
     return response.body.toString();
   }
   Future<List<MyUser>> findUserByUsername(String s)async{
@@ -206,7 +208,7 @@ class DatabaseService{
       'Content-Type': 'application/json; charset=UTF-8',
       "Authorization" :"Bearer " + token!
     };
-    Response response = await get(Uri.parse("$url/api/v1/user/"+s), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/user/find/"+s), headers: headers);
     int statusCode = response.statusCode;
 
     if(statusCode != 200){
@@ -216,6 +218,21 @@ class DatabaseService{
         .map((data) => MyUser.fromJson(data))
         .toList();
     print(result.length);
+    return result;
+  }
+
+  Future<MyUserWithFollow> getUserInfoWithFollow(String uid) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    Response response = await get(Uri.parse("$url/api/v1/user/"+uid), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("error");
+    }
+    MyUserWithFollow result =MyUserWithFollow.fromJson(json.decode(response.body));
     return result;
   }
   //// Group /////
@@ -307,5 +324,78 @@ class DatabaseService{
     print(data.toString());
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
     return result;
+  }
+
+  ////Follow///
+  Future<List<Follow>> getFollowing(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    Response response = await get(Uri.parse("$url/api/v1/follow/following/"+uid), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("error");
+    }
+    List<Follow> result = (json.decode(response.body) as List<dynamic>)
+        .map((data) => Follow.fromJson(data))
+        .toList();
+    return result;
+  }
+  Future<List<Follow>> getFollowed(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    Response response = await get(Uri.parse("$url/api/v1/follow/followed/"+uid), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("error");
+    }
+    List<Follow> result = (json.decode(response.body) as List<dynamic>)
+        .map((data) => Follow.fromJson(data))
+        .toList();
+    return result;
+  }
+  Future<bool> followUid(String uid) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await post(
+        Uri.parse("$url/api/v1/follow"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          "userFollow": GlobalVariable.currentUser?.myUser.uid,
+          "userFollowed": uid
+          // Add any other data you want to send in the body
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> unfollowUid(String uid) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await delete(
+        Uri.parse("$url/api/v1/follow/"+ uid),
+        headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
   }
 }

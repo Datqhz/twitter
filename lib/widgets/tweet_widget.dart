@@ -33,25 +33,6 @@ class _TweetWidgetState extends State<TweetWidget> {
   @override
   void initState() {
     super.initState();
-    if(widget.tweet.content.length>200){
-      setState(() {
-        _isShowMore = true;
-      });
-    }
-  }
-  String caculateUploadDate(DateTime date){
-    DateTime currentDate = DateTime.now();
-    // Calculate the absolute difference
-    Duration difference = currentDate.difference(date).abs();
-    if (difference.inDays > 0 ) {
-      if(difference.inDays>365){
-        return DateFormat.yMMMMd("en_US").parse(date.toString()).toString();
-      }else {
-        return DateFormat.MMMMd("en_US").format(date).toString();
-      }
-    }else {
-      return "${difference.inHours}h";
-    }
   }
   Widget buildMediaView(List<String> imgLinks){
     return Container(
@@ -94,6 +75,11 @@ class _TweetWidgetState extends State<TweetWidget> {
     }else {
       tweet = widget.tweet;
     }
+    if(tweet!.content.length>200){
+      setState(() {
+        _isShowMore = true;
+      });
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,7 +108,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        tweet!.user!.displayName,
+                        tweet!.user!.myUser.displayName,
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -131,7 +117,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                       ),
                       SizedBox(width: 8,),
                       Text(
-                        tweet.user!.username,
+                        tweet.user!.myUser.username,
                         style: TextStyle(
                             fontSize: 14,
                             color: Color.fromRGBO(170, 184, 194, 1),
@@ -146,7 +132,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                       ),
                       SizedBox(width: 4,),
                       Text(
-                          caculateUploadDate(tweet.uploadDate),
+                        GlobalVariable().caculateUploadDate(tweet.uploadDate),
                         style: TextStyle(
                             fontSize: 14,
                             color: Color.fromRGBO(170, 184, 194, 1)
@@ -174,7 +160,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                           text: 'Reply to ',
                         ),
                         TextSpan(
-                          text: tweet.replyTo?.username,
+                          text: tweet.replyTo?.myUser.username,
                           style: TextStyle(
                               color: Colors.blue,
                               fontSize: 14
@@ -269,7 +255,7 @@ class _TweetWidgetState extends State<TweetWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>TweetView(tweet: widget.tweet,)));
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>TweetView(tweet: (widget.tweet.repost!=null && widget.tweet.content.isEmpty)?widget.tweet.repost!:widget.tweet,)));
       },
       child: Container(
         padding: const EdgeInsets.only(left: 8,right: 8, top: 12),
@@ -294,7 +280,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                 Icon(widget.tweet.groupName.isNotEmpty? CupertinoIcons.person_2_fill: FontAwesomeIcons.retweet, color: Colors.white.withOpacity(0.5), size: 14,),
                 SizedBox(width: 12,),
                 Text(
-                  widget.tweet.groupName.isNotEmpty?widget.tweet.groupName: "${widget.tweet.user!.displayName} repost",
+                  widget.tweet.groupName.isNotEmpty?widget.tweet.groupName: "${widget.tweet.user!.myUser.displayName} repost",
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -406,7 +392,7 @@ class _TweetActionState extends State<TweetAction> {
                             );
                             Navigator.pop(context);
                           }:()async{
-                            Tweet repost = Tweet(idAsString: "", content: "", uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
+                            Tweet repost = Tweet(idAsString: "", content: "", uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                               uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: 1 ,
                               isLike: false,groupName: "", repost: widget.tweet, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
                             await DatabaseService().postTweet(repost);

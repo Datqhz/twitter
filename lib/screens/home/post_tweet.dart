@@ -203,7 +203,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                         builder: (context, value, child){
                           return TextButton(
                             onPressed: value?(){
-                              Tweet tweet = Tweet(idAsString: "", content: content.value, uid: GlobalVariable.currentUser!.uid, imgLinks: [], videoLinks: [],
+                              Tweet tweet = Tweet(idAsString: "", content: content.value, uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                                 uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal.value ,
                                 isLike: false,groupName: "", repost: widget.quote, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
                               print(tweet);

@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:twitter/models/user.dart';
+import 'package:twitter/models/user_info_with_follow.dart';
 
 class Tweet {
   late String idAsString;
@@ -8,7 +9,7 @@ class Tweet {
   late List<String> imgLinks;
   late List<String> videoLinks;
   late DateTime uploadDate;
-  late MyUser? user;
+  late MyUserWithFollow? user;
   late int totalComment;
   late int totalLike;
   late int totalRepost;
@@ -18,7 +19,7 @@ class Tweet {
   late bool isRepost;
   late Tweet? repost;
   late String commentTweetId;
-  late MyUser? replyTo;
+  late MyUserWithFollow? replyTo;
 
 
 
@@ -37,7 +38,7 @@ class Tweet {
         imgLinks: List<String>.from(json["imageLinks"]),
         videoLinks: List<String>.from(json["videoLinks"]),
         uploadDate: DateTime.parse(json['uploadDate']),
-        user: MyUser.fromJson(json['user']),
+        user: MyUserWithFollow.fromJson(json['userCreate']),
         totalLike: json["totalLike"],
         totalComment: json["totalComment"],
         totalRepost: json["totalRepost"],
@@ -45,7 +46,7 @@ class Tweet {
         personal: json['personal'],
         isLike: json['like'],
         isRepost: json['repost'],
-        replyTo: json['replyToUser'] != null ?MyUser.fromJson(json['replyToUser']): null,
+        replyTo: json['replyToUser'] != null ?MyUserWithFollow.fromJson(json['replyToUser']): null,
         repost: json['repostTweet'] != null?Tweet.fromJson(json['repostTweet']): null,
         commentTweetId: json['commentTweetId']??""
     );

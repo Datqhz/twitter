@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:twitter/shared/global_variable.dart';
 
 import '../models/tweet.dart';
 import '../services/storage.dart';
@@ -42,20 +43,6 @@ class BriefTweet extends StatelessWidget {
         )
     );
   }
-  String caculateUploadDate(DateTime date){
-    DateTime currentDate = DateTime.now();
-    // Calculate the absolute difference
-    Duration difference = currentDate.difference(date).abs();
-    if (difference.inDays > 0 ) {
-      if(difference.inDays>365){
-        return DateFormat.yMMMMd("en_US").parse(date.toString()).toString();
-      }else {
-        return DateFormat.MMMMd("en_US").format(date).toString();
-      }
-    }else {
-      return "${difference.inHours}h";
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -80,7 +67,7 @@ class BriefTweet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: FutureBuilder(
-                    future: Storage().downloadAvatarURL(tweet.user!.avatarLink),
+                    future: Storage().downloadAvatarURL(tweet.user!.myUser.avatarLink),
                     builder: (context, snapshot){
                       if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
                         return Image.network(snapshot.data!);
@@ -105,7 +92,7 @@ class BriefTweet extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              tweet.user!.displayName,
+                              tweet.user!.myUser.displayName,
                               style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
@@ -114,7 +101,7 @@ class BriefTweet extends StatelessWidget {
                             ),
                             SizedBox(width: 8,),
                             Text(
-                              tweet.user!.username,
+                              tweet.user!.myUser.username,
                               style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.white.withOpacity(0.5),
@@ -125,7 +112,7 @@ class BriefTweet extends StatelessWidget {
                         ),
                         //post time
                         Text(
-                          caculateUploadDate(tweet.uploadDate),
+                          GlobalVariable().caculateUploadDate(tweet.uploadDate),
                           style: TextStyle(
                               fontSize: 13,
                               color: Colors.white.withOpacity(0.5)
@@ -136,7 +123,7 @@ class BriefTweet extends StatelessWidget {
                     //is replied?
                     if(tweet.replyTo!=null)...[
                       Text(
-                        "Replying to ${tweet.replyTo?.username}",
+                        "Replying to ${tweet.replyTo?.myUser.username}",
                         style: TextStyle(
                             fontSize: 13,
                             color: Colors.white.withOpacity(0.5),

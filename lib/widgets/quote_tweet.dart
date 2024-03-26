@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:twitter/shared/global_variable.dart';
 import 'package:twitter/widgets/ImageGridView.dart';
 
 import '../models/tweet.dart';
@@ -86,21 +87,6 @@ class QuoteTweet extends StatelessWidget {
     }
   }
 
-  String caculateUploadDate(DateTime date){
-    DateTime currentDate = DateTime.now();
-    // Calculate the absolute difference
-    Duration difference = currentDate.difference(date).abs();
-    if (difference.inDays > 0 ) {
-      if(difference.inDays>365){
-        return DateFormat.yMMMMd("en_US").parse(date.toString()).toString();
-      }else {
-        return DateFormat.MMMMd("en_US").format(date).toString();
-      }
-    }else {
-      return "${difference.inHours}h";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -119,7 +105,7 @@ class QuoteTweet extends StatelessWidget {
                 Container(
                   height: 20,
                   child: FutureBuilder<String?>(
-                      future: Storage().downloadAvatarURL(quote!.user!.avatarLink),
+                      future: Storage().downloadAvatarURL(quote!.user!.myUser.avatarLink),
                       builder: (context, snapshot) {
                         if(snapshot.connectionState == ConnectionState.done){
                           return CircleAvatar(
@@ -135,7 +121,7 @@ class QuoteTweet extends StatelessWidget {
                 ),
                 SizedBox(width: 4,),
                 Text(
-                  quote!.user!.displayName,
+                  quote!.user!.myUser.displayName,
                   style: TextStyle(
                       fontSize: 15,
                       color: Colors.white,
@@ -145,7 +131,7 @@ class QuoteTweet extends StatelessWidget {
                 ),
                 SizedBox(width: 4,),
                 Text(
-                  quote!.user!.username,
+                  quote!.user!.myUser.username,
                   style: TextStyle(
                       fontSize: 15,
                       color: Colors.white.withOpacity(0.5),
@@ -160,7 +146,7 @@ class QuoteTweet extends StatelessWidget {
                 ),
                 SizedBox(width: 4,),
                 Text(
-                  caculateUploadDate(quote!.uploadDate),
+                  GlobalVariable().caculateUploadDate(quote!.uploadDate),
                   style: TextStyle(
                       fontSize: 15,
                       color: Colors.white.withOpacity(0.5)
@@ -172,7 +158,7 @@ class QuoteTweet extends StatelessWidget {
           if(quote!.replyTo!=null)...[Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              "Replying to ${quote!.replyTo?.username}",
+              "Replying to ${quote!.replyTo?.myUser.username}",
               style: TextStyle(
                   fontSize: 15,
                   color: Colors.white.withOpacity(0.5),

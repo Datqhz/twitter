@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
+import 'package:twitter/models/notify.dart';
 import 'package:twitter/models/user_info_with_follow.dart';
 import 'package:twitter/services/storage.dart';
 import 'package:twitter/shared/global_variable.dart';
@@ -12,7 +13,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.19:8080';
+  String url = 'http://192.168.1.30:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -397,5 +398,24 @@ class DatabaseService{
       return true;
     }
     return false;
+  }
+
+  //Notification////
+  Future<List<MyNotification>> getNotification() async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/notification"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<MyNotification> result = data.map((e) => MyNotification.fromJson(e)).toList();
+    print(" num of notification: " + result.length.toString());
+    return result;
   }
 }

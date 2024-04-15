@@ -1,6 +1,8 @@
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:image_picker/image_picker.dart";
 import "package:twitter/models/tweet.dart";
 import "package:twitter/shared/global_variable.dart";
 import "package:twitter/widgets/ImageGridView.dart";
@@ -8,6 +10,7 @@ import "package:twitter/widgets/quote_tweet.dart";
 import "package:twitter/widgets/tweet_widget.dart";
 
 import "../screens/home/comment_tweet.dart";
+import "../screens/home/post_tweet.dart";
 import "../services/database_service.dart";
 import "../services/storage.dart";
 
@@ -22,6 +25,44 @@ class _TweetViewState extends State<TweetView> {
   bool _isRepost = false;
   bool _isBookmark = false;
   late Future<List<Tweet>> tweets;
+
+  void postTweet(List<XFile> images, Tweet tweet)async{
+    List<String> imageNames = [];
+    try{
+      // upload image to the cloud if have
+      if(images.length!=0){
+        for(XFile image in images){
+          String name = await Storage().putImage(image);
+          if(name != ""){
+            imageNames.add(name);
+          }
+        }
+      }
+      tweet.imgLinks = imageNames;
+      bool result = await DatabaseService().postTweet(tweet);
+      if(result){
+        print("post tweet successful!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // backgroundColor: Colors.transparent,
+            // padding: EdgeInsets.symmetric(horizontal: 12),
+            width: 2.3*MediaQuery.of(context).size.width/4,
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Your tweet is posted success!!'),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }else {
+        print("error");
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
+
   List<Widget> buildComment(List<Tweet> comment){
     List<Widget> rs = [];
     comment.forEach((element) {
@@ -137,7 +178,16 @@ class _TweetViewState extends State<TweetView> {
                               height: 26,
                               width: 110,
                               child: TextButton(
-                                onPressed: (){
+                                onPressed: widget.tweet.user!.isFollow?()async{
+                                  await DatabaseService().unfollowUid(widget.tweet.user!.myUser.uid);
+                                  setState((){
+                                    widget.tweet.user!.isFollow = !widget.tweet.user!.isFollow;
+                                  });
+                                }:()async{
+                                  await DatabaseService().followUid(widget.tweet.user!.myUser.uid);
+                                  setState((){
+                                    widget.tweet.user!.isFollow = !widget.tweet.user!.isFollow;
+                                  });
                                 },
                                 child: Text(
                                   widget.tweet.user!.isFollow?"Following": "Follow",
@@ -318,6 +368,114 @@ class _TweetViewState extends State<TweetView> {
                             ),
                             GestureDetector(
                               onTap: (){
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (context){
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 12),
+                                        height: 150,
+                                        color: Colors.black,
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              width: double.infinity,
+                                              alignment: Alignment.center,
+                                              child: Icon(
+                                                CupertinoIcons.minus,
+                                                color: Colors.white,
+                                                size: 40,
+                                              ),
+                                            ),
+                                            // not yet
+                                            GestureDetector(
+                                              onTap: widget.tweet.isRepost? () async{
+                                                await DatabaseService().undoRepost(widget.tweet.idAsString);
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    // backgroundColor: Colors.transparent,
+
+                                                    behavior: SnackBarBehavior.floating,
+                                                    content: Align( alignment: Alignment.center, child: const Text('Undo Repost tweet successful!.')),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(14)
+                                                    ),
+                                                    duration: const Duration(seconds: 3),
+                                                  ),
+                                                );
+                                                Navigator.pop(context);
+                                              }:()async{
+                                                Tweet repost = Tweet(idAsString: "", content: "", uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
+                                                  uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: 1 ,
+                                                  isLike: false,groupName: "", repost: widget.tweet, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
+                                                await DatabaseService().postTweet(repost);
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    // backgroundColor: Colors.transparent,
+
+                                                    behavior: SnackBarBehavior.floating,
+                                                    content: Align( alignment: Alignment.center, child: const Text('Repost tweet successful!.')),
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(14)
+                                                    ),
+                                                    duration: const Duration(seconds: 3),
+                                                  ),
+                                                );
+                                                Navigator.pop(context);
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(vertical: 12),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      CupertinoIcons.arrow_2_squarepath,
+                                                      color: Colors.white.withOpacity(0.7),
+                                                      size: 25,
+                                                    ),
+                                                    SizedBox(width: 12,),
+                                                    Text(
+                                                      widget.tweet.isRepost ? "Undo Reposts" :"Reposts",
+                                                      style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: Colors.white.withOpacity(0.7)
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: (){
+                                                Navigator.pop(context);
+                                                Navigator.push(context, MaterialPageRoute(builder: (context)=>PostTweetScreen(postTweet: postTweet, quote: widget.tweet,)));
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(vertical: 12),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      FontAwesomeIcons.solidPenToSquare,
+                                                      color: Colors.white.withOpacity(0.7),
+                                                      size: 24,
+                                                    ),
+                                                    SizedBox(width: 12,),
+                                                    Text(
+                                                      "Quotes",
+                                                      style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: Colors.white.withOpacity(0.7)
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                );
                                 setState(() {
                                   _isRepost = !_isRepost;
                                 });

@@ -183,7 +183,13 @@ class FollowItem extends StatelessWidget {
                 return SizedBox(
                   height: 30,
                   child: TextButton(
-                    onPressed: (){
+                    onPressed: ()async{
+                      if(_isFollow.value){
+                        await DatabaseService().unfollowUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
+                      }else {
+                        await DatabaseService().followUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
+                      }
+                      await DatabaseService().getUserInfo();
                       _isFollow.value = !_isFollow.value;
                     },
                     child: Text(

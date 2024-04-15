@@ -15,8 +15,8 @@ class ImageGridView extends StatelessWidget {
     double ratio4 = ((MediaQuery.of(context).size.width-64)/2)/97;
     double ratiolr = ((MediaQuery.of(context).size.width-64)/2)/200;
     if(isSquare){
-      ratio4 = 1;
-      ratiolr = 1;
+      ratio4 = 0.5;
+      ratiolr = 0.5;
     }else {
       ratio4 = ((MediaQuery.of(context).size.width-64)/2)/97;
       ratiolr = ((MediaQuery.of(context).size.width-64)/2)/200;
@@ -64,10 +64,10 @@ class ImageGridView extends StatelessWidget {
             primary: false,
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            crossAxisSpacing: 6,
-            mainAxisSpacing: 6,
+            crossAxisSpacing: isSquare?2:6,
+            mainAxisSpacing: isSquare?2:6,
             crossAxisCount: 1,
-            childAspectRatio: ratio4,//((MediaQuery.of(context).size.width-64)/2)/97
+            childAspectRatio: isSquare?1:ratio4,//((MediaQuery.of(context).size.width-64)/2)/97
             children: temp
         ));
       }
@@ -75,8 +75,8 @@ class ImageGridView extends StatelessWidget {
           primary: false,
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
+          crossAxisSpacing: isSquare?2:6,
+          mainAxisSpacing: isSquare?2:6,
           crossAxisCount: 2,
           childAspectRatio: imageLinks.length == 4? ratio4 :ratiolr,
           children: results

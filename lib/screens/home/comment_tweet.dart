@@ -155,7 +155,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                                 text: 'Replying to ',
                               ),
                               TextSpan(
-                                text: widget.reply.replyTo?.myUser.username,
+                                text: widget.reply.user?.myUser.username,
                                 style: TextStyle(
                                     color: Colors.blue,
                                     fontSize: 14

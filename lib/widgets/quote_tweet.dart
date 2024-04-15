@@ -55,8 +55,8 @@ class QuoteTweet extends StatelessWidget {
       ];
     }else {
       return [
+        SizedBox(height: 6,),
         if(quote!.content.isNotEmpty)...[
-          SizedBox(height: 4,),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/group.dart';
 import '../../services/storage.dart';
-import 'group_profile.dart';
+import 'community-screen.dart';
 
 class CommunitiesItem extends StatelessWidget {
   CommunitiesItem({super.key, required this.group});
@@ -27,7 +27,7 @@ class CommunitiesItem extends StatelessWidget {
                 height: 90,
                 width: 90,
                 child: FutureBuilder<String?>(
-                  future: Storage().downloadGroupULR(group.groupImg), // Replace with your function to load the image
+                  future: Storage().downloadGroupURL(group.groupImg), // Replace with your function to load the image
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
                       return ClipRRect(

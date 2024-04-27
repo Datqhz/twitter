@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:twitter/models/notify.dart';
 import 'package:twitter/services/database_service.dart';
+import 'package:twitter/services/storage.dart';
+import 'package:twitter/widgets/tweet_view.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
 
 import '../../shared/app_bar.dart';
@@ -104,74 +106,88 @@ class NotifyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withOpacity(0.8),
-            width: 0.15
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>TweetView(tweet: notification.tweet)));
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.white.withOpacity(0.8),
+              width: 0.15
+            )
           )
-        )
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon( notification.type == 2? CupertinoIcons.arrow_2_squarepath : CupertinoIcons.bell_fill, color: notification.type == 2 ? Colors.green: Colors.blue, size: 24,),
-          SizedBox(width: 12,),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                //alignment: Alignment.centerLeft,
-                  height: 30,
-                  width: 30,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Image.asset("assets/images/patty.png")
-              ),
-              SizedBox(height: 6,),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 15,
-                      color: Colors.white.withOpacity(0.8),
-                    fontWeight: FontWeight.w400
-                  ),
-                  children: [
-                    if(notification.type == 3) ...[TextSpan(
-                      text: "New post notifications for ",
-                    )],
-                    TextSpan(
-                      text: 'Cher',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600
-                      ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon( notification.type == 2? CupertinoIcons.arrow_2_squarepath : CupertinoIcons.bell_fill, color: notification.type == 2 ? Colors.green: Colors.blue, size: 24,),
+            SizedBox(width: 12,),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  //alignment: Alignment.centerLeft,
+                    height: 30,
+                    width: 30,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(50),
                     ),
-                    if(notification.type == 2) ...[TextSpan(
-                      text: " reposted your post",
-                    )]
-                  ],
+                    child: FutureBuilder(
+                      future: Storage().downloadAvatarURL(notification.tweet.user!.myUser.avatarLink),
+                      builder: (context, snapshot){
+                        if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                          return Image.network(snapshot.data!);
+                        }else {
+                          return Image.asset("assets/images/black.jpg");
+                        }
+                      },
+                    )
                 ),
-              ),
-              SizedBox(height: 6,),
-              Text(
-                "pic.twitter.com/kdjdjsv",
-                style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white.withOpacity(0.4),
-                    fontWeight: FontWeight.w400
+                SizedBox(height: 6,),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 15,
+                        color: Colors.white.withOpacity(0.8),
+                      fontWeight: FontWeight.w400
+                    ),
+                    children: [
+                      if(notification.type == 3) ...[TextSpan(
+                        text: "New post notifications for ",
+                      )],
+                      TextSpan(
+                        text: notification.tweet.user?.myUser.displayName,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                      if(notification.type == 2) ...[TextSpan(
+                        text: " reposted your post",
+                      )]
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                SizedBox(height: 6,),
+                Text(
+                  "pic.twitter.com/kdjdjsv",
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w400
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

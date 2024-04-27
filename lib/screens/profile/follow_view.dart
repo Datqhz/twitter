@@ -53,7 +53,7 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
         ),
       ),
       body: FutureBuilder(
-        future: widget.isFollowing?DatabaseService().getFollowing(widget.uid):DatabaseService().getFollowed(widget.uid),
+        future: widget.isFollowing?DatabaseService().getFollowing(widget.uid):DatabaseService().getFollowers(widget.uid),
         builder: (context, snapshot){
           if(snapshot.connectionState == ConnectionState.done){
             if(snapshot.hasData){

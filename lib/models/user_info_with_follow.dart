@@ -11,7 +11,7 @@ class MyUserWithFollow{
   factory MyUserWithFollow.fromJson(Map<String, dynamic> json) {
     return MyUserWithFollow(
         myUser: MyUser.fromJson(json['user']),
-        numOfFollowed: json['numOfFollowed'],
+        numOfFollowed: json['numOfFollowers'],
         numOfFollowing: json['numOfFollowing'],
         isFollow: json['follow']
     );

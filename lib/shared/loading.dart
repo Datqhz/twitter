@@ -9,9 +9,9 @@ class Loading extends StatelessWidget {
     return Container(
       color: Colors.black,
       child: Center(
-        child: SpinKitRing(
+        child: SpinKitPulse(
+          size: 50,
           color: Colors.blue,
-          size: 50.0,
         ),
       ),
     );;

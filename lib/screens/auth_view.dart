@@ -27,6 +27,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
   int _currentPage = 0;
   bool isShowBottomBar = true;
   DatabaseService databaseService = DatabaseService();
+  bool _isLoad = true;
 
   Widget _bottomNavigateBar(){
     return Container(
@@ -128,7 +129,10 @@ class _AuthNavigationState extends State<AuthNavigation> {
     });
   }
   Future<void> getUserInfo()async{
-    databaseService.getUserInfo();
+    await databaseService.getUserInfo();
+    _isLoad = false;
+    setState(() {
+    });
   }
 
   void postTweet(List<XFile> images, Tweet tweet)async{
@@ -137,7 +141,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
       // upload image to the cloud if have
       if(images.length!=0){
         for(XFile image in images){
-          String name = await Storage().putImage(image);
+          String name = await Storage().putImage(image, 'tweet/images');
           if(name != ""){
             imageNames.add(name);
           }
@@ -149,8 +153,6 @@ class _AuthNavigationState extends State<AuthNavigation> {
         print("post tweet successful!");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            // backgroundColor: Colors.transparent,
-            // padding: EdgeInsets.symmetric(horizontal: 12),
             width: 2.3*MediaQuery.of(context).size.width/4,
             behavior: SnackBarBehavior.floating,
             content: const Text('Your tweet is posted success!!'),
@@ -168,54 +170,59 @@ class _AuthNavigationState extends State<AuthNavigation> {
     }
   }
 
+
+  @override
+  void initState() {
+    getUserInfo();
+    super.initState();
+
+  }
+
   @override
   Widget build(BuildContext context) {
-      return FutureBuilder(
-          future: getUserInfo(),
-          builder: (context, snapshot){
-            if(snapshot.connectionState == ConnectionState.done){
-              return Scaffold(
-                backgroundColor: Colors.black,
-                body: Stack(
-                  children: [
-                    _switchPage(),
-                    AnimatedPositioned(
-                        duration: Duration(milliseconds: 200),
-                        bottom: isShowBottomBar?70:-50,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>PostTweetScreen(postTweet: postTweet)));
-                          },
-                          child: Container(
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(50)
-                            ),
-                            child: Icon(FontAwesomeIcons.featherPointed),
-                          ),
-                        )
+      return _isLoad?
+        SpinKitPulse(
+          size: 50,
+          color: Colors.white,
+        ): Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              _switchPage(),
+              AnimatedPositioned(
+                  duration: Duration(milliseconds: 200),
+                  bottom: isShowBottomBar?70:-50,
+                  right: 10,
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>PostTweetScreen(postTweet: postTweet)));
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(50)
+                      ),
+                      child: Icon(FontAwesomeIcons.featherPointed),
                     ),
-                    AnimatedPositioned(
-                        bottom: isShowBottomBar?0:-50,
-                        right: 0,
-                        left: 0,
-                        duration: Duration(milliseconds: 200),
-                        child: _bottomNavigateBar()
-                    ),
-                  ],
-                ),
-                drawer: MyDrawer(),
-              );
-            }else {
-              return SpinKitPulse(
-                size: 50,
-                color: Colors.white,
-              );
-            }
-          }
-      );
+                  )
+              ),
+              AnimatedPositioned(
+                  bottom: isShowBottomBar?0:-50,
+                  right: 0,
+                  left: 0,
+                  duration: Duration(milliseconds: 200),
+                  child: _bottomNavigateBar()
+              ),
+            ],
+          ),
+          drawer: MyDrawer(),
+        );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

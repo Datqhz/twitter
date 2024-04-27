@@ -3,15 +3,22 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:twitter/models/user.dart';
+import 'package:twitter/models/user_info_with_follow.dart';
+import 'package:twitter/screens/profile/edit-profile.dart';
 import 'package:twitter/screens/profile/follow_view.dart';
 import 'package:twitter/services/database_service.dart';
+import 'package:twitter/shared/loading.dart';
 
 import '../../models/tweet.dart';
+import '../../services/storage.dart';
 import '../../shared/global_variable.dart';
 import '../../widgets/tweet_widget.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  Profile({super.key, required this.uid});
+  String uid;
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -22,9 +29,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   ValueNotifier<double> top = ValueNotifier(0);
   ValueNotifier<double> avatarSize = ValueNotifier(100);
   ValueNotifier<bool> showAppbar = ValueNotifier(false);
+  ValueNotifier<String?> avatarLink = ValueNotifier(null);
+  ValueNotifier<String?> wallLink = ValueNotifier(null);
   late TabController _tabController;
   DatabaseService _databaseService = DatabaseService();
   List<Tweet> tweets = [];
+  late MyUserWithFollow user;
+  bool _isLoad = true;
   // late ScrollController scrollController;
   List<ScrollController> tabScrollControllers = List.generate(5, (index) => ScrollController());
   List<PageStorageKey<int>> pageKeys = List.generate(5, (index) => PageStorageKey<int>(index));
@@ -69,14 +80,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   }
   Future<void> fetchData()async{
     try{
-      tweets =  await _databaseService.getTweetWithCurrentUID();
-      print(tweets);
+      print("get user data");
+      user = await _databaseService.getUserInfoWithFollow(widget.uid);
+      print("get tweet data");
+      tweets =  await _databaseService.getTweetOfUid(widget.uid);
+      avatarLink.value = await Storage().downloadAvatarURL(user.myUser.avatarLink);
+      wallLink.value = await Storage().downloadWallURL(user.myUser.wallLink);
+      _isLoad = false;
       setState(() {
       });
     }catch(e){
       print(e);
     }
-
   }
   List<Tweet> filterListTweetForTab(int index){
     List<Tweet> rs = [];
@@ -108,7 +123,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
+      body: _isLoad ? Loading() : SafeArea(
         child: Stack(
               children: [
                 TabBarView(
@@ -134,15 +149,34 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                         height: 360+avatarSize.value,
                         child: Column(
                           children: [
-                            Container(
-                              height: 150,
-                              width:  MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(GlobalVariable.wall),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                            // wall
+                            ValueListenableBuilder(
+                                valueListenable: wallLink,
+                                builder: (context, value, child){
+                                  if(value!=null){
+                                    return Container(
+                                      height: 150,
+                                      width:  MediaQuery.of(context).size.width,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: NetworkImage(value),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    );
+                                  }else {
+                                    return Container(
+                                      height: 150,
+                                      width:  MediaQuery.of(context).size.width,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage("assets/images/black.jpg"),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
                             ),
                             Container(
                               transform: Matrix4.translationValues(0, 50-avatarSize.value, 0),
@@ -155,7 +189,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
                                           Padding(
@@ -164,17 +197,49 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                               alignment: Alignment.centerLeft,
                                               height: avatarSize.value,
                                               width: avatarSize.value,
-                                              clipBehavior: Clip.antiAlias,
                                               decoration: BoxDecoration(
                                                 color: Colors.black,
                                                 borderRadius: BorderRadius.circular(50),
                                               ),
-                                              child: Image.network(GlobalVariable.avatar),
+                                              child: ValueListenableBuilder(
+                                                valueListenable: avatarLink,
+                                                builder: (context, value, child){
+                                                  if(value!= null){
+                                                    return CircleAvatar(
+                                                      backgroundColor: Colors.black,
+                                                      radius: 50,
+                                                      backgroundImage: NetworkImage(value),
+                                                    );
+                                                  }else {
+                                                    return CircleAvatar(
+                                                      backgroundColor: Colors.black,
+                                                      radius: 50,
+                                                    );
+                                                  }
+                                                },
+                                              )
 
                                             ),
                                           ),
+                                          Expanded(child: SizedBox(height: 1,)),
+                                          //notify option button
+                                          if(GlobalVariable.currentUser?.myUser.uid != widget.uid) ...[GestureDetector(
+                                            child: Container(
+                                                height: 38,
+                                                width: 38,
+                                                margin: EdgeInsets.only(bottom: 4, right: 12),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    borderRadius: BorderRadius.circular(25),
+                                                    border: Border.all(color: Theme.of(context).dividerColor, width: 1)
+                                                ),
+                                                child: Icon(user.isFollow == true ?CupertinoIcons.bell: CupertinoIcons.bell_slash, color: Colors.white, size: 16,)
+                                            ),
+                                          ),],
                                           OutlinedButton(
-                                            onPressed: (){},
+                                            onPressed: (){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>EditProfileScreen()));
+                                            },
                                             style: OutlinedButton.styleFrom(
                                               backgroundColor: Colors.black,
                                               foregroundColor: Colors.white,
@@ -199,7 +264,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        GlobalVariable.currentUser!.myUser.displayName,
+                                        user.myUser.displayName,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 22,
@@ -212,7 +277,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        GlobalVariable.currentUser!.myUser.username,
+                                        user.myUser.username,
                                         style: TextStyle(
                                           color: Color.fromRGBO(170, 184, 194, 1),
                                           fontSize: 14,
@@ -227,12 +292,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     // joined time
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 14),
-                                      child: const Row(
+                                      child: Row(
                                         children: [
                                           Icon(CupertinoIcons.calendar, size: 14, color: Color.fromRGBO(170, 184, 194, 1),),
                                           SizedBox(width: 8,),
                                           Text(
-                                            "Joined November 2023 ",
+                                            "Joined "+ DateFormat.yMMMM("en_US").format(user.myUser.createDate).toString(),
                                             style: TextStyle(
                                               color: Color.fromRGBO(170, 184, 194, 1),
                                               fontSize: 14,
@@ -249,7 +314,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                       child: Row(
                                         children: [
                                           Text(
-                                            GlobalVariable.numOfFollowing.toString(),
+                                            user.numOfFollowing.toString(),
                                             style: TextStyle(
                                               color: Colors.white ,
                                               fontSize: 14,
@@ -271,7 +336,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                           ),
                                           SizedBox(width: 8,),
                                           Text(
-                                            GlobalVariable.numOfFollowed.toString(),
+                                            user.numOfFollowed.toString(),
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
@@ -284,7 +349,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                               Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: false)));
                                             },
                                             child: Text(
-                                              "Followed",
+                                              "Followers",
                                               style: TextStyle(
                                                 color: Color.fromRGBO(170, 184, 194, 1),
                                                 fontSize: 14,
@@ -319,7 +384,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                   ]
                               ),
                             ),
-
                           ],
                         ),
                       ),
@@ -337,9 +401,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                         right: 0,
                         child: Container(
                           height: 50,
-                          decoration: value?const BoxDecoration(
+                          decoration: value? BoxDecoration(
                             image: DecorationImage(
-                              image: AssetImage("assets/images/wall.jpg"),
+                              image: NetworkImage(wallLink.value!),
                               fit: BoxFit.cover,
                             ),
                           ):null,
@@ -361,7 +425,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          GlobalVariable.currentUser!.myUser.displayName,
+                                          user.myUser.displayName,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,
@@ -402,20 +466,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
         ),
       ),
     );
-  }
-  List<Widget>_loadList(String text){
-    List<Widget> rs = [];
-    for(int i in List.generate(20, (index) =>index)){
-      rs.add(ListTile(
-        title: Container(
-          color: Colors.blue,
-          width: 100,
-          height: 100,
-          child: Text(i.toString() + text),
-        ),
-      ));
-    }
-    return rs;
   }
   Widget _buildTabContent(String text, int tabIndex) {
     return ListView(

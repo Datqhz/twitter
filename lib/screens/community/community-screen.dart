@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
@@ -10,6 +11,7 @@ import 'package:twitter/widgets/tweet_widget.dart';
 import '../../models/group.dart';
 import '../../models/tweet.dart';
 import '../../services/storage.dart';
+import '../home/post_tweet.dart';
 
 class GroupScreen extends StatefulWidget {
   GroupScreen({super.key, required this.group});
@@ -26,6 +28,14 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   late TabController _tabController;
   late Future<String?> _groupImg;
   List<ScrollController> _scrollControllers = List.generate(2, (index) => ScrollController());
+
+  final GlobalKey _menuKey = new GlobalKey();
+
+  void showMenu() {
+    dynamic popUpMenuState = _menuKey.currentState;
+    popUpMenuState.showButtonMenu();
+  }
+
   @override
   void initState() {
     _tabController =  TabController(length: 2, vsync: this);
@@ -49,9 +59,45 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
       });
     });
     super.initState();
-    _groupImg = Storage().downloadGroupULR(widget.group.groupImg);
+    _groupImg = Storage().downloadGroupURL(widget.group.groupImg);
   }
 
+  void postTweet(List<XFile> images, Tweet tweet)async{
+    List<String> imageNames = [];
+    try{
+      // upload image to the cloud if have
+      if(images.length!=0){
+        for(XFile image in images){
+          String name = await Storage().putImage(image,'tweet/images');
+          if(name != ""){
+            imageNames.add(name);
+          }
+        }
+      }
+      tweet.imgLinks = imageNames;
+      bool result = await DatabaseService().postTweet(tweet);
+      if(result){
+        print("post tweet successful!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // backgroundColor: Colors.transparent,
+            // padding: EdgeInsets.symmetric(horizontal: 12),
+            width: 2.3*MediaQuery.of(context).size.width/4,
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Your tweet is posted success!!'),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }else {
+        print("error");
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
 
   List<Widget> loadTweet(List<Tweet>? tweets){
     List<Widget> widgets =[SizedBox(height: 360,)];
@@ -192,38 +238,35 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                           ),
                                           child: Icon(Icons.share_outlined, size: 18,),
                                         ),
-                                        SizedBox(width: 8,),
-                                        OutlinedButton(
-                                          onPressed: (){},
-                                          style: OutlinedButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            foregroundColor: Colors.white,
-                                            side: BorderSide(
-                                              color: Colors.white, // Set the border color here
-                                              width: 1.0, // Set the border width here
+                                        //join in
+                                        if(!widget.group.isJoined)...[
+                                          SizedBox(width: 8,),
+                                          OutlinedButton(
+                                            onPressed: () async{
+                                              await DatabaseService().joinGroup(widget.group.groupIdAsString);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.black,
+                                              side: BorderSide(
+                                                color: Colors.white, // Set the border color here
+                                                width: 1.0, // Set the border width here
+                                              ),
+                                              shape:RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(20.0), // Set the border radius here
+                                              ),
                                             ),
-                                            shape:RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(20.0), // Set the border radius here
+                                            child: const Text(
+                                                "Join in",
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black
+                                                )
                                             ),
                                           ),
-                                          child: const Text(
-                                              "Join in",
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white
-                                              )
-                                          ),
-                                        ),
-                                        SizedBox(width: 8,),
-                                        Container(
-                                          padding: EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(20),
-                                              border: Border.all(width: 1, color: Colors.white)
-                                          ),
-                                          child: Icon(CupertinoIcons.bell, size: 18,),
-                                        )
+                                        ]
+
                                       ],
                                     ),
                                   ],
@@ -271,6 +314,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                 },
 
               ),
+              //appbar
               Positioned(
                 top: 0,
                 left: 0,
@@ -333,9 +377,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                               ),
                               SizedBox(width: 20,),
                               GestureDetector(
-                                onTap: (){
-
-                                },
+                                onTap:()=> showMenu(),
                                 child: Container(
                                     height: 32,
                                     width: 32,
@@ -344,7 +386,38 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                         color: Colors.white.withOpacity((0.4-value).clamp(0, 0.4)),
                                         borderRadius: BorderRadius.circular(16)
                                     ),
-                                    child: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.white,)
+                                    child: Stack(
+                                      children: [
+                                        Center(child: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.white,)),
+                                        PopupMenuButton<String>(
+                                          key: _menuKey,
+                                          color: Colors.black,
+                                          icon: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.transparent,),
+                                          enabled: false,
+                                          onSelected: (value) async{
+                                            if(widget.group.isJoined){
+                                                await DatabaseService().leaveGroup(widget.group.groupIdAsString);
+                                                Navigator.pop(context);
+                                            }else {
+                                                await DatabaseService().joinGroup(widget.group.groupIdAsString);
+                                            }
+                                          },
+                                          itemBuilder: (BuildContext context) {
+                                            return {widget.group.isJoined?'Leave Community': 'Join Community'}.map((String choice) {
+                                              return PopupMenuItem<String>(
+                                                value: choice,
+                                                child: Text(
+                                                  choice,
+                                                  style: TextStyle(
+                                                      color: widget.group.isJoined?Colors.red:Colors.white
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList();
+                                          },
+                                        )
+                                      ],
+                                    )
                                 ),
                               ),
                             ],
@@ -354,6 +427,24 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                     );
                   },
                 ),
+              ),
+              Positioned(
+                bottom: 20,
+                right: 10,
+                child: GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PostTweetScreen(postTweet: postTweet, groupId: widget.group.groupIdAsString,)));
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(50)
+                    ),
+                    child: Icon(FontAwesomeIcons.featherPointed),
+                  ),
+                )
               ),
             ],
         ),
@@ -475,7 +566,7 @@ class AboutGroupView extends StatelessWidget {
                             SizedBox(width: 16,),
                             Container(
                               child: Text(
-                                "Create " +DateFormat('dd-MM-yyyy').format(group.createDate) +  " by " + group.groupOwner.username,
+                                "Create " +DateFormat('dd-MM-yyyy').format(group.createDate) +  " by " + group.groupOwner.myUser.username,
                                 style:TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,

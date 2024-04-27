@@ -93,7 +93,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
       // upload image to the cloud if have
       if(images.length!=0){
         for(XFile image in images){
-          String name = await Storage().putImage(image);
+          String name = await Storage().putImage(image, 'tweet/images');
           if(name != ""){
             imageNames.add(name);
           }
@@ -261,9 +261,11 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                         onPressed: _canPost?(){
                           Tweet tweet = Tweet(idAsString: "", content: content, uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                             uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal ,
-                            isLike: false,groupName: "", repost: null, commentTweetId: widget.reply.idAsString, replyTo: widget.reply.user, totalRepost: 0, isRepost: false, );
+                            isLike: false,groupName: "", repost: null, commentTweetId: widget.reply.idAsString, replyTo: widget.reply.user, totalRepost: 0,
+                            isRepost: false, isBookmark: false, totalBookmark: 0, totalQuote: 0,  );
                           print(tweet);
                           postTweet(imagePicked, tweet);
+
                           Navigator.pop(context);
                         }:null,
                         child: Text(

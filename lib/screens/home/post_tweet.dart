@@ -8,14 +8,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
+import 'package:twitter/screens/home/rule-screen.dart';
+import 'package:twitter/shared/loading.dart';
+import 'package:twitter/widgets/group_brief.dart';
 import 'package:twitter/widgets/quote_tweet.dart';
+import '../../models/group.dart';
 import '../../models/tweet.dart';
+import '../../services/database_service.dart';
 import '../../shared/global_variable.dart';
 
 class PostTweetScreen extends StatefulWidget {
-  PostTweetScreen({super.key, required this.postTweet, this.quote});
+  PostTweetScreen({super.key, required this.postTweet, this.quote, this.groupId });
   late Function postTweet;
   late Tweet? quote;
+  late String? groupId;
   @override
   State<PostTweetScreen> createState() => _PostTweetScreenState();
 }
@@ -27,13 +33,38 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
   ValueNotifier<int> numOfWord = ValueNotifier(0);
   final ValueNotifier<bool> _canPost = ValueNotifier(false);
   final ValueNotifier<bool> _brief = ValueNotifier(false);
+  final ValueNotifier<int> _audience = ValueNotifier(0);
   ValueNotifier<String> content = ValueNotifier("");
   ValueNotifier<int> personal = ValueNotifier(1);
-
+  List<Group> groupList = [];
+  bool _isLoad = true;
   @override
   void initState() {
     super.initState();
-  } // build view for imagePicked
+    fetchData();
+  }
+
+  //Get list group user join
+  Future<void> fetchData() async{
+    try{
+      groupList =  await DatabaseService().getGroupJoined();
+      _isLoad = false;
+      if(widget.groupId!=null){
+        for(int index = 0; index < groupList.length; index++){
+          Group group = groupList[index];
+          if(group.groupIdAsString == widget.groupId){
+            _audience.value = index+1;
+          }
+        }
+      }
+      setState(() {
+      });
+    }catch(e){
+      print(e);
+    }
+  }
+
+  // build view for imagePicked
   Widget buildListImage(List<XFile> images){
     if(images.length >1){
       List<Widget> result = [];
@@ -90,11 +121,34 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
       ],
     );
   }
+  List<Widget> buildListGroup(){
+    List<Widget> rs = [];
+    for(int index = 0; index < groupList.length; index++){
+      Group group = groupList[index];
+      if(group.groupIdAsString!= null && group.groupIdAsString == widget.groupId){
+        _audience.value = index+1;
+      }
+      rs.add(GestureDetector(
+          onTap: (){
+            _audience.value = index+1;
+            Navigator.pop(context);  
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: BriefGroup(img: group.groupImg, title: group.groupName,
+                subTitle: group.groupMembers.length.toString(),
+                isActive: _audience.value == index+1),
+          )
+      )
+      );
+    }
+    return rs;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
+      body: _isLoad? Loading(): SafeArea(
         child: Stack(
           children: [
             Container(
@@ -122,7 +176,129 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                       // content and media
                       Expanded(
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            GestureDetector(
+                              onTap: (){
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return Container(
+                                        color: Colors.black,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  CupertinoIcons.minus,
+                                                  color: Colors.white.withOpacity(0.8),
+                                                  size: 40,
+                                                )
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            Align(
+                                              alignment: Alignment.center,
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                                child: Text(
+                                                  "Choose audience",
+                                                  style: TextStyle(
+                                                    fontSize: 22,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 15,),
+                                            //everyone
+                                            GestureDetector(
+                                              onTap: (){
+                                                _audience.value = 0;
+                                                Navigator.pop(context);
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black,
+                                                  border: Border(
+                                                    bottom: BorderSide(
+                                                      color: Colors.white.withOpacity(0.4),
+                                                      width: 0.15
+                                                    ),
+                                                    top: BorderSide(
+                                                        color: Colors.white.withOpacity(0.4),
+                                                        width: 0.15
+                                                    ),
+                                                  )
+                                                ),
+                                                child: BriefGroup(img: "", title:"Everyone", subTitle: "", isActive:_audience.value==0),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                                              child: Text(
+                                                "My Communities",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ...buildListGroup()
+                                          ],
+                                        ),
+                                      );
+                                    });
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black,
+                                        borderRadius: BorderRadius.circular(25),
+                                        border: Border.all(color: Colors.blue, width: 0.8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          ValueListenableBuilder(
+                                              valueListenable: _audience,
+                                              builder: (context, value, child){
+                                                return Text(
+                                                  value == 0? "Everyone": groupList[value-1].groupName,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14,
+                                                    overflow: TextOverflow.ellipsis,
+
+                                                  ),
+                                                );
+                                              }
+                                          ) ,
+                                          SizedBox(width: 2,),
+                                          Icon(
+                                            CupertinoIcons.chevron_down,
+                                            size: 14,
+                                            color: Colors.white,
+                                          )
+                                        ],
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
                             TextFormField(
                               controller:_controller ,
                               decoration: InputDecoration(
@@ -203,10 +379,14 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                         builder: (context, value, child){
                           return TextButton(
                             onPressed: value?(){
+                              String groupId = "";
+                              if(_audience.value != 0){
+                                groupId = groupList[_audience.value-1].groupIdAsString;
+                              }
                               Tweet tweet = Tweet(idAsString: "", content: content.value, uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                                 uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: personal.value ,
-                                isLike: false,groupName: "", repost: widget.quote, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
-                              print(tweet);
+                                isLike: false,groupName: groupId, repost: widget.quote, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false,
+                                isBookmark: false, totalBookmark: 0, totalQuote: 0,  );
                               widget.postTweet(imagePicked.value, tweet);
                               Navigator.pop(context);
                             }:null,
@@ -252,247 +432,290 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                               )
                           )
                       ),
-                      child: GestureDetector(
-                        onTap: (){
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return Container(
-                                  height: MediaQuery.of(context).size.height * 0.5,
-                                  color: Colors.black,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            CupertinoIcons.minus,
-                                            color: Colors.white,
-                                            size: 40,
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 20),
-                                          child: Text(
-                                            "Who can reply?",
-                                            style: TextStyle(
-                                              fontSize: 22,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 15,),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 20),
-                                          child: Text(
-                                            "Pick who can reply to this post. Keep in mind that anyone mentioned can always reply.",
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.white.withOpacity(0.5),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.pop(context);
-                                          personal.value = 1;
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal:20 ),
-                                          child: SizedBox(
-                                              width: MediaQuery.of(context).size.width,
-                                              child: Row(
-                                                children: [
-                                                  Stack(
-                                                    children: [
-                                                      Container(
-                                                        width: 50,
-                                                        height: 50,
-                                                        margin: EdgeInsets.all(4),
-                                                        decoration: BoxDecoration(
-                                                            color: Colors.blue,
-                                                          borderRadius: BorderRadius.circular(25)
-                                                        ),
-                                                        child: Icon(FontAwesomeIcons.earth, size: 20),
-                                                      ),
-                                                      Visibility(
-                                                          visible: personal.value == 1,
-                                                          child: Positioned(
-                                                            right: 0,
-                                                            bottom: 0,
-                                                            child: Container(
-                                                              height: 20,
-                                                              width: 20,
-                                                              decoration: BoxDecoration(
-                                                                color: CupertinoColors.systemGreen,
-                                                                borderRadius: BorderRadius.circular(10),
-                                                                border: Border.all(
-                                                                  width: 1.5,
-                                                                  color: Colors.black
-                                                                )
-                                                              ),
-                                                              child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
-                                                            ),
-                                                          )
-                                                      )
-                                                    ],
-                                                  ),
-                                                  SizedBox(width: 12,),
-                                                  Text(
-                                                    "Everyone",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                ],
-                                              )
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 20,),
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.pop(context);
-                                          personal.value = 2;
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal:20 ),
-                                          child: SizedBox(
-                                              width: MediaQuery.of(context).size.width,
-                                              child: Row(
-                                                children: [
-                                                  Stack(
-                                                    children: [
-                                                      Container(
-                                                        width: 50,
-                                                        height: 50,
-                                                        margin: EdgeInsets.all(4),
-                                                        decoration: BoxDecoration(
-                                                            color: Colors.blue,
-                                                            borderRadius: BorderRadius.circular(25)
-                                                        ),
-                                                        child: Icon(FontAwesomeIcons.user, size: 20),
-                                                      ),
-                                                      Visibility(
-                                                          visible: personal.value == 2,
-                                                          child: Positioned(
-                                                            right: 0,
-                                                            bottom: 0,
-                                                            child: Container(
-                                                              height: 20,
-                                                              width: 20,
-                                                              decoration: BoxDecoration(
-                                                                  color: CupertinoColors.systemGreen,
-                                                                  borderRadius: BorderRadius.circular(10),
-                                                                  border: Border.all(
-                                                                      width: 1.5,
-                                                                      color: Colors.black
-                                                                  )
-                                                              ),
-                                                              child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
-                                                            ),
-                                                          )
-                                                      )
-                                                    ],
-                                                  ),
-                                                  SizedBox(width: 12,),
-                                                  Text(
-                                                    "Anyone follow you",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                ],
-                                              )
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 20,),
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.pop(context);
-                                          personal.value = 3;
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal:20 ),
-                                          child: SizedBox(
-                                              width: MediaQuery.of(context).size.width,
-                                              child: Row(
-                                                children: [
-                                                  Stack(
-                                                    children: [
-                                                      Container(
-                                                        width: 50,
-                                                        height: 50,
-                                                        margin: EdgeInsets.all(4),
-                                                        decoration: BoxDecoration(
-                                                            color: Colors.blue,
-                                                            borderRadius: BorderRadius.circular(25)
-                                                        ),
-                                                        child: Icon(FontAwesomeIcons.at, size: 20),
-                                                      ),
-                                                      Visibility(
-                                                          visible: personal.value == 3,
-                                                          child: Positioned(
-                                                            right: 0,
-                                                            bottom: 0,
-                                                            child: Container(
-                                                              height: 20,
-                                                              width: 20,
-                                                              decoration: BoxDecoration(
-                                                                  color: CupertinoColors.systemGreen,
-                                                                  borderRadius: BorderRadius.circular(10),
-                                                                  border: Border.all(
-                                                                      width: 1.5,
-                                                                      color: Colors.black
-                                                                  )
-                                                              ),
-                                                              child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
-                                                            ),
-                                                          )
-                                                      )
-                                                    ],
-                                                  ),
-                                                  SizedBox(width: 12,),
-                                                  Text(
-                                                    "Just you",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                ],
-                                              )
-                                          ),
-                                        ),
+                      child: ValueListenableBuilder(
+                          valueListenable: _audience,
+                          builder: (context, value, child){
+                            if(value!=0){
+                              return GestureDetector(
+                                onTap: (){
+                                  Navigator.push(context,
+                                      MaterialPageRoute(
+                                          builder: (context)=> CommunityRulesScreen(
+                                              ruleNameList: groupList[_audience.value-1].rulesName,
+                                              ruleDesList: groupList[_audience.value-1].rulesContent)
                                       )
-                                    ],
-                                  ),
-                                );
-                              });
-                        },
-                        child: ValueListenableBuilder(
-                          valueListenable: personal,
-                          builder: (context,value, child) {
-                            return buildPickPersonalView(value);
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.person_2_fill, color: Colors.white.withOpacity(0.8),size: 16,),
+                                    SizedBox(width: 12,),
+                                    Text(
+                                      "Community menbers can reply",
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.8),
+                                          fontSize: 13
+                                      ),
+                                    ),
+                                    SizedBox(width: 6,),
+                                    Icon(CupertinoIcons.circle_fill, color: Colors.white.withOpacity(0.8),size: 3,),
+                                    SizedBox(width: 6,),
+                                    Text(
+                                      "Rules",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }else {
+                              return GestureDetector(
+                                onTap: (){
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return Container(
+                                          height: MediaQuery.of(context).size.height * 0.5,
+                                          color: Colors.black,
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    CupertinoIcons.minus,
+                                                    color: Colors.white,
+                                                    size: 40,
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 20,
+                                              ),
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                                  child: Text(
+                                                    "Who can reply?",
+                                                    style: TextStyle(
+                                                      fontSize: 22,
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 15,),
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                                  child: Text(
+                                                    "Pick who can reply to this post. Keep in mind that anyone mentioned can always reply.",
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      color: Colors.white.withOpacity(0.5),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 20,
+                                              ),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.pop(context);
+                                                  personal.value = 1;
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                  child: SizedBox(
+                                                      width: MediaQuery.of(context).size.width,
+                                                      child: Row(
+                                                        children: [
+                                                          Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: 50,
+                                                                height: 50,
+                                                                margin: EdgeInsets.all(4),
+                                                                decoration: BoxDecoration(
+                                                                    color: Colors.blue,
+                                                                    borderRadius: BorderRadius.circular(25)
+                                                                ),
+                                                                child: Icon(FontAwesomeIcons.earth, size: 20),
+                                                              ),
+                                                              Visibility(
+                                                                  visible: personal.value == 1,
+                                                                  child: Positioned(
+                                                                    right: 0,
+                                                                    bottom: 0,
+                                                                    child: Container(
+                                                                      height: 20,
+                                                                      width: 20,
+                                                                      decoration: BoxDecoration(
+                                                                          color: CupertinoColors.systemGreen,
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                          border: Border.all(
+                                                                              width: 1.5,
+                                                                              color: Colors.black
+                                                                          )
+                                                                      ),
+                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                    ),
+                                                                  )
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(width: 12,),
+                                                          Text(
+                                                            "Everyone",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: Colors.white,
+                                                            ),
+                                                          )
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 20,),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.pop(context);
+                                                  personal.value = 2;
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                  child: SizedBox(
+                                                      width: MediaQuery.of(context).size.width,
+                                                      child: Row(
+                                                        children: [
+                                                          Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: 50,
+                                                                height: 50,
+                                                                margin: EdgeInsets.all(4),
+                                                                decoration: BoxDecoration(
+                                                                    color: Colors.blue,
+                                                                    borderRadius: BorderRadius.circular(25)
+                                                                ),
+                                                                child: Icon(FontAwesomeIcons.user, size: 20),
+                                                              ),
+                                                              Visibility(
+                                                                  visible: personal.value == 2,
+                                                                  child: Positioned(
+                                                                    right: 0,
+                                                                    bottom: 0,
+                                                                    child: Container(
+                                                                      height: 20,
+                                                                      width: 20,
+                                                                      decoration: BoxDecoration(
+                                                                          color: CupertinoColors.systemGreen,
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                          border: Border.all(
+                                                                              width: 1.5,
+                                                                              color: Colors.black
+                                                                          )
+                                                                      ),
+                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                    ),
+                                                                  )
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(width: 12,),
+                                                          Text(
+                                                            "Anyone follow you",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: Colors.white,
+                                                            ),
+                                                          )
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 20,),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.pop(context);
+                                                  personal.value = 3;
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                  child: SizedBox(
+                                                      width: MediaQuery.of(context).size.width,
+                                                      child: Row(
+                                                        children: [
+                                                          Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: 50,
+                                                                height: 50,
+                                                                margin: EdgeInsets.all(4),
+                                                                decoration: BoxDecoration(
+                                                                    color: Colors.blue,
+                                                                    borderRadius: BorderRadius.circular(25)
+                                                                ),
+                                                                child: Icon(FontAwesomeIcons.at, size: 20),
+                                                              ),
+                                                              Visibility(
+                                                                  visible: personal.value == 3,
+                                                                  child: Positioned(
+                                                                    right: 0,
+                                                                    bottom: 0,
+                                                                    child: Container(
+                                                                      height: 20,
+                                                                      width: 20,
+                                                                      decoration: BoxDecoration(
+                                                                          color: CupertinoColors.systemGreen,
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                          border: Border.all(
+                                                                              width: 1.5,
+                                                                              color: Colors.black
+                                                                          )
+                                                                      ),
+                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                    ),
+                                                                  )
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(width: 12,),
+                                                          Text(
+                                                            "Just you",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: Colors.white,
+                                                            ),
+                                                          )
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      });
+                                },
+                                child: ValueListenableBuilder(
+                                    valueListenable: personal,
+                                    builder: (context, value, child){
+                                      return buildPickPersonalView(value);
+                                    }
+                                ),
+                              );
+                            }
                           }
-                        ),
                       ),
                     ),
                     Container(

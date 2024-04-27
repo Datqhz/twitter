@@ -3,9 +3,11 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:twitter/screens/bookmark_screen.dart';
 import 'package:twitter/screens/profile/profile.dart';
 import 'package:twitter/services/auth_firebase.dart';
 
+import '../screens/profile/follow_view.dart';
 import 'global_variable.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -52,7 +54,7 @@ class MyDrawer extends StatelessWidget {
                           child: Image.network(GlobalVariable.avatar),
                       ),
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile(uid: GlobalVariable.currentUser!.myUser.uid,)));
                       },
                     ),
                     GestureDetector(
@@ -82,37 +84,56 @@ class MyDrawer extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      GlobalVariable.numOfFollowing.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400
-                      ),
-                    ),
-                    Text(
-                      ' Following',
-                      style: TextStyle(
-                          color: Color.fromRGBO(170, 184, 194, 1),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: true)));
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            GlobalVariable.numOfFollowing.toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
+                          Text(
+                            ' Following',
+                            style: TextStyle(
+                                color: Color.fromRGBO(170, 184, 194, 1),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(width: 6,),
-                    Text(
-                      GlobalVariable.numOfFollowed.toString(),
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400
-                      ),
-                    ),
-                    Text(
-                      ' Followers',
-                      style: TextStyle(
-                          color: Color.fromRGBO(170, 184, 194, 1),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: false)));
+
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            GlobalVariable.numOfFollowed.toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
+                          Text(
+                            ' Followers',
+                            style: TextStyle(
+                                color: Color.fromRGBO(170, 184, 194, 1),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400
+                            ),
+                          )
+                        ],
                       ),
                     )
                   ],
@@ -174,6 +195,7 @@ class MyDrawer extends StatelessWidget {
               minLeadingWidth: 24,
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>BookmarkScreen()));
               },
             ),
           ),

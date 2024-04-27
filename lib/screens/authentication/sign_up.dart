@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:twitter/services/auth_firebase.dart';
 
+import '../../models/user.dart';
 import '../../shared/loading.dart';
 
 
@@ -618,211 +619,6 @@ class _SignUpStep1State extends State<SignUpStep1> {
   }
 }
 
-// class SignUpStep2 extends StatefulWidget {
-//   const SignUpStep2({super.key});
-//
-//   @override
-//   State<SignUpStep2> createState() => _SignUpStep2State();
-// }
-//
-// class _SignUpStep2State extends State<SignUpStep2> {
-//   bool _isChecked = true;
-//   final AuthFirebaseService authFirebaseService = AuthFirebaseService();
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//
-//     final Map<String, dynamic> receivedData =
-//     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-//
-//     final String name = receivedData['name'];
-//     final String accout = receivedData['info'];
-//     final DateTime birth  = receivedData['birth'];
-//     return Scaffold(
-//       appBar: AppBar(
-//         leading: IconButton(
-//           icon: const Icon(Icons.arrow_back),
-//           onPressed: () {
-//             Navigator.pop(context);
-//           },
-//         ),
-//         title: const Icon(FontAwesomeIcons.xTwitter),
-//         centerTitle: true,
-//         backgroundColor: Theme.of(context).primaryColor,
-//       ),
-//       body: Stack(children: [
-//         Container(
-//           height: MediaQuery.of(context).size.height,
-//           width: MediaQuery.of(context).size.width,
-//           color: Theme.of(context).primaryColor,
-//           padding: const EdgeInsets.symmetric(horizontal: 50),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               SizedBox(height: 40,),
-//               Text(
-//                 "Customize your experience",
-//                 style: TextStyle(
-//                     color: Colors.white,
-//                     fontWeight: FontWeight.w600,
-//                     fontSize: 20),
-//               ),
-//               SizedBox(height: 30,),
-//               Text(
-//                 "Track where you see X content across the web",
-//                 style: TextStyle(
-//                     color: Colors.white,
-//                     fontWeight: FontWeight.w500,
-//                     fontSize: 15),
-//               ),
-//               SizedBox(height: 30,),
-//               Row(
-//                 children: [
-//                   Expanded(
-//                     flex: 9,
-//                     child: Text(
-//                       "X users this data to personalize your experience. This web browsing history will never be stored with your name, email, or phone number.",
-//                       style: TextStyle(
-//                           color: Colors.white,
-//                           fontWeight: FontWeight.w500,
-//                           fontSize: 15),
-//                     ),
-//                   ),
-//                   Expanded(
-//                     flex: 1,
-//                     child: Checkbox(
-//                         checkColor: Colors.black,
-//                         value: _isChecked,
-//                         onChanged: (check){
-//                           setState(() {
-//                             _isChecked = check!;
-//                           });
-//                         },
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(3),
-//                         ),
-//                         side: BorderSide(
-//                           color: Colors.white,
-//                           width: 2.5,
-//                         ),
-//
-//                     ),
-//                   )
-//                 ],
-//               ),
-//               SizedBox(height: 30,),
-//               Wrap(
-//                 children: [
-//                   Text(
-//                     "By signing up, uou agree to our ",
-//                     style: TextStyle(
-//                         color: Theme.of(context).dividerColor,
-//                         fontSize: 13.5),
-//                   ),
-//                   SizedBox(
-//                     width: 2,
-//                   ),
-//                   InkWell(
-//                     child: Text(
-//                       "Term",
-//                       style: TextStyle(color: Colors.blue, fontSize: 13.5),
-//                     ),
-//                     onTap: () {
-//                       Navigator.pushReplacementNamed(context, '/login');
-//                     },
-//                   ),
-//                   Text(
-//                     ", ",
-//                     style: TextStyle(
-//                         color: Theme.of(context).dividerColor,
-//                         fontSize: 13.5),
-//                   ),
-//                   InkWell(
-//                     child: Text(
-//                       "Privacy Policy",
-//                       style: TextStyle(color: Colors.blue, fontSize: 13.5),
-//                     ),
-//                     onTap: () {
-//                       Navigator.pushReplacementNamed(context, '/login');
-//                     },
-//                   ),
-//                   Text(
-//                     ", and ",
-//                     style: TextStyle(
-//                         color: Theme.of(context).dividerColor,
-//                         fontSize: 13.5),
-//                   ),
-//                   InkWell(
-//                     child: Text(
-//                       "Cookie Use",
-//                       style: TextStyle(color: Colors.blue, fontSize: 13.5),
-//                     ),
-//                     onTap: () {
-//                       Navigator.pushReplacementNamed(context, '/login');
-//                     },
-//                   ),
-//                   Text(
-//                     ". X may use your contact infomation, including your email address and phone number for purposes outlined in our Privacy Policy. ",
-//                     style: TextStyle(
-//                         color: Theme.of(context).dividerColor,
-//                         fontSize: 13.5),
-//                   ),
-//                   InkWell(
-//                     child: Text(
-//                       "Learn more",
-//                       style: TextStyle(color: Colors.blue, fontSize: 13.5),
-//                     ),
-//                     onTap: () {
-//                       Navigator.pushReplacementNamed(context, '/login');
-//                     },
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//         Positioned(
-//             bottom: 0,
-//             left: 0,
-//             right: 0,
-//             child: Container(
-//               alignment: Alignment.centerRight,
-//               decoration: BoxDecoration(
-//                   border: Border(
-//                       top: BorderSide(
-//                           color: Theme.of(context).dividerColor, width: 0.1))),
-//               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.end,
-//                   children: [
-//                         ElevatedButton(
-//                           onPressed: (){
-//                           },
-//                           style: ElevatedButton.styleFrom(
-//                               backgroundColor: Colors.white,
-//                               disabledBackgroundColor:
-//                               const Color.fromRGBO(212, 214, 223, 1),
-//                               shape: RoundedRectangleBorder(
-//                                   borderRadius: BorderRadius.circular(20)),
-//                               side: BorderSide(
-//                                   color: Colors.white, width: 1)),
-//                           child: const Text(
-//                             "Next",
-//                             style: TextStyle(
-//                                 fontWeight: FontWeight.w500,
-//                                 color: Colors.black,
-//                                 fontSize: 16),
-//                           ),
-//                         )
-//                   ]
-//               ),
-//             ))
-//       ]),
-//     );
-//   }
-// }
 class SignUpStep2 extends StatefulWidget {
   SignUpStep2({super.key});
   @override
@@ -990,7 +786,9 @@ class _SignUpStep2State extends State<SignUpStep2> {
                             setState(() {
                               _loading  = true;
                             });
-                            dynamic result = await _authFirebaseService.registerWithEmailAndPassword(account, _password, name, birth );
+                            MyUser user = MyUser(uid: "", createDate: DateTime.now(), bio: "", displayName: name, username: "", wallLink: "wall.jpg", avatarLink: "img1.jpg", phoneNumber: "", email: account);
+
+                            dynamic result = await _authFirebaseService.registerWithEmailAndPassword(account, _password, user , birth);
                             if(result == null) {
                               setState(() {
                                 _loading = false;

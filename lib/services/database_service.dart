@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
+import 'package:twitter/models/bookmark.dart';
 import 'package:twitter/models/notify.dart';
 import 'package:twitter/models/user_info_with_follow.dart';
 import 'package:twitter/services/storage.dart';
@@ -13,7 +14,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.30:8080';
+  String url = 'http://192.168.1.6:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -182,7 +183,80 @@ class DatabaseService{
     return result;
 
   }
+  Future<List<Tweet>> getTweetOfUid(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/user?uid=$uid"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    return result;
+
+  }
   //// User //////
+  Future<bool> saveUserInfo(MyUser myUser, FirebaseAuth auth) async{
+    User? user = await auth.currentUser;
+    String? token = await user?.getIdToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await post(
+        Uri.parse("$url/api/v1/user"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          "uid": user?.uid,
+          "bio": myUser.bio,
+          "displayName": myUser.displayName,
+          "username": "dav",
+          "avatarLink": "img1.jpg",
+          "wallLink": "wall.jpg",
+          "phoneNumber": myUser.phoneNumber,
+          "email": myUser.email,
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> updateUserInfo(MyUser myUser, FirebaseAuth auth) async{
+    User? user = await auth.currentUser;
+    String? token = await user?.getIdToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await put(
+        Uri.parse("$url/api/v1/user"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          "uid": user?.uid,
+          "bio": myUser.bio,
+          "displayName": myUser.displayName,
+          "username": "dav",
+          "avatarLink": myUser.avatarLink,
+          "wallLink": myUser.wallLink,
+          "phoneNumber": myUser.phoneNumber,
+          "email": myUser.email,
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
   Future<String> getUserInfo() async{
     var token = await extractToken();
     Map<String, String> headers = {
@@ -196,11 +270,11 @@ class DatabaseService{
     }
     final Map<String, dynamic> data = json.decode(response.body);
     GlobalVariable.currentUser = MyUserWithFollow.fromJson(data);
-    GlobalVariable.numOfFollowed = data['numOfFollowed'];
+    GlobalVariable.numOfFollowed = data['numOfFollowers'];
     GlobalVariable.numOfFollowing = data['numOfFollowing'];
     GlobalVariable.avatar = (await Storage().downloadAvatarURL(GlobalVariable.currentUser!.myUser.avatarLink))!;
     print(GlobalVariable.avatar);
-    GlobalVariable.wall = (await Storage().downloadWallULR(GlobalVariable.currentUser!.myUser.wallLink))!;
+    GlobalVariable.wall = (await Storage().downloadWallURL(GlobalVariable.currentUser!.myUser.wallLink))!;
     return response.body.toString();
   }
   Future<List<MyUser>> findUserByUsername(String s)async{
@@ -238,6 +312,69 @@ class DatabaseService{
   }
   //// Group /////
   //get list group
+  Future<bool> createGroup(Group group) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await post(
+        Uri.parse("$url/api/v1/group"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          "groupName": group.groupName,
+          "groupOwnerId": group.groupOwner.myUser.uid,
+          "rulesName": group.rulesName,
+          "rulesContent": group.rulesContent,
+          "review": group.review,
+          "groupImg": group.groupImg,
+          "groupMemberIds": group.groupMembers.map((e) => e.myUser.uid).toList()
+          // Add any other data you want to send in the body
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> joinGroup(String groupId) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await put(
+        Uri.parse("$url/api/v1/group/join"),
+        headers: headers,
+        body:  groupId
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> leaveGroup(String groupId) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await put(
+        Uri.parse("$url/api/v1/group/leave"),
+        headers: headers,
+        body:  groupId
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
   Future<List<Group>> getAllGroup()async{
     var token = await extractToken();
     Map<String, String> headers = {
@@ -344,13 +481,13 @@ class DatabaseService{
         .toList();
     return result;
   }
-  Future<List<Follow>> getFollowed(String uid)async{
+  Future<List<Follow>> getFollowers(String uid)async{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       "Authorization" :"Bearer " + token!
     };
-    Response response = await get(Uri.parse("$url/api/v1/follow/followed/"+uid), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/follow/followers/"+uid), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("error");
@@ -418,4 +555,80 @@ class DatabaseService{
     print(" num of notification: " + result.length.toString());
     return result;
   }
+
+  // Bookmark//
+  Future<List<Bookmark>> getBookmarkTweet()async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/bookmark"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Bookmark> result = data.map((e) => Bookmark.fromJson(e)).toList();
+    return result;
+
+  }
+  Future<bool> addBookmark(String tweetId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await post(
+        Uri.parse("$url/api/v1/bookmark"),
+        headers: headers,
+        body:  jsonEncode(<String, dynamic>{
+          "uid": GlobalVariable.currentUser?.myUser.uid,
+          "tweetId": tweetId
+          // Add any other data you want to send in the body
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> removeBookmarkTweet(String tweetId) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await delete(
+      Uri.parse("$url/api/v1/bookmark/"+ tweetId),
+      headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
+  }
+  Future<bool> removeAllBookmark() async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer " + token!
+    };
+
+    Response response = await get(
+      Uri.parse("$url/api/v1/bookmark/clear-all"),
+      headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
+  }
+
 }

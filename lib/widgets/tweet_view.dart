@@ -4,6 +4,7 @@ import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:image_picker/image_picker.dart";
 import "package:twitter/models/tweet.dart";
+import "package:twitter/screens/profile/profile.dart";
 import "package:twitter/shared/global_variable.dart";
 import "package:twitter/widgets/ImageGridView.dart";
 import "package:twitter/widgets/quote_tweet.dart";
@@ -32,7 +33,7 @@ class _TweetViewState extends State<TweetView> {
       // upload image to the cloud if have
       if(images.length!=0){
         for(XFile image in images){
-          String name = await Storage().putImage(image);
+          String name = await Storage().putImage(image, 'tweet/images');
           if(name != ""){
             imageNames.add(name);
           }
@@ -129,48 +130,52 @@ class _TweetViewState extends State<TweetView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(right: 16),
-                              height: 32,
-                              width: 32,
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: FutureBuilder<String?>(
-                                  future: Storage().downloadAvatarURL(widget.tweet.user!.myUser.avatarLink),
-                                  builder: (context, snapshot){
-                                    if(snapshot.connectionState == ConnectionState.done){
-                                      return Image.network(snapshot.data!);
+                        GestureDetector(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile(uid:widget.tweet.user!.myUser.uid)));
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(right: 16),
+                                height: 32,
+                                width: 32,
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: FutureBuilder<String?>(
+                                    future: Storage().downloadAvatarURL(widget.tweet.user!.myUser.avatarLink),
+                                    builder: (context, snapshot){
+                                      if(snapshot.connectionState == ConnectionState.done){
+                                        return Image.network(snapshot.data!);
+                                      }
+                                      return Container(color: Colors.black,);
                                     }
-                                    return Container(color: Colors.black,);
-                                  }
+                                ),
                               ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.tweet.user!.myUser.displayName,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 16
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.tweet.user!.myUser.displayName,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontSize: 16
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  widget.tweet.user!.myUser.username,
-                                  style: TextStyle(
-                                      color: Color.fromRGBO(170, 184, 194, 1),
-                                      fontSize: 14
+                                  Text(
+                                    widget.tweet.user!.myUser.username,
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(170, 184, 194, 1),
+                                        fontSize: 14
+                                    ),
                                   ),
-                                ),
-
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         Row(
                           children: [
@@ -219,7 +224,6 @@ class _TweetViewState extends State<TweetView> {
                       //Navigate to replied user profile
                       GestureDetector(
                         onTap: (){
-
                         },
                         child: RichText(
                           text: TextSpan(
@@ -277,7 +281,7 @@ class _TweetViewState extends State<TweetView> {
                       child: Row(
                         children: [
                           Text(
-                            "35.9M ",
+                            widget.tweet.totalRepost.toString(),
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -285,7 +289,7 @@ class _TweetViewState extends State<TweetView> {
                             ),
                           ),
                           Text(
-                            "Reposts",
+                            " Reposts",
                             style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.white.withOpacity(0.6)
@@ -293,7 +297,7 @@ class _TweetViewState extends State<TweetView> {
                           ),
                           SizedBox(width: 8,),
                           Text(
-                            "70 ",
+                            widget.tweet.totalQuote.toString(),
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -301,7 +305,7 @@ class _TweetViewState extends State<TweetView> {
                             ),
                           ),
                           Text(
-                            "Quote",
+                            " Quote",
                             style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.white.withOpacity(0.6)
@@ -317,14 +321,14 @@ class _TweetViewState extends State<TweetView> {
                             ),
                           ),
                           Text(
-                            "Likes",
+                            " Likes",
                             style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.white.withOpacity(0.6)
                             ),
                           ),SizedBox(width: 8,),
                           Text(
-                            "324 ",
+                            widget.tweet.totalBookmark.toString(),
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -332,7 +336,7 @@ class _TweetViewState extends State<TweetView> {
                             ),
                           ),
                           Text(
-                            "Bookmarks",
+                            " Bookmarks",
                             style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.white.withOpacity(0.6)
@@ -406,7 +410,8 @@ class _TweetViewState extends State<TweetView> {
                                               }:()async{
                                                 Tweet repost = Tweet(idAsString: "", content: "", uid: GlobalVariable.currentUser!.myUser.uid, imgLinks: [], videoLinks: [],
                                                   uploadDate: DateTime.now(), user: GlobalVariable.currentUser, totalComment: 0, totalLike: 0, personal: 1 ,
-                                                  isLike: false,groupName: "", repost: widget.tweet, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false, );
+                                                  isLike: false,groupName: "", repost: widget.tweet, commentTweetId: '', replyTo: null, totalRepost: 0, isRepost: false,
+                                                  isBookmark: false, totalBookmark: 0, totalQuote: 0,  );
                                                 await DatabaseService().postTweet(repost);
                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                   SnackBar(
@@ -509,15 +514,25 @@ class _TweetViewState extends State<TweetView> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: (){
+                              onTap: () async{
+                                if(widget.tweet.isBookmark) {
+                                  await DatabaseService().removeBookmarkTweet(widget.tweet.idAsString);
+                                }else {
+                                  await DatabaseService().addBookmark(widget.tweet.idAsString);
+                                }
                                 setState(() {
-                                  _isBookmark = !_isBookmark;
+                                  if(widget.tweet.isBookmark){
+                                    widget.tweet.totalBookmark -=1;
+                                  }else {
+                                    widget.tweet.totalBookmark +=1;
+                                  }
+                                  widget.tweet.isBookmark= !widget.tweet.isBookmark;
                                 });
                               },
                               child: Icon(
-                                _isBookmark? CupertinoIcons.bookmark_solid :CupertinoIcons.bookmark,
+                                widget.tweet.isBookmark ?  CupertinoIcons.bookmark_solid :CupertinoIcons.bookmark,
                                 size: 22,
-                                color: _isBookmark? Colors.blue :Color.fromRGBO(170, 184, 194, 1),
+                                color: widget.tweet.isBookmark ? Colors.blue :Color.fromRGBO(170, 184, 194, 1),
                               ),
                             ),
                             const Icon(

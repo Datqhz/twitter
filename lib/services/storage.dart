@@ -53,7 +53,7 @@ class Storage{
       throw Exception('Failed to load image');
     }
   }
-  Future<String?> downloadWallULR(String link) async {
+  Future<String?> downloadWallURL(String link) async {
     try {
       // Download the image to memory
       Reference storageReference = wallRef.child(link);
@@ -67,7 +67,7 @@ class Storage{
       return null;
     }
   }
-  Future<String?> downloadGroupULR(String link) async {
+  Future<String?> downloadGroupURL(String link) async {
     try {
       // Download the image to memory
       Reference storageReference = groupImgRef.child(link);
@@ -81,11 +81,12 @@ class Storage{
       return null;
     }
   }
-  Future<String> putImage(XFile image)async{
+  Future<String> putImage(XFile image, String path)async{
     try{
       String randomName = getRandomString(10);
       final metadata = SettableMetadata(contentType: 'image/jpeg');
-      tweetImgRef.child(randomName+".jpg").putFile(File(image.path),metadata);
+      Reference ref =  FirebaseStorage.instance.ref().child(path);
+      ref.child(randomName+".jpg").putFile(File(image.path),metadata);
       return randomName+".jpg";
     }catch(e){
       return "";

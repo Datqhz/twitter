@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:twitter/models/user.dart';
+import 'package:twitter/services/database_service.dart';
 import 'package:twitter/services/firebase_database.dart';
 
 import '../auth/user_auth.dart';
@@ -16,17 +18,17 @@ class AuthFirebaseService{
         .map((User? user) => _userFromFirebase(user!));
   }
   //register with email and password
-  Future registerWithEmailAndPassword(String email, String password, String displayName, DateTime birth) async{
+  Future registerWithEmailAndPassword(String email, String password, MyUser myUser, DateTime birth) async{
     FirebaseApp app = await Firebase.initializeApp(
         name: 'Secondary', options: Firebase.app().options);
+    FirebaseAuth tempAuth = FirebaseAuth.instanceFor(app: app);
     try{
-      UserCredential result = await FirebaseAuth.instanceFor(app: app).createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await tempAuth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
-      await FirebaseDatabase(uid: user!.uid).updateUserData(email, displayName, birth);
-      return _userFromFirebase(user!);
+      await FirebaseDatabase(uid: user!.uid).updateUserData(myUser, birth);
+      await DatabaseService().saveUserInfo(myUser, tempAuth);
     }catch(e){
       print(e.toString());
-      return null;
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:indexed/indexed.dart';
+import 'package:twitter/screens/community/create-community-screen.dart';
 import 'package:twitter/screens/community/search_commutities.dart';
 
 import '../screens/search/search_view.dart';
@@ -120,10 +121,15 @@ class _MyAppBarState extends State<MyAppBar> {
                 const SizedBox(
                   width: 18,
                 ),
-                Icon(
-                  CupertinoIcons.person_add,
-                  color: Theme.of(context).iconTheme.color,
-                  size: 24,
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateCommunityScreen()));
+                  },
+                  child: Icon(
+                    CupertinoIcons.person_add,
+                    color: Theme.of(context).iconTheme.color,
+                    size: 24,
+                  ),
                 ),
               ],
             )

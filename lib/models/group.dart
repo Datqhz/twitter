@@ -1,17 +1,19 @@
 
 import 'package:intl/intl.dart';
 import 'package:twitter/models/user.dart';
+import 'package:twitter/models/user_info_with_follow.dart';
 
 class Group {
   String groupIdAsString;
   String groupName;
-  MyUser groupOwner;
+  MyUserWithFollow groupOwner;
   List<String> rulesName;
   List<String> rulesContent;
   DateTime createDate;
   String review;
   String groupImg;
-  List<MyUser> groupMembers;
+  List<MyUserWithFollow> groupMembers;
+  bool isJoined;
 
   Group({
       required this.groupIdAsString,
@@ -22,22 +24,24 @@ class Group {
       required this.createDate,
       required this.review,
       required this.groupImg,
-      required this.groupMembers});
+      required this.groupMembers,
+      required this.isJoined});
   factory Group.fromJson(Map<String, dynamic> json){
     return Group(
         groupIdAsString: json['groupIdAsString'],
         groupName: json['groupName'],
-        groupOwner: MyUser.fromJson(json['groupOwner']),
+        groupOwner: MyUserWithFollow.fromJson(json['groupOwner']),
         rulesName: List<String>.from(json['rulesName']),
         rulesContent: List<String>.from(json['rulesContent']),
         createDate:  DateTime.parse(json['createDate']),
         review: json['review'],
         groupImg: json['groupImg'],
-        groupMembers: List<MyUser>.from(
+        groupMembers: List<MyUserWithFollow>.from(
             (json['groupMembers'] as List).map(
-                (memberJson) => MyUser.fromJson(memberJson),
+                (memberJson) => MyUserWithFollow.fromJson(memberJson),
             )
-        )
+        ),
+        isJoined: json['isJoined']
     );
   }
 }

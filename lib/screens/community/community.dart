@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:twitter/models/tweet.dart';
 import 'package:twitter/screens/community/community_item.dart';
-import 'package:twitter/screens/community/group_profile.dart';
+import 'package:twitter/screens/community/community-screen.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
 
@@ -92,7 +92,7 @@ class _CommunityState extends State<Community> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FutureBuilder(
-              future: Storage().downloadGroupULR(group.groupImg),
+              future: Storage().downloadGroupURL(group.groupImg),
                 builder: (context, snapshot){
                   if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
                     return Image(image: NetworkImage(snapshot.data!), height: 50, width: double.infinity,fit: BoxFit.cover,);

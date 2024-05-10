@@ -86,8 +86,8 @@ class Storage{
       String randomName = getRandomString(10);
       final metadata = SettableMetadata(contentType: 'image/jpeg');
       Reference ref =  FirebaseStorage.instance.ref().child(path);
-      ref.child(randomName+".jpg").putFile(File(image.path),metadata);
-      return randomName+".jpg";
+      ref.child("$randomName.jpg").putFile(File(image.path),metadata);
+      return "$randomName.jpg";
     }catch(e){
       return "";
     }

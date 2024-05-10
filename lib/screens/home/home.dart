@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:twitter/models/tweet.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/services/storage.dart';
-import 'package:twitter/shared/global_variable.dart';
-import 'package:twitter/widgets/tweet_view.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
 
 import '../../shared/app_bar.dart';
@@ -20,8 +18,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
   late TabController _tabController;
   Storage storage = Storage();
-  DatabaseService _databaseService = DatabaseService();
-  List<Tweet> tweets=[];
+  final DatabaseService _databaseService = DatabaseService();
+  List<Tweet> tweetsForU=[];
+  List<Tweet> tweetsFollowing=[];
   @override
   void initState(){
 
@@ -38,22 +37,36 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
 
   Future<void> fetchData()async{
     try{
-      List<Tweet> data =  await _databaseService.getTweet();
+      List<Tweet> data1 =  await _databaseService.getTweetForU();
+      List<Tweet> data2 =  await _databaseService.getTweetFollowing();
       setState(() {
-        tweets = data;
+        tweetsForU = data1;
+        tweetsFollowing = data2;
       });
     }catch(e){
       print(e);
     }
   }
-  List<Widget> buildListTweet(){
+  List<Widget> buildListTweet(List<Tweet> tweets){
     List<Widget> items = [];
-    if(tweets.length>0){
+    if(tweets.isNotEmpty){
       for(Tweet t in tweets){
         items.add(TweetWidget(tweet: t));
       }
     }
-    items.add(SizedBox(height: 50,));
+    items.add(Container(
+      padding: const EdgeInsets.only(top: 12, bottom: 12),
+      decoration: BoxDecoration(
+          border: Border(
+              top: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                  width: 0.4
+              )
+          )
+      ),
+      child: const Icon(CupertinoIcons.circle_fill, size: 5,),
+    ));
+    items.add(const SizedBox(height: 50,));
     return items;
   }
 
@@ -68,14 +81,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
                       height: MediaQuery.of(context).size.height,
                       width: MediaQuery.of(context).size.width,
                       color: Colors.black,
-                      padding: EdgeInsets.only(top: 88),
+                      padding: const EdgeInsets.only(top: 88),
                       child: ListView(
-                        children: buildListTweet(),
+                        children: buildListTweet(tweetsForU),
                        )
                     ),
-                    Center(
-                        child: Text('following', style: TextStyle(color: Colors.black))
-                    )
+                  Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black,
+                      padding: const EdgeInsets.only(top: 88),
+                      child: ListView(
+                        children: buildListTweet(tweetsFollowing),
+                      )
+                  ),
                 ]
             ),
             Positioned(
@@ -97,7 +116,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
                     )
                   ),
                   child: TabBar(
-                    unselectedLabelColor: Color.fromRGBO(170, 184, 194, 1),
+                    unselectedLabelColor: const Color.fromRGBO(170, 184, 194, 1),
                     indicatorSize: TabBarIndicatorSize.label,
                     indicatorWeight: 3,
                     controller: _tabController,

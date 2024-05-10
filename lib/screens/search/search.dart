@@ -14,7 +14,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget trending(){
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,12 +32,12 @@ class _SearchPageState extends State<SearchPage> {
               ),
               GestureDetector(
                 onTap: (){},
-                child: Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white,size: 14,),
+                child: const Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white,size: 14,),
               )
             ],
           ),
-          SizedBox(height: 3,),
-          Text(
+          const SizedBox(height: 3,),
+          const Text(
             "Expansion Pack",
             style: TextStyle(
                 fontSize: 15,
@@ -45,7 +45,7 @@ class _SearchPageState extends State<SearchPage> {
                 fontWeight: FontWeight.w500
             ),
           ),
-          SizedBox(height: 3,),
+          const SizedBox(height: 3,),
           Text(
             "8,845 posts",
             style: TextStyle(
@@ -53,7 +53,7 @@ class _SearchPageState extends State<SearchPage> {
                 color: Colors.white.withOpacity(0.6),
             ),
           ),
-          SizedBox(height: 24,)
+          const SizedBox(height: 24,)
         ],
       )
     );
@@ -63,7 +63,7 @@ class _SearchPageState extends State<SearchPage> {
     return Stack(
           children: [
             Container(
-              margin: EdgeInsets.only(top: 80),
+              margin: const EdgeInsets.only(top: 80),
               child: ListView.builder(
                 itemCount: 4,
               itemBuilder: (BuildContext context, int index) {

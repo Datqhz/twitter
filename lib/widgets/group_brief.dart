@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../models/group.dart';
 import '../services/storage.dart';
 
 class BriefGroup extends StatelessWidget {
@@ -16,7 +15,7 @@ class BriefGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: IntrinsicHeight(
         child: Row(
           mainAxisSize: MainAxisSize.max,
@@ -33,7 +32,7 @@ class BriefGroup extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     color: Colors.blue,
                   ),
-                  child: img.isEmpty?Icon(FontAwesomeIcons.earth, color: Colors.white, size: 16,):FutureBuilder<String?>(
+                  child: img.isEmpty?const Icon(FontAwesomeIcons.earth, color: Colors.white, size: 16,):FutureBuilder<String?>(
                     future: Storage(). downloadGroupURL(img), // Replace with your function to load the image
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
@@ -49,7 +48,7 @@ class BriefGroup extends StatelessWidget {
                       }else {
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image(
+                          child: const Image(
                             height: 60,
                             width: 60,
                             image: AssetImage("assets/images/black.jpg"),
@@ -76,13 +75,13 @@ class BriefGroup extends StatelessWidget {
                                 color: Colors.black
                             )
                         ),
-                        child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                        child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
                       ),
                     )
                 )
               ],
             ),
-            SizedBox(width: 12,),
+            const SizedBox(width: 12,),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,16 +89,16 @@ class BriefGroup extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w400,
                         fontSize: 16
                     ),
                   ),
                   if(subTitle.isNotEmpty)...[
-                    SizedBox(height: 4,),
+                    const SizedBox(height: 4,),
                     Text(
-                      subTitle + " Members",
+                      "$subTitle Members",
                       style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
                           fontWeight: FontWeight.w400,

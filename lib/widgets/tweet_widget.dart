@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:twitter/models/tweet.dart';
 import 'package:twitter/screens/home/comment_tweet.dart';
 import 'package:twitter/screens/profile/profile.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/shared/global_variable.dart';
-import 'package:twitter/widgets/ImageGridView.dart';
+import 'package:twitter/widgets/image_grid_view.dart';
 import 'package:twitter/widgets/quote_tweet.dart';
 import 'package:twitter/widgets/tweet_view.dart';
 
@@ -39,7 +38,7 @@ class _TweetWidgetState extends State<TweetWidget> {
     return Container(
         color: Colors.black,
         width: double.infinity,
-        constraints: BoxConstraints(minHeight: 100, maxHeight: 400),
+        constraints: const BoxConstraints(minHeight: 100, maxHeight: 400),
         child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: imgLinks.length == 1
@@ -50,7 +49,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.hasError || snapshot.data == null) {
-                            return Text("Error");
+                            return const Text("Error");
                           } else {
                             return Image.network(
                               snapshot.data!,
@@ -58,7 +57,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                             );
                           }
                         }
-                        return SpinKitPulse(
+                        return const SpinKitPulse(
                           color: Colors.blue,
                           size: 50.0,
                         );
@@ -129,45 +128,412 @@ class _TweetWidgetState extends State<TweetWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        tweet!.user!.myUser.displayName,
-                        style: TextStyle(
+                        tweet.user!.myUser.displayName,
+                        style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 8,
                       ),
                       Text(
                         tweet.user!.myUser.username,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14,
                             color: Color.fromRGBO(170, 184, 194, 1),
                             overflow: TextOverflow.ellipsis),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 4,
                       ),
-                      Icon(
+                      const Icon(
                         FontAwesomeIcons.solidCircle,
                         size: 2.5,
                         color: Color.fromRGBO(170, 184, 194, 1),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 4,
                       ),
                       Text(
                         GlobalVariable().caculateUploadDate(tweet.uploadDate),
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14,
                             color: Color.fromRGBO(170, 184, 194, 1)),
                       ),
                     ],
                   ),
-                  Icon(
-                    CupertinoIcons.ellipsis_vertical,
-                    color: Colors.white,
-                    size: 14,
+                  GestureDetector(
+                    onTap: (){
+                      showModalBottomSheet(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return Container(
+                              color: Colors.black,
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.minus,
+                                        color: Colors.white.withOpacity(0.8),
+                                        size: 40,
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 6,
+                                  ),
+                                  OptionItem(icon: Icon(CupertinoIcons.trash, size: 24, color: Colors.grey.withOpacity(0.8)), title: "Delete post", callback: () async{
+                                    Navigator.pop(context);
+                                    showDialog(
+                                        context: context,
+                                        builder: (context){
+                                          return Dialog(
+                                            elevation: 0,
+                                            backgroundColor: Colors.grey.shade800,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const SizedBox(height: 8,),
+                                                  const Text(
+                                                    "Delete post?",
+                                                    style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8,),
+                                                  const Text(
+                                                    "This can't be undo and it will be removed from your profile, the timeline of any accounts that follow your, and from search results.",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    children: [
+                                                      TextButton(
+                                                        onPressed: (){
+                                                          Navigator.pop(context);
+                                                        },
+                                                        style: TextButton.styleFrom(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                          textStyle: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.w500,
+                                                              color: Color.fromRGBO(153, 162, 232, 1)
+                                                          ),
+                                                          backgroundColor: Colors.transparent,
+                                                        ),
+                                                        child: const Text(
+                                                          "Cancel",
+                                                        ),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () async{
+                                                          await DatabaseService().deleteTweet(widget.tweet.idAsString);
+                                                          Navigator.pop(context);
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(
+                                                              width: 2.3 * MediaQuery.of(context).size.width / 4,
+                                                              behavior: SnackBarBehavior.floating,
+                                                              content: const Text('Your post is deleted.', textAlign: TextAlign.center,),
+                                                              shape:
+                                                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                                              duration: const Duration(seconds: 3),
+                                                            ),
+                                                          );
+                                                        },
+                                                        style: TextButton.styleFrom(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                                          textStyle: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.w500,
+                                                              color: Color.fromRGBO(153, 162, 232, 1)
+                                                          ),
+                                                          backgroundColor: Colors.transparent,
+                                                        ),
+                                                        child: const Text(
+                                                          "Delete",
+                                                        ),
+                                                      )
+                                                    ],
+                                                  )
+                                                ],
+                                              )
+                                            ),
+                                          );
+                                        }
+                                    );
+                                  }),
+                                  OptionItem(icon: Icon(CupertinoIcons.chat_bubble, size: 24, color: Colors.grey.withOpacity(0.8)),
+                                      title: "Change who can reply",
+                                         callback:  () {
+                                            Navigator.pop(context);
+                                            showModalBottomSheet(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Container(
+                                                    height: MediaQuery.of(context).size.height * 0.5,
+                                                    color: Colors.black,
+                                                    child: Column(
+                                                      children: [
+                                                        const Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Icon(
+                                                              CupertinoIcons.minus,
+                                                              color: Colors.white,
+                                                              size: 40,
+                                                            )
+                                                          ],
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        const Align(
+                                                          alignment: Alignment.centerLeft,
+                                                          child: Padding(
+                                                            padding: EdgeInsets.symmetric(horizontal: 20),
+                                                            child: Text(
+                                                              "Who can reply?",
+                                                              style: TextStyle(
+                                                                fontSize: 22,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w600,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 15,),
+                                                        Align(
+                                                          alignment: Alignment.centerLeft,
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                            child: Text(
+                                                              "Pick who can reply to this post. Keep in mind that anyone mentioned can always reply.",
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: Colors.white.withOpacity(0.5),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        //personal 1
+                                                        GestureDetector(
+                                                          onTap: () async{
+                                                            Navigator.pop(context);
+                                                            await DatabaseService().changeTweetPersonal(widget.tweet.idAsString, 1);
+                                                          },
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                            child: SizedBox(
+                                                                width: MediaQuery.of(context).size.width,
+                                                                child: Row(
+                                                                  children: [
+                                                                    Stack(
+                                                                      children: [
+                                                                        Container(
+                                                                          width: 50,
+                                                                          height: 50,
+                                                                          margin: const EdgeInsets.all(4),
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.blue,
+                                                                              borderRadius: BorderRadius.circular(25)
+                                                                          ),
+                                                                          child: const Icon(FontAwesomeIcons.earth, size: 20),
+                                                                        ),
+                                                                        Visibility(
+                                                                            visible: widget.tweet.personal == 1,
+                                                                            child: Positioned(
+                                                                              right: 0,
+                                                                              bottom: 0,
+                                                                              child: Container(
+                                                                                height: 20,
+                                                                                width: 20,
+                                                                                decoration: BoxDecoration(
+                                                                                    color: CupertinoColors.systemGreen,
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                    border: Border.all(
+                                                                                        width: 1.5,
+                                                                                        color: Colors.black
+                                                                                    )
+                                                                                ),
+                                                                                child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                              ),
+                                                                            )
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    const SizedBox(width: 12,),
+                                                                    const Text(
+                                                                      "Everyone",
+                                                                      style: TextStyle(
+                                                                        fontSize: 16,
+                                                                        color: Colors.white,
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        //personal 2
+                                                        const SizedBox(height: 20,),
+                                                        GestureDetector(
+                                                          onTap: ()async{
+                                                            Navigator.pop(context);
+                                                            await DatabaseService().changeTweetPersonal(widget.tweet.idAsString, 2);
+                                                          },
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                            child: SizedBox(
+                                                                width: MediaQuery.of(context).size.width,
+                                                                child: Row(
+                                                                  children: [
+                                                                    Stack(
+                                                                      children: [
+                                                                        Container(
+                                                                          width: 50,
+                                                                          height: 50,
+                                                                          margin: const EdgeInsets.all(4),
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.blue,
+                                                                              borderRadius: BorderRadius.circular(25)
+                                                                          ),
+                                                                          child: const Icon(FontAwesomeIcons.user, size: 20),
+                                                                        ),
+                                                                        Visibility(
+                                                                            visible: widget.tweet.personal  == 2,
+                                                                            child: Positioned(
+                                                                              right: 0,
+                                                                              bottom: 0,
+                                                                              child: Container(
+                                                                                height: 20,
+                                                                                width: 20,
+                                                                                decoration: BoxDecoration(
+                                                                                    color: CupertinoColors.systemGreen,
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                    border: Border.all(
+                                                                                        width: 1.5,
+                                                                                        color: Colors.black
+                                                                                    )
+                                                                                ),
+                                                                                child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                              ),
+                                                                            )
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    const SizedBox(width: 12,),
+                                                                    const Text(
+                                                                      "Anyone follow you",
+                                                                      style: TextStyle(
+                                                                        fontSize: 16,
+                                                                        color: Colors.white,
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 20,),
+                                                        //personal 3
+                                                        GestureDetector(
+                                                          onTap: ()async{
+                                                            Navigator.pop(context);
+                                                            await DatabaseService().changeTweetPersonal(widget.tweet.idAsString, 3);
+                                                          },
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal:20 ),
+                                                            child: SizedBox(
+                                                                width: MediaQuery.of(context).size.width,
+                                                                child: Row(
+                                                                  children: [
+                                                                    Stack(
+                                                                      children: [
+                                                                        Container(
+                                                                          width: 50,
+                                                                          height: 50,
+                                                                          margin: const EdgeInsets.all(4),
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.blue,
+                                                                              borderRadius: BorderRadius.circular(25)
+                                                                          ),
+                                                                          child: const Icon(FontAwesomeIcons.at, size: 20),
+                                                                        ),
+                                                                        Visibility(
+                                                                            visible: widget.tweet.personal == 3,
+                                                                            child: Positioned(
+                                                                              right: 0,
+                                                                              bottom: 0,
+                                                                              child: Container(
+                                                                                height: 20,
+                                                                                width: 20,
+                                                                                decoration: BoxDecoration(
+                                                                                    color: CupertinoColors.systemGreen,
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                    border: Border.all(
+                                                                                        width: 1.5,
+                                                                                        color: Colors.black
+                                                                                    )
+                                                                                ),
+                                                                                child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                              ),
+                                                                            )
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    const SizedBox(width: 12,),
+                                                                    const Text(
+                                                                      "Just you",
+                                                                      style: TextStyle(
+                                                                        fontSize: 16,
+                                                                        color: Colors.white,
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )
+                                                            ),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  );
+                                                });
+                                          }),
+                                  const SizedBox(
+                                    height: 6,
+                                  ),
+                                ],
+                              ),
+                            );
+                          });
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 8, top: 6, bottom: 6),
+                      child: Icon(
+                        CupertinoIcons.ellipsis_vertical,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
                   )
                 ],
               ),
@@ -182,12 +548,12 @@ class _TweetWidgetState extends State<TweetWidget> {
                         color: Colors.grey.shade700,
                       ),
                       children: [
-                        TextSpan(
+                        const TextSpan(
                           text: 'Reply to ',
                         ),
                         TextSpan(
                           text: tweet.replyTo?.myUser.username,
-                          style: TextStyle(color: Colors.blue, fontSize: 14),
+                          style: const TextStyle(color: Colors.blue, fontSize: 14),
                         ),
                       ],
                     ),
@@ -203,15 +569,15 @@ class _TweetWidgetState extends State<TweetWidget> {
                     text: _isShowMore
                         ? (_isExtend
                             ? tweet.content
-                            : widget.tweet.content.substring(0, 200) + "...")
+                            : "${widget.tweet.content.substring(0, 200)}...")
                         : tweet.content,
-                    style: TextStyle(fontSize: 14.0, color: Colors.white),
+                    style: const TextStyle(fontSize: 14.0, color: Colors.white),
                     children: <TextSpan>[
                       if (_isShowMore)
                         if (!_isExtend)
                           TextSpan(
                             text: ' more',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.blue,
                             ),
                             // Xử lý khi nhấn vào "Xem thêm"
@@ -225,7 +591,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                         else
                           TextSpan(
                             text: ' brief',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.blue,
                             ),
                             // Xử lý khi nhấn vào "Thu gọn"
@@ -337,7 +703,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 26,
                   ),
                   Icon(
@@ -347,7 +713,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                     color: Colors.white.withOpacity(0.5),
                     size: 14,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 12,
                   ),
                   Text(
@@ -361,7 +727,7 @@ class _TweetWidgetState extends State<TweetWidget> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 4,
               ),
             ],
@@ -398,7 +764,7 @@ class _TweetActionState extends State<TweetAction> {
     List<String> imageNames = [];
     try {
       // upload image to the cloud if have
-      if (images.length != 0) {
+      if (images.isNotEmpty) {
         for (XFile image in images) {
           String name = await Storage().putImage(image, "tweet/images");
           if (name != "") {
@@ -447,7 +813,7 @@ class _TweetActionState extends State<TweetAction> {
                 context: context,
                 builder: (context) {
                   return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     height: 150,
                     color: Colors.black,
                     child: Column(
@@ -455,7 +821,7 @@ class _TweetActionState extends State<TweetAction> {
                         Container(
                           width: double.infinity,
                           alignment: Alignment.center,
-                          child: Icon(
+                          child: const Icon(
                             CupertinoIcons.minus,
                             color: Colors.white,
                             size: 40,
@@ -472,9 +838,9 @@ class _TweetActionState extends State<TweetAction> {
                                       // backgroundColor: Colors.transparent,
 
                                       behavior: SnackBarBehavior.floating,
-                                      content: Align(
+                                      content: const Align(
                                           alignment: Alignment.center,
-                                          child: const Text(
+                                          child: Text(
                                               'Undo Repost tweet successful!.')),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -513,9 +879,9 @@ class _TweetActionState extends State<TweetAction> {
                                       // backgroundColor: Colors.transparent,
 
                                       behavior: SnackBarBehavior.floating,
-                                      content: Align(
+                                      content: const Align(
                                           alignment: Alignment.center,
-                                          child: const Text(
+                                          child: Text(
                                               'Repost tweet successful!.')),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -526,7 +892,7 @@ class _TweetActionState extends State<TweetAction> {
                                   Navigator.pop(context);
                                 },
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Row(
                               children: [
                                 Icon(
@@ -534,7 +900,7 @@ class _TweetActionState extends State<TweetAction> {
                                   color: Colors.white.withOpacity(0.7),
                                   size: 25,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 12,
                                 ),
                                 Text(
@@ -562,7 +928,7 @@ class _TweetActionState extends State<TweetAction> {
                                         )));
                           },
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Row(
                               children: [
                                 Icon(
@@ -570,7 +936,7 @@ class _TweetActionState extends State<TweetAction> {
                                   color: Colors.white.withOpacity(0.7),
                                   size: 24,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 12,
                                 ),
                                 Text(
@@ -639,6 +1005,36 @@ class _TweetActionState extends State<TweetAction> {
         ),
       ),
     );
-    ;
   }
 }
+class OptionItem extends StatelessWidget {
+  OptionItem({super.key, required this.icon, required this.title, required this.callback});
+  Icon icon;
+  String title;
+  VoidCallback callback;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: callback,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              icon,
+              const SizedBox(width: 8,),
+              Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+}
+

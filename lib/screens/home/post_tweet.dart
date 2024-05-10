@@ -1,9 +1,7 @@
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart';
@@ -72,7 +70,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
         Size size = ImageSizeGetter.getSize(FileInput(File(element.path)));
         result.add(ImagePicked(image: element, removeImage: removeImage,));
       }
-      return Container(
+      return SizedBox(
         height: 160,
         child: ListView(
           scrollDirection: Axis.horizontal,
@@ -92,28 +90,28 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
     if(imagePicked.value.isEmpty && _brief.value){
       _brief.value = false;
     }
-    print("image length: " + imagePicked.value.length.toString());
+    print("image length: ${imagePicked.value.length}");
   }
   Widget buildPickPersonalView(int value){
     String content = "";
     late Icon icon;
     if(value == 1){
       content = "Everyone can reply";
-      icon = Icon(FontAwesomeIcons.earth, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.earth, color: Colors.blue, size: 13,);
     }else if(value == 2){
       content = "Anyone follow you can reply";
-      icon = Icon(FontAwesomeIcons.user, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.user, color: Colors.blue, size: 13,);
     }else {
       content = "Just you can reply";
-      icon = Icon(FontAwesomeIcons.at, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.at, color: Colors.blue, size: 13,);
     }
     return Row(
       children: [
         icon,
-        SizedBox(width: 12,),
+        const SizedBox(width: 12,),
         Text(
           content,
-          style: TextStyle(
+          style: const TextStyle(
               color: Colors.blue,
               fontSize: 13
           ),
@@ -125,7 +123,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
     List<Widget> rs = [];
     for(int index = 0; index < groupList.length; index++){
       Group group = groupList[index];
-      if(group.groupIdAsString!= null && group.groupIdAsString == widget.groupId){
+      if(group.groupIdAsString == widget.groupId){
         _audience.value = index+1;
       }
       rs.add(GestureDetector(
@@ -134,7 +132,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
             Navigator.pop(context);  
           },
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: BriefGroup(img: group.groupImg, title: group.groupName,
                 subTitle: group.groupMembers.length.toString(),
                 isActive: _audience.value == index+1),
@@ -148,13 +146,13 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _isLoad? Loading(): SafeArea(
+      body: _isLoad? const Loading(): SafeArea(
         child: Stack(
           children: [
             Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(top: 65, left: 15, right: 15),
+              padding: const EdgeInsets.only(top: 65, left: 15, right: 15),
               child: ListView(
                 scrollDirection: Axis.vertical,
                 children: [
@@ -172,7 +170,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                           ),
                           child: Image.network(GlobalVariable.avatar),
                       ),
-                      SizedBox(width: 12,),
+                      const SizedBox(width: 12,),
                       // content and media
                       Expanded(
                         child: Column(
@@ -198,10 +196,10 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                 )
                                               ],
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 20,
                                             ),
-                                            Align(
+                                            const Align(
                                               alignment: Alignment.center,
                                               child: Padding(
                                                 padding: EdgeInsets.symmetric(horizontal: 20),
@@ -215,7 +213,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(height: 15,),
+                                            const SizedBox(height: 15,),
                                             //everyone
                                             GestureDetector(
                                               onTap: (){
@@ -223,7 +221,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                 Navigator.pop(context);
                                               },
                                               child: Container(
-                                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                                 decoration: BoxDecoration(
                                                   color: Colors.black,
                                                   border: Border(
@@ -240,11 +238,11 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                 child: BriefGroup(img: "", title:"Everyone", subTitle: "", isActive:_audience.value==0),
                                               ),
                                             ),
-                                            SizedBox(
+                                            const SizedBox(
                                               height: 20,
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 12),
                                               child: Text(
                                                 "My Communities",
                                                 style: TextStyle(
@@ -264,7 +262,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
                                         color: Colors.black,
                                         borderRadius: BorderRadius.circular(25),
@@ -277,7 +275,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                               builder: (context, value, child){
                                                 return Text(
                                                   value == 0? "Everyone": groupList[value-1].groupName,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 14,
@@ -287,8 +285,8 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                 );
                                               }
                                           ) ,
-                                          SizedBox(width: 2,),
-                                          Icon(
+                                          const SizedBox(width: 2,),
+                                          const Icon(
                                             CupertinoIcons.chevron_down,
                                             size: 14,
                                             color: Colors.white,
@@ -302,7 +300,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                             TextFormField(
                               controller:_controller ,
                               decoration: InputDecoration(
-                                hintText: imagePicked.value.length != 0 ? "Add a comment...":"What's happening?",
+                                hintText: imagePicked.value.isNotEmpty ? "Add a comment...":"What's happening?",
                                 hintStyle: TextStyle(
                                     color: Colors.white.withOpacity(0.5),
                                     fontSize: 16
@@ -320,15 +318,14 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                   content.value = value;
                                   if(value.length >300){
                                     _canPost.value = false;
-                                  }else if(value.length >0 || imagePicked.value.length!=0){
+                                  }else if(value.isNotEmpty || imagePicked.value.isNotEmpty){
                                     _canPost.value = true;
                                   }else {
                                     _canPost.value = false;
                                   }
-                                ;
                               },
                             ),
-                            if(imagePicked.value.length!=0)...[
+                            if(imagePicked.value.isNotEmpty)...[
                               ValueListenableBuilder(
                                   valueListenable: imagePicked,
                                   builder: (context, value, child) {
@@ -336,7 +333,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                     return buildListImage(value);
                                   },
                               ),
-                              SizedBox(height: 12,)
+                              const SizedBox(height: 12,)
                             ],
                             if(widget.quote != null)...[
                               ValueListenableBuilder(
@@ -352,7 +349,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 100,)
+                  const SizedBox(height: 100,)
                 ],
               ),
             ),
@@ -363,7 +360,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                 right: 0,
                 child: Container(
                   color: Colors.black,
-                  padding: EdgeInsets.only(top: 12, right: 15, left: 15),
+                  padding: const EdgeInsets.only(top: 12, right: 15, left: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,7 +369,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                         onTap: (){
                           Navigator.pop(context);
                         },
-                        child: Icon(FontAwesomeIcons.close, size: 24,),
+                        child: const Icon(FontAwesomeIcons.close, size: 24,),
                       ),
                       ValueListenableBuilder(
                         valueListenable: _canPost,
@@ -390,22 +387,22 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                               widget.postTweet(imagePicked.value, tweet);
                               Navigator.pop(context);
                             }:null,
-                            child: Text(
-                                "Post"
-                            ),
                             style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                 backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
                                 disabledBackgroundColor: Colors.blue.withOpacity(0.6),
                                 disabledForegroundColor: Colors.white.withOpacity(0.6),
-                                textStyle: TextStyle(
+                                textStyle: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 15
                                 ),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)
                                 )
+                            ),
+                            child: const Text(
+                                "Post"
                             ),
                           );
                         },
@@ -422,7 +419,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
                       decoration: BoxDecoration(
                         color: Colors.black,
                           border: Border(
@@ -449,7 +446,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                 child: Row(
                                   children: [
                                     Icon(CupertinoIcons.person_2_fill, color: Colors.white.withOpacity(0.8),size: 16,),
-                                    SizedBox(width: 12,),
+                                    const SizedBox(width: 12,),
                                     Text(
                                       "Community menbers can reply",
                                       style: TextStyle(
@@ -457,10 +454,10 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                           fontSize: 13
                                       ),
                                     ),
-                                    SizedBox(width: 6,),
+                                    const SizedBox(width: 6,),
                                     Icon(CupertinoIcons.circle_fill, color: Colors.white.withOpacity(0.8),size: 3,),
-                                    SizedBox(width: 6,),
-                                    Text(
+                                    const SizedBox(width: 6,),
+                                    const Text(
                                       "Rules",
                                       style: TextStyle(
                                           color: Colors.white,
@@ -482,7 +479,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                           color: Colors.black,
                                           child: Column(
                                             children: [
-                                              Row(
+                                              const Row(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Icon(
@@ -492,10 +489,10 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                   )
                                                 ],
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 20,
                                               ),
-                                              Align(
+                                              const Align(
                                                 alignment: Alignment.centerLeft,
                                                 child: Padding(
                                                   padding: EdgeInsets.symmetric(horizontal: 20),
@@ -509,11 +506,11 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(height: 15,),
+                                              const SizedBox(height: 15,),
                                               Align(
                                                 alignment: Alignment.centerLeft,
                                                 child: Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 20),
                                                   child: Text(
                                                     "Pick who can reply to this post. Keep in mind that anyone mentioned can always reply.",
                                                     style: TextStyle(
@@ -523,7 +520,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 height: 20,
                                               ),
                                               GestureDetector(
@@ -542,12 +539,12 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                               Container(
                                                                 width: 50,
                                                                 height: 50,
-                                                                margin: EdgeInsets.all(4),
+                                                                margin: const EdgeInsets.all(4),
                                                                 decoration: BoxDecoration(
                                                                     color: Colors.blue,
                                                                     borderRadius: BorderRadius.circular(25)
                                                                 ),
-                                                                child: Icon(FontAwesomeIcons.earth, size: 20),
+                                                                child: const Icon(FontAwesomeIcons.earth, size: 20),
                                                               ),
                                                               Visibility(
                                                                   visible: personal.value == 1,
@@ -565,14 +562,14 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                                               color: Colors.black
                                                                           )
                                                                       ),
-                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                      child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
                                                                     ),
                                                                   )
                                                               )
                                                             ],
                                                           ),
-                                                          SizedBox(width: 12,),
-                                                          Text(
+                                                          const SizedBox(width: 12,),
+                                                          const Text(
                                                             "Everyone",
                                                             style: TextStyle(
                                                               fontSize: 16,
@@ -584,7 +581,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(height: 20,),
+                                              const SizedBox(height: 20,),
                                               GestureDetector(
                                                 onTap: (){
                                                   Navigator.pop(context);
@@ -601,12 +598,12 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                               Container(
                                                                 width: 50,
                                                                 height: 50,
-                                                                margin: EdgeInsets.all(4),
+                                                                margin: const EdgeInsets.all(4),
                                                                 decoration: BoxDecoration(
                                                                     color: Colors.blue,
                                                                     borderRadius: BorderRadius.circular(25)
                                                                 ),
-                                                                child: Icon(FontAwesomeIcons.user, size: 20),
+                                                                child: const Icon(FontAwesomeIcons.user, size: 20),
                                                               ),
                                                               Visibility(
                                                                   visible: personal.value == 2,
@@ -624,14 +621,14 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                                               color: Colors.black
                                                                           )
                                                                       ),
-                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                      child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
                                                                     ),
                                                                   )
                                                               )
                                                             ],
                                                           ),
-                                                          SizedBox(width: 12,),
-                                                          Text(
+                                                          const SizedBox(width: 12,),
+                                                          const Text(
                                                             "Anyone follow you",
                                                             style: TextStyle(
                                                               fontSize: 16,
@@ -643,7 +640,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(height: 20,),
+                                              const SizedBox(height: 20,),
                                               GestureDetector(
                                                 onTap: (){
                                                   Navigator.pop(context);
@@ -660,12 +657,12 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                               Container(
                                                                 width: 50,
                                                                 height: 50,
-                                                                margin: EdgeInsets.all(4),
+                                                                margin: const EdgeInsets.all(4),
                                                                 decoration: BoxDecoration(
                                                                     color: Colors.blue,
                                                                     borderRadius: BorderRadius.circular(25)
                                                                 ),
-                                                                child: Icon(FontAwesomeIcons.at, size: 20),
+                                                                child: const Icon(FontAwesomeIcons.at, size: 20),
                                                               ),
                                                               Visibility(
                                                                   visible: personal.value == 3,
@@ -683,14 +680,14 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                                                               color: Colors.black
                                                                           )
                                                                       ),
-                                                                      child: Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
+                                                                      child: const Icon(FontAwesomeIcons.check, color: Colors.black,size: 10,),
                                                                     ),
                                                                   )
                                                               )
                                                             ],
                                                           ),
-                                                          SizedBox(width: 12,),
-                                                          Text(
+                                                          const SizedBox(width: 12,),
+                                                          const Text(
                                                             "Just you",
                                                             style: TextStyle(
                                                               fontSize: 16,
@@ -719,7 +716,7 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
                       decoration: BoxDecoration(
                         color: Colors.black,
                           border: Border(
@@ -740,40 +737,38 @@ class _PostTweetScreenState extends State<PostTweetScreen> {
                                       maxHeight: 1080,
                                       imageQuality: 100
                                   );
-                                  if(images!=null){
-                                    if(images.length>4){
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          // backgroundColor: Colors.transparent,
-                                          width: 2.6*MediaQuery.of(context).size.width/4,
-                                          behavior: SnackBarBehavior.floating,
-                                          content: const Text('The number of selected photos is more than 4. Therefore, the first 4 images selected will be kept.'),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(14)
-                                          ),
-                                          duration: const Duration(seconds: 3),
+                                  if(images.length>4){
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        // backgroundColor: Colors.transparent,
+                                        width: 2.6*MediaQuery.of(context).size.width/4,
+                                        behavior: SnackBarBehavior.floating,
+                                        content: const Text('The number of selected photos is more than 4. Therefore, the first 4 images selected will be kept.'),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(14)
                                         ),
-                                      );
-                                      imagePicked.value = images.sublist(0, 4);
-                                    }else {
-                                      imagePicked.value = images;
-                                    }
-                                    if(!_brief.value){
-                                      _brief.value = true;
-                                    }
-                                    _canPost.value = true;
-                                    setState(() {
-
-                                    });
+                                        duration: const Duration(seconds: 3),
+                                      ),
+                                    );
+                                    imagePicked.value = images.sublist(0, 4);
+                                  }else {
+                                    imagePicked.value = images;
                                   }
-                                }
+                                  if(!_brief.value){
+                                    _brief.value = true;
+                                  }
+                                  _canPost.value = true;
+                                  setState(() {
+
+                                  });
+                                                                }
                               },
                               child: Icon(FontAwesomeIcons.image, color: imagePicked.value.length == 4 ? Colors.blue.withOpacity(0.7):Colors.blue, size: 20,)
                           ),
                           ValueListenableBuilder(
                             valueListenable: numOfWord,
                             builder: (context, value, child) {
-                              return Container(
+                              return SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
@@ -835,7 +830,7 @@ class ImagePicked extends StatelessWidget {
                   color: Colors.white.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(50)
               ),
-              child: Icon(FontAwesomeIcons.close, size: 16,color: Colors.black,),
+              child: const Icon(FontAwesomeIcons.close, size: 16,color: Colors.black,),
             ),
           ),
         )

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,8 +15,9 @@ import 'package:twitter/shared/global_variable.dart';
 import '../../services/storage.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
-
+  EditProfileScreen({super.key, required this.avatarLink, required this.wallLink});
+  ValueNotifier<String?> avatarLink;
+  ValueNotifier<String?> wallLink;
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -26,10 +26,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   ValueNotifier<DateTime> birth = ValueNotifier(DateTime.now());
 
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _bioController = TextEditingController();
-  ValueNotifier<XFile?> _newWall = ValueNotifier(null);
-  ValueNotifier<XFile?> _newAvatar = ValueNotifier(null);
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final ValueNotifier<XFile?> _newWall = ValueNotifier(null);
+  final ValueNotifier<XFile?> _newAvatar = ValueNotifier(null);
 
 
   @override
@@ -68,7 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
@@ -80,7 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           child: AppBar(
             backgroundColor: Colors.black,
-            title: Text(
+            title: const Text(
               "Edit profile",
               style: TextStyle(
                   color: Colors.white,
@@ -124,16 +124,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     );
                     Navigator.pop(context);
                   },
-                  child: Text(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent
+                  ),
+                  child: const Text(
                     "Save",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w500
                     ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent
                   ),
               )
             ],
@@ -144,8 +144,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Stack(
           children: [
             Container(
-              margin: EdgeInsets.only(top: 210),
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              margin: const EdgeInsets.only(top: 210),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -189,7 +189,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     onSaved: (value){
                     },
                   ),
-                  SizedBox(height: 16,),
+                  const SizedBox(height: 16,),
                   Text(
                     "Bio",
                     style: TextStyle(
@@ -228,7 +228,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     onSaved: (value){
                     },
                   ),
-                  SizedBox(height: 16,),
+                  const SizedBox(height: 16,),
                   Text(
                     "Birth date",
                     style: TextStyle(
@@ -298,7 +298,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           width:  MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: FileImage(File(value!.path)),
+                              image: FileImage(File(value.path)),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -313,7 +313,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   color: Colors.black.withOpacity(0.4),
                                 ),
                               ),
-                              Positioned(
+                              const Positioned(
                                 top: 0,
                                 bottom: 0,
                                 right: 0,
@@ -335,7 +335,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           width:  MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: AssetImage("assets/images/wall.jpg"),
+                              image:NetworkImage(widget.wallLink.value!),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -350,7 +350,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   color: Colors.black.withOpacity(0.4),
                                 ),
                               ),
-                              Positioned(
+                              const Positioned(
                                 top: 0,
                                 bottom: 0,
                                 right: 0,
@@ -408,13 +408,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               return CircleAvatar(
                                 backgroundColor: Colors.black,
                                 radius: 50,
-                                backgroundImage: FileImage(File(value!.path)),
+                                backgroundImage: FileImage(File(value.path)),
                               );
                             }
                             return CircleAvatar(
                               backgroundColor: Colors.black,
                               radius: 50,
-                              backgroundImage: AssetImage("assets/images/patty.png"),
+                              backgroundImage: NetworkImage(widget.avatarLink.value!),
                             );
                           },
                         ),
@@ -431,7 +431,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                           ),
                         ),
-                        Center(
+                        const Center(
                           child: Icon(
                             CupertinoIcons.camera_viewfinder,
                             size: 30,

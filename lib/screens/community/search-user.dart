@@ -19,14 +19,14 @@ class SearchUserAddInCommunity extends StatefulWidget {
 
 class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
   bool isShowX = false; // button clear text
-  Timer _debounce = Timer(Duration(seconds: 2), (){});
+  Timer _debounce = Timer(const Duration(seconds: 2), (){});
   List<MyUser> listUser = [];
   DatabaseService databaseService = DatabaseService();
 
   void _loadUserContainRegex(String value) {
-    if (_debounce != null && _debounce.isActive) {
+    if (_debounce.isActive) {
       _debounce.cancel();
     }
     _debounce = Timer(const Duration(seconds: 2), () async{
@@ -48,10 +48,10 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
               });
             },
             child: Container(
-              margin: EdgeInsets.only(bottom: 12),
+              margin: const EdgeInsets.only(bottom: 12),
               child: Row(
                 children: [
-                  Container(
+                  SizedBox(
                     height: 40,
                     child: FutureBuilder<String?>(
                         future: Storage().downloadAvatarURL(user.avatarLink),
@@ -63,18 +63,18 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                               radius: 20,
                             );
                           }else {
-                            return SizedBox(height: 0,);
+                            return const SizedBox(height: 0,);
                           }
                         }
                     ),
                   ),
-                  SizedBox(width: 8,),
+                  const SizedBox(width: 8,),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         user.displayName,
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                             fontSize: 15
@@ -92,7 +92,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                       )
                     ],
                   ),
-                  Expanded(child: SizedBox(height: 1,)),
+                  const Expanded(child: SizedBox(height: 1,)),
                   if(_isChoosed(user.uid))...[
                     GestureDetector(
                       onTap: (){
@@ -102,7 +102,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                         setState(() {
                         });
                       },
-                      child: Icon(
+                      child: const Icon(
                         CupertinoIcons.xmark,
                         color: Colors.white,
                         size: 20,
@@ -126,8 +126,8 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
   }
   Widget userBrief(MyUser user){
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      margin: EdgeInsets.only(right: 6, bottom: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      margin: const EdgeInsets.only(right: 6, bottom: 4),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.25),
         borderRadius: BorderRadius.circular(6)
@@ -167,13 +167,13 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                 },
               )
           ),
-          SizedBox(width: 8,),
+          const SizedBox(width: 8,),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 user.displayName,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w500
@@ -189,7 +189,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
               ),
             ],
           ),
-          SizedBox(width: 8,),
+          const SizedBox(width: 8,),
           GestureDetector(
             onTap: (){
               List<MyUser> temp = widget.userChoosedList.value;
@@ -198,7 +198,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
               setState(() {
               });
             },
-            child: Icon(
+            child: const Icon(
               CupertinoIcons.xmark,
               color: Colors.white,
               size: 20,
@@ -222,7 +222,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(50.0),
+          preferredSize: const Size.fromHeight(50.0),
           child: Container(
             decoration: BoxDecoration(
                 border: Border(
@@ -267,7 +267,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                       });
                     }:null,
                     color: isShowX? Colors.white: Colors.transparent,
-                    icon: Icon(CupertinoIcons.multiply)
+                    icon: const Icon(CupertinoIcons.multiply)
                 )
               ],
             ),
@@ -284,7 +284,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                   bottom: 0,
                   right: 0,
                   left: 0,
-                  child: Container(
+                  child: SizedBox(
                     height: 150,
                     child: SingleChildScrollView(
                       child: Column(
@@ -293,7 +293,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              const Text(
                                 "Choosed",
                                 style: TextStyle(
                                     color: Colors.white,
@@ -320,7 +320,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                                     Navigator.pop(context);
                                   }
                                 },
-                                child: Text(
+                                child: const Text(
                                   "OK",
                                   style: TextStyle(
                                       color: Colors.white,
@@ -331,7 +331,7 @@ class _SearchUserAddInCommunityState extends State<SearchUserAddInCommunity> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 6,),
+                          const SizedBox(height: 6,),
                           Wrap(
                             children: buildListUserChoosed(),
                           )

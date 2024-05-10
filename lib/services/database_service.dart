@@ -14,7 +14,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.6:8080';
+  String url = 'http://192.168.1.19:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);
@@ -22,7 +22,7 @@ class DatabaseService{
 
   Future<String?> extractToken() async{
     FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    User? user = await firebaseAuth.currentUser;
+    User? user = firebaseAuth.currentUser;
     String? token = await user?.getIdToken();
     return token;
   }
@@ -32,7 +32,6 @@ class DatabaseService{
       'Content-Type': 'application/json; charset=UTF-8',
       "Authorization" :"Bearer " + token
     };
-    print(headers);
     Response response = await get(Uri.parse("$url/api/employees"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
@@ -42,11 +41,11 @@ class DatabaseService{
   }
   //// Tweet //////
   //Get tweet for u
-  Future<List<Tweet>> getTweet()async{
+  Future<List<Tweet>> getTweetForU()async{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/tweet/for-you"), headers: headers);
@@ -56,7 +55,23 @@ class DatabaseService{
     }
     final List<dynamic> data = json.decode(response.body);
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
-    print("getd tweet: "  + result.length.toString());
+    return result;
+
+  }
+  Future<List<Tweet>> getTweetFollowing()async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/following"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
     return result;
 
   }
@@ -65,18 +80,16 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
-    Response response = await get(Uri.parse("$url/api/v1/tweet/comment/"+tweetId), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/comment/$tweetId"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("Could not get data tweet from server!");
     }
     final List<dynamic> data = json.decode(response.body);
-    print("begin map");
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
-    print("comment: " + result.length.toString());
     return result;
   }
   //Post tweet
@@ -84,7 +97,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await post(
@@ -111,16 +124,34 @@ class DatabaseService{
     }
     return false;
   }
+  //  delete tweet
+  Future<bool> deleteTweet(String tweetId)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+
+    Response response = await delete(
+        Uri.parse("$url/api/v1/tweet/$tweetId"),
+        headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 201){
+      return true;
+    }
+    return false;
+  }
   // Like tweet
   Future<bool> likeTweet(String tweetId)async{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await get(
-        Uri.parse("$url/api/v1/tweet/like/"+tweetId),
+        Uri.parse("$url/api/v1/tweet/like/$tweetId"),
         headers: headers,
     );
     int statusCode = response.statusCode;
@@ -134,12 +165,31 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await get(
-      Uri.parse("$url/api/v1/tweet/unlike/"+tweetId),
+      Uri.parse("$url/api/v1/tweet/unlike/$tweetId"),
       headers: headers,
+    );
+    int statusCode = response.statusCode;
+    if(statusCode == 200){
+      return true;
+    }
+    return false;
+  }
+  // Change tweet personal
+  Future<bool> changeTweetPersonal(String tweetId, int personal)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+
+    Response response = await put(
+        Uri.parse("$url/api/v1/tweet/personal/$tweetId"),
+        headers: headers,
+        body:  personal.toString()
     );
     int statusCode = response.statusCode;
     if(statusCode == 200){
@@ -152,11 +202,11 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await get(
-      Uri.parse("$url/api/v1/tweet/undo-repost/"+repostId),
+      Uri.parse("$url/api/v1/tweet/undo-repost/$repostId"),
       headers: headers,
     );
     int statusCode = response.statusCode;
@@ -170,7 +220,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/tweet"), headers: headers);
@@ -187,7 +237,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/tweet/user?uid=$uid"), headers: headers);
@@ -200,13 +250,64 @@ class DatabaseService{
     return result;
 
   }
+  Future<List<Tweet>> getReplyTweetOfUid(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/reply?uid=$uid"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    return result;
+
+  }
+  Future<List<Tweet>> getMediaTweetOfUid(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/media?uid=$uid"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    return result;
+
+  }
+  Future<List<Tweet>> getLikedTweetByUid(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    print(token);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/user-like?uid=$uid"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("Could not get data tweet from server!");
+    }
+    final List<dynamic> data = json.decode(response.body);
+    List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
+    return result;
+
+  }
   //// User //////
   Future<bool> saveUserInfo(MyUser myUser, FirebaseAuth auth) async{
-    User? user = await auth.currentUser;
+    User? user = auth.currentUser;
     String? token = await user?.getIdToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await post(
@@ -230,11 +331,11 @@ class DatabaseService{
     return false;
   }
   Future<bool> updateUserInfo(MyUser myUser, FirebaseAuth auth) async{
-    User? user = await auth.currentUser;
+    User? user = auth.currentUser;
     String? token = await user?.getIdToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await put(
@@ -261,7 +362,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     Response response = await get(Uri.parse("$url/api/v1/user"), headers: headers);
     int statusCode = response.statusCode;
@@ -273,7 +374,6 @@ class DatabaseService{
     GlobalVariable.numOfFollowed = data['numOfFollowers'];
     GlobalVariable.numOfFollowing = data['numOfFollowing'];
     GlobalVariable.avatar = (await Storage().downloadAvatarURL(GlobalVariable.currentUser!.myUser.avatarLink))!;
-    print(GlobalVariable.avatar);
     GlobalVariable.wall = (await Storage().downloadWallURL(GlobalVariable.currentUser!.myUser.wallLink))!;
     return response.body.toString();
   }
@@ -281,9 +381,9 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
-    Response response = await get(Uri.parse("$url/api/v1/user/find/"+s), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/user/find/$s"), headers: headers);
     int statusCode = response.statusCode;
 
     if(statusCode != 200){
@@ -292,7 +392,6 @@ class DatabaseService{
     List<MyUser> result = (json.decode(response.body) as List<dynamic>)
         .map((data) => MyUser.fromJson(data))
         .toList();
-    print(result.length);
     return result;
   }
 
@@ -300,9 +399,9 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
-    Response response = await get(Uri.parse("$url/api/v1/user/"+uid), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/user/$uid"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("error");
@@ -316,7 +415,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await post(
@@ -343,7 +442,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await put(
@@ -361,7 +460,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await put(
@@ -379,7 +478,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     Response response = await get(Uri.parse("$url/api/v1/group"), headers: headers);
     int statusCode = response.statusCode;
@@ -390,16 +489,15 @@ class DatabaseService{
     List<Group> result = (json.decode(response.body) as List<dynamic>)
         .map((data) => Group.fromJson(data))
         .toList();
-    print(result.length);
     return result;
   }
   Future<List<Group>> getAllGroupContainS(String s)async{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
-    Response response = await get(Uri.parse("$url/api/v1/group/find?regex="+s), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/group/find?regex=$s"), headers: headers);
     int statusCode = response.statusCode;
 
     if(statusCode != 200){
@@ -408,7 +506,6 @@ class DatabaseService{
     List<Group> result = (json.decode(response.body) as List<dynamic>)
         .map((data) => Group.fromJson(data))
         .toList();
-    print(result.length);
     return result;
   }
   // get all group joined
@@ -416,7 +513,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     Response response = await get(Uri.parse("$url/api/v1/group/joined"), headers: headers);
     int statusCode = response.statusCode;
@@ -434,10 +531,10 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
-    Response response = await get(Uri.parse("$url/api/v1/tweet/group/"+ groupId), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/tweet/group/$groupId"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("Could not get data tweet from server!");
@@ -450,7 +547,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/tweet/group"), headers: headers);
@@ -459,9 +556,25 @@ class DatabaseService{
       print("Could not get data tweet from server!");
     }
     final List<dynamic> data = json.decode(response.body);
-    print(data.toString());
     List<Tweet> result = data.map((e) => Tweet.fromJson(e)).toList();
     return result;
+  }
+  //get members in group
+  Future<List<MyUserWithFollow>> getMembersOfGroup(String groupId) async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    Response response = await get(Uri.parse("$url/api/v1/group/member/$groupId"), headers: headers);
+    int statusCode = response.statusCode;
+    List<MyUserWithFollow> rs = [];
+    if(statusCode == 200){
+      rs = (json.decode(response.body) as List<dynamic>)
+          .map((data) => MyUserWithFollow.fromJson(data))
+          .toList();
+    }
+    return rs;
   }
 
   ////Follow///
@@ -469,9 +582,9 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
-    Response response = await get(Uri.parse("$url/api/v1/follow/following/"+uid), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/follow/following/$uid"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("error");
@@ -485,9 +598,9 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
-    Response response = await get(Uri.parse("$url/api/v1/follow/followers/"+uid), headers: headers);
+    Response response = await get(Uri.parse("$url/api/v1/follow/followers/$uid"), headers: headers);
     int statusCode = response.statusCode;
     if(statusCode != 200){
       print("error");
@@ -501,7 +614,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await post(
@@ -523,11 +636,11 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await delete(
-        Uri.parse("$url/api/v1/follow/"+ uid),
+        Uri.parse("$url/api/v1/follow/$uid"),
         headers: headers,
     );
     int statusCode = response.statusCode;
@@ -542,7 +655,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/notification"), headers: headers);
@@ -552,7 +665,6 @@ class DatabaseService{
     }
     final List<dynamic> data = json.decode(response.body);
     List<MyNotification> result = data.map((e) => MyNotification.fromJson(e)).toList();
-    print(" num of notification: " + result.length.toString());
     return result;
   }
 
@@ -561,7 +673,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
     print(token);
     Response response = await get(Uri.parse("$url/api/v1/bookmark"), headers: headers);
@@ -578,7 +690,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await post(
@@ -600,11 +712,11 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await delete(
-      Uri.parse("$url/api/v1/bookmark/"+ tweetId),
+      Uri.parse("$url/api/v1/bookmark/$tweetId"),
       headers: headers,
     );
     int statusCode = response.statusCode;
@@ -617,7 +729,7 @@ class DatabaseService{
     var token = await extractToken();
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
-      "Authorization" :"Bearer " + token!
+      "Authorization" :"Bearer ${token!}"
     };
 
     Response response = await get(

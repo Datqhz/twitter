@@ -15,10 +15,15 @@ class _MessagePageState extends State<MessagePage> {
     return Stack(
         children: [
           Center(
-            child: Text(
-              "Message",
-              style: TextStyle(
-                  color: Colors.white
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: const Text(
+                "This feature is in development.",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 36
+                ),
               ),
             ),
           ),

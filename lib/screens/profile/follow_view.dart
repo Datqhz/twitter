@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:twitter/services/database_service.dart';
-import 'package:twitter/shared/global_variable.dart';
 
 import '../../models/follow.dart';
 import '../../services/storage.dart';
@@ -27,7 +26,7 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
             border: Border(
@@ -46,7 +45,7 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
             actions: [
               IconButton(
                   onPressed: (){},
-                  icon: Icon(CupertinoIcons.person_add)
+                  icon: const Icon(CupertinoIcons.person_add)
               )
             ],
           ),
@@ -63,14 +62,14 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
             }else {
               return Center(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         widget.isFollowing?"Be in the know":"Looking for followers?",
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                             fontSize: 28
@@ -91,7 +90,7 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
               );
             }
           }else{
-            return Center(child: SpinKitPulse(size: 50, color: Colors.blue,));
+            return const Center(child: SpinKitPulse(size: 50, color: Colors.blue,));
           }
         },
       )
@@ -99,9 +98,9 @@ class _FollowViewState extends State<FollowView> with SingleTickerProviderStateM
   }
   List<Widget> _buildFollowList(List<Follow> follows) {
     List<Widget> rs = [];
-    follows.forEach((element) {
+    for (var element in follows) {
       rs.add(FollowItem(follow: element, followers: !widget.isFollowing));
-    });
+    }
     return rs;
   }
 }
@@ -110,7 +109,7 @@ class FollowItem extends StatelessWidget {
   FollowItem({super.key, required this.follow, required this.followers});
   Follow follow;
   bool followers;
-  late ValueNotifier<bool> _isFollow = ValueNotifier(false);
+  late final ValueNotifier<bool> _isFollow = ValueNotifier(false);
   @override
   Widget build(BuildContext context) {
     if(followers){
@@ -119,7 +118,7 @@ class FollowItem extends StatelessWidget {
       _isFollow.value = follow.userFollowed.isFollow;
     }
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.black,
         border: Border(
@@ -134,7 +133,7 @@ class FollowItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
+              SizedBox(
                 height: 40,
                 child: FutureBuilder<String?>(
                     future: Storage().downloadAvatarURL(!followers?follow.userFollowed.myUser.avatarLink:follow.userFollow.myUser.avatarLink),
@@ -146,18 +145,18 @@ class FollowItem extends StatelessWidget {
                           radius: 20,
                         );
                       }else {
-                        return SizedBox(height: 0,);
+                        return const SizedBox(height: 0,);
                       }
                     }
                 ),
               ),
-              SizedBox(width: 8,),
+              const SizedBox(width: 8,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     !followers?follow.userFollowed.myUser.displayName:follow.userFollow.myUser.displayName,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
                         fontSize: 15
@@ -192,15 +191,12 @@ class FollowItem extends StatelessWidget {
                       await DatabaseService().getUserInfo();
                       _isFollow.value = !_isFollow.value;
                     },
-                    child: Text(
-                        value?"Following":"Follow"
-                    ),
                     style: TextButton.styleFrom(
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500
                       ),
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                         backgroundColor: value?Colors.black:Colors.white,
                         foregroundColor: value?Colors.white:Colors.black,
                         shape: RoundedRectangleBorder(
@@ -210,6 +206,9 @@ class FollowItem extends StatelessWidget {
                               color: Theme.of(context).dividerColor
                             )
                         )
+                    ),
+                    child: Text(
+                        value?"Following":"Follow"
                     ),
                   ),
                 );

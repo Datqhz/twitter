@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:twitter/auth/user_auth.dart';
 import 'package:twitter/services/auth_firebase.dart';
 import 'package:twitter/services/firebase_database.dart';
-import 'package:twitter/shared/global_variable.dart';
-import 'package:twitter/services/storage.dart';
 
 import '../../services/database_service.dart';
 class SignIn extends StatelessWidget {
@@ -145,9 +142,9 @@ class SignIn extends StatelessWidget {
                       color: Theme.of(context).dividerColor
                       ),
                     ),
-                    SizedBox(width: 2,),
+                    const SizedBox(width: 2,),
                     InkWell(
-                      child: Text("Sign up",
+                      child: const Text("Sign up",
                         style: TextStyle(
                             color: Colors.blue
                         ),
@@ -325,7 +322,7 @@ class _SignInStep1State extends State<SignInStep1> {
                     ElevatedButton(
                       onPressed: !_isEmpty?() async{
                         if(_formKey.currentState!.validate()){
-                          print('username '  + _username );
+                          print('username $_username' );
                           bool check = await FirebaseDatabase(uid: '').findAccountByEmail(_username);
                           if(check){
                             Navigator.popAndPushNamed(context,'/login-step-2', arguments: _username);
@@ -374,7 +371,7 @@ class _SignInStep1State extends State<SignInStep1> {
 }
 
 class SignInStep2 extends StatefulWidget {
-  SignInStep2({super.key});
+  const SignInStep2({super.key});
 
   @override
   State<SignInStep2> createState() => _SignInStep2State();
@@ -390,7 +387,7 @@ class _SignInStep2State extends State<SignInStep2> {
   final _formKey = GlobalKey<FormState>();
   String _password = "";
   bool _isObscure = true;
-  DatabaseService _databaseService = DatabaseService();
+  final DatabaseService _databaseService = DatabaseService();
   @override
   void initState() {
     super.initState();
@@ -462,7 +459,7 @@ class _SignInStep2State extends State<SignInStep2> {
                               decoration: TextDecoration.none
                           ),
                         ),
-                        SizedBox(height: 16,),
+                        const SizedBox(height: 16,),
                         TextFormField(
                           controller: _controller,
                           focusNode: _focusNode,
@@ -562,7 +559,7 @@ class _SignInStep2State extends State<SignInStep2> {
                       ElevatedButton(
                         onPressed: !_isEmpty?()async{
                           if(_formKey.currentState!.validate()){
-                            print('password: ' + _password);
+                            print('password: $_password');
                             dynamic result = await authFirebaseService.signInWithEmailAndPassword(username, _password) ;
                             if(result == null){
                               ScaffoldMessenger.of(context).showSnackBar(

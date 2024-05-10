@@ -10,7 +10,7 @@ class CommunityRulesScreen extends StatelessWidget {
     List<Widget> rs = [];
     for(int index = 0; index < ruleNameList.length; index++){
       rs.add(ruleItem(index, ruleNameList[index], ruleDesList[index]));
-      rs.add(SizedBox(height: 16,));
+      rs.add(const SizedBox(height: 16,));
     }
     return rs;
   }
@@ -27,11 +27,11 @@ class CommunityRulesScreen extends StatelessWidget {
               color: Colors.blue,
               borderRadius: BorderRadius.circular(17)
           ),
-          child: Text((idx+1).toString(), style: TextStyle(
+          child: Text((idx+1).toString(), style: const TextStyle(
               color: Colors.white
           ),),
         ),
-        SizedBox(width: 16,),
+        const SizedBox(width: 16,),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +65,7 @@ class CommunityRulesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
@@ -77,7 +77,7 @@ class CommunityRulesScreen extends StatelessWidget {
           ),
           child: AppBar(
             backgroundColor: Colors.black,
-            title: Text(
+            title: const Text(
               "Community Rules",
               style: TextStyle(
                   color: Colors.white,
@@ -88,7 +88,7 @@ class CommunityRulesScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
+      body: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Stack(
           children: [
@@ -105,7 +105,7 @@ class CommunityRulesScreen extends StatelessWidget {
                         fontSize: 14,
                       ),
                     ),
-                    SizedBox(height: 16,),
+                    const SizedBox(height: 16,),
                     ...buildListRule()
                   ],
                 ),
@@ -118,7 +118,7 @@ class CommunityRulesScreen extends StatelessWidget {
               right: 0,
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.black,
                   border: Border(
@@ -129,17 +129,9 @@ class CommunityRulesScreen extends StatelessWidget {
                   )
                 ),
                 child: TextButton(
-                  child: Text(
-                    "Got it",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500
-                    ),
-                  ),
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)
                     )
@@ -147,6 +139,14 @@ class CommunityRulesScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
+                  child: const Text(
+                    "Got it",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
                 ),
               ),
             )

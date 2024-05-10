@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:twitter/shared/global_variable.dart';
-import 'package:twitter/widgets/ImageGridView.dart';
+import 'package:twitter/widgets/image_grid_view.dart';
 
 import '../models/tweet.dart';
 import '../services/storage.dart';
@@ -15,7 +14,7 @@ class QuoteTweet extends StatelessWidget {
   List<Widget> buildCore(){
     if(brief){
       return [
-        SizedBox(height: 12,),
+        const SizedBox(height: 12,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
@@ -32,12 +31,12 @@ class QuoteTweet extends StatelessWidget {
                 child: ImageGridView(imageLinks: quote!.imgLinks, isSquare: true)
       ),
               if(quote!.content.isNotEmpty)...[
-                SizedBox(height: 4,),
+                const SizedBox(height: 4,),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     quote!.content,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 15,
                         color: Colors.white,
                         fontWeight: FontWeight.w400,
@@ -46,22 +45,22 @@ class QuoteTweet extends StatelessWidget {
                     maxLines: 5,
                   ),
                 ),
-                SizedBox(height: 4,),
+                const SizedBox(height: 4,),
               ],
             ],
           ),
         ),
-        SizedBox(height: 10,),
+        const SizedBox(height: 10,),
       ];
     }else {
       return [
-        SizedBox(height: 6,),
+        const SizedBox(height: 6,),
         if(quote!.content.isNotEmpty)...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               quote!.content,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 15,
                   color: Colors.white,
                   fontWeight: FontWeight.w400,
@@ -70,15 +69,15 @@ class QuoteTweet extends StatelessWidget {
               maxLines: 5,
             ),
           ),
-          SizedBox(height: 4,),
+          const SizedBox(height: 4,),
         ],
         Container(
           clipBehavior: Clip.antiAlias,
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
           minHeight: 100,
           maxHeight: 300,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12))
           ),
@@ -97,12 +96,12 @@ class QuoteTweet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 8,),
+          const SizedBox(height: 8,),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   height: 20,
                   child: FutureBuilder<String?>(
                       future: Storage().downloadAvatarURL(quote!.user!.myUser.avatarLink),
@@ -114,22 +113,22 @@ class QuoteTweet extends StatelessWidget {
                             radius: 10,
                           );
                         }else {
-                          return SizedBox(height: 0,);
+                          return const SizedBox(height: 0,);
                         }
                       }
                   ),
                 ),
-                SizedBox(width: 4,),
+                const SizedBox(width: 4,),
                 Text(
                   quote!.user!.myUser.displayName,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 15,
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                       overflow: TextOverflow.ellipsis
                   ),
                 ),
-                SizedBox(width: 4,),
+                const SizedBox(width: 4,),
                 Text(
                   quote!.user!.myUser.username,
                   style: TextStyle(
@@ -138,13 +137,13 @@ class QuoteTweet extends StatelessWidget {
                     overflow: TextOverflow.ellipsis
                   ),
                 ),
-                SizedBox(width: 4,),
+                const SizedBox(width: 4,),
                 Icon(
                   FontAwesomeIcons.solidCircle,
                   size: 2.5,
                   color: Colors.white.withOpacity(0.5),
                 ),
-                SizedBox(width: 4,),
+                const SizedBox(width: 4,),
                 Text(
                   GlobalVariable().caculateUploadDate(quote!.uploadDate),
                   style: TextStyle(

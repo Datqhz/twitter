@@ -139,7 +139,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
     List<String> imageNames = [];
     try{
       // upload image to the cloud if have
-      if(images.length!=0){
+      if(images.isNotEmpty){
         for(XFile image in images){
           String name = await Storage().putImage(image, 'tweet/images');
           if(name != ""){
@@ -181,7 +181,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
   @override
   Widget build(BuildContext context) {
       return _isLoad?
-        SpinKitPulse(
+        const SpinKitPulse(
           size: 50,
           color: Colors.white,
         ): Scaffold(
@@ -190,7 +190,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
             children: [
               _switchPage(),
               AnimatedPositioned(
-                  duration: Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 200),
                   bottom: isShowBottomBar?70:-50,
                   right: 10,
                   child: GestureDetector(
@@ -204,7 +204,7 @@ class _AuthNavigationState extends State<AuthNavigation> {
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(50)
                       ),
-                      child: Icon(FontAwesomeIcons.featherPointed),
+                      child: const Icon(FontAwesomeIcons.featherPointed),
                     ),
                   )
               ),
@@ -212,12 +212,12 @@ class _AuthNavigationState extends State<AuthNavigation> {
                   bottom: isShowBottomBar?0:-50,
                   right: 0,
                   left: 0,
-                  duration: Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 200),
                   child: _bottomNavigateBar()
               ),
             ],
           ),
-          drawer: MyDrawer(),
+          drawer: const MyDrawer(),
         );
   }
 

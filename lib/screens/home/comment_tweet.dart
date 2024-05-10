@@ -1,9 +1,6 @@
-import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart';
@@ -38,11 +35,11 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
   Widget buildListImage(){
     if(imagePicked.length>1){
       List<Widget> result = [];
-      imagePicked.forEach((element) {
+      for (var element in imagePicked) {
         Size size = ImageSizeGetter.getSize(FileInput(File(element.path)));
         result.add(ImagePicked(image: element, removeImage: removeImage,));
-      });
-      return Container(
+      }
+      return SizedBox(
         height: 160,
         child: ListView(
           scrollDirection: Axis.horizontal,
@@ -64,21 +61,21 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
     late Icon icon;
     if(personal == 1){
       content = "Everyone can reply";
-      icon = Icon(FontAwesomeIcons.earth, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.earth, color: Colors.blue, size: 13,);
     }else if(personal == 2){
       content = "Anyone follow you can reply";
-      icon = Icon(FontAwesomeIcons.user, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.user, color: Colors.blue, size: 13,);
     }else {
       content = "Just you can reply";
-      icon = Icon(FontAwesomeIcons.at, color: Colors.blue, size: 13,);
+      icon = const Icon(FontAwesomeIcons.at, color: Colors.blue, size: 13,);
     }
     return Row(
       children: [
         icon,
-        SizedBox(width: 12,),
+        const SizedBox(width: 12,),
         Text(
           content,
-          style: TextStyle(
+          style: const TextStyle(
               color: Colors.blue,
               fontSize: 13
           ),
@@ -91,7 +88,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
     List<String> imageNames = [];
     try{
       // upload image to the cloud if have
-      if(images.length!=0){
+      if(images.isNotEmpty){
         for(XFile image in images){
           String name = await Storage().putImage(image, 'tweet/images');
           if(name != ""){
@@ -133,7 +130,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
               Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.only(top: 55, left: 15, right: 15, bottom:50 ),
+                padding: const EdgeInsets.only(top: 55, left: 15, right: 15, bottom:50 ),
                 child: ListView(
                   scrollDirection: Axis.vertical,
                   children: [
@@ -143,7 +140,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                       },
                       child: Container(
                         width: double.infinity,
-                        margin: EdgeInsets.only(left: 52),
+                        margin: const EdgeInsets.only(left: 52),
                         child: RichText(
                           text: TextSpan(
                             style: TextStyle(
@@ -151,12 +148,12 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                               color: Colors.white.withOpacity(0.5),
                             ),
                             children: [
-                              TextSpan(
+                              const TextSpan(
                                 text: 'Replying to ',
                               ),
                               TextSpan(
                                 text: widget.reply.user?.myUser.username,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.blue,
                                     fontSize: 14
                                 ),
@@ -166,7 +163,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 4,),
+                    const SizedBox(height: 4,),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -181,7 +178,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                           ),
                           child: Image.network(GlobalVariable.avatar),
                         ),
-                        SizedBox(width: 12,),
+                        const SizedBox(width: 12,),
                         // content and media
                         Expanded(
                           child: Column(
@@ -189,7 +186,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                               TextFormField(
                                 controller:_controller ,
                                 decoration: InputDecoration(
-                                  hintText: imagePicked.length != 0 ? "Add a comment...":"Post your reply?",
+                                  hintText: imagePicked.isNotEmpty ? "Add a comment...":"Post your reply?",
                                   hintStyle: TextStyle(
                                       color: Colors.white.withOpacity(0.5),
                                       fontSize: 16
@@ -208,7 +205,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                                     content = value;
                                     if(value.length >300){
                                       _canPost = false;
-                                    }else if(value.length >0 || imagePicked.length!=0){
+                                    }else if(value.isNotEmpty || imagePicked.isNotEmpty){
                                       _canPost = true;
                                     }else {
                                       _canPost = false;
@@ -219,7 +216,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                                   });
                                 },
                               ),
-                              imagePicked.length!=0? buildListImage(): Container()
+                              imagePicked.isNotEmpty? buildListImage(): Container()
                             ],
                           ),
                         ),
@@ -243,7 +240,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                       )
                     )
                   ),
-                  padding: EdgeInsets.only(right: 15, left: 15),
+                  padding: const EdgeInsets.only(right: 15, left: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,8 +249,8 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                         onTap: (){
                           Navigator.pop(context);
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8),
+                        child: const Padding(
+                          padding: EdgeInsets.only(top: 8),
                           child: Icon(FontAwesomeIcons.close, size: 24,),
                         ),
                       ),
@@ -268,22 +265,22 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
 
                           Navigator.pop(context);
                         }:null,
-                        child: Text(
-                            "Reply"
-                        ),
                         style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                             disabledBackgroundColor: Colors.blue.withOpacity(0.6),
                             disabledForegroundColor: Colors.white.withOpacity(0.6),
-                            textStyle: TextStyle(
+                            textStyle: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 15
                             ),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30)
                             )
+                        ),
+                        child: const Text(
+                            "Reply"
                         ),
                       )
                     ],
@@ -296,7 +293,7 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
                     decoration: BoxDecoration(
                         color: Colors.black,
                         border: Border(
@@ -317,33 +314,31 @@ class _CommentTweetScreenState extends State<CommentTweetScreen> {
                                     maxHeight: 1080,
                                     imageQuality: 100
                                 );
-                                if(images!=null){
-                                  if(images.length>4){
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        // backgroundColor: Colors.transparent,
-                                        width: 2.6*MediaQuery.of(context).size.width/4,
-                                        behavior: SnackBarBehavior.floating,
-                                        content: const Text('The number of selected photos is more than 4. Therefore, the first 4 images selected will be kept.'),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(14)
-                                        ),
-                                        duration: const Duration(seconds: 3),
+                                if(images.length>4){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      // backgroundColor: Colors.transparent,
+                                      width: 2.6*MediaQuery.of(context).size.width/4,
+                                      behavior: SnackBarBehavior.floating,
+                                      content: const Text('The number of selected photos is more than 4. Therefore, the first 4 images selected will be kept.'),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14)
                                       ),
-                                    );
-                                    imagePicked = images.sublist(0, 4);
-                                  }else {
-                                    imagePicked = images;
-                                  }
-                                  setState(() {
-                                    _canPost = true;
-                                  });
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                  imagePicked = images.sublist(0, 4);
+                                }else {
+                                  imagePicked = images;
                                 }
-                              }
+                                setState(() {
+                                  _canPost = true;
+                                });
+                                                            }
                             },
                             child: Icon(FontAwesomeIcons.image, color: imagePicked.length == 4 ? Colors.blue.withOpacity(0.7):Colors.blue, size: 20,)
                         ),
-                        Container(
+                        SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(

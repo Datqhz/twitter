@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:twitter/screens/community/members.dart';
 import 'package:twitter/services/database_service.dart';
 import 'package:twitter/widgets/tweet_widget.dart';
 
@@ -27,9 +28,9 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   ValueNotifier<double> opacity = ValueNotifier(0);
   late TabController _tabController;
   late Future<String?> _groupImg;
-  List<ScrollController> _scrollControllers = List.generate(2, (index) => ScrollController());
+  final List<ScrollController> _scrollControllers = List.generate(2, (index) => ScrollController());
 
-  final GlobalKey _menuKey = new GlobalKey();
+  final GlobalKey _menuKey = GlobalKey();
 
   void showMenu() {
     dynamic popUpMenuState = _menuKey.currentState;
@@ -44,7 +45,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
         _scrollControllers[_tabController.index].jumpTo(-top.value);
       }
     });
-    _scrollControllers.forEach((element) {
+    for (var element in _scrollControllers) {
       element.addListener(() {
         double newTop = -element.offset;
         double op = element.offset/135;
@@ -57,7 +58,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
         top.value = newTop;
         opacity.value = op;
       });
-    });
+    }
     super.initState();
     _groupImg = Storage().downloadGroupURL(widget.group.groupImg);
   }
@@ -66,7 +67,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
     List<String> imageNames = [];
     try{
       // upload image to the cloud if have
-      if(images.length!=0){
+      if(images.isNotEmpty){
         for(XFile image in images){
           String name = await Storage().putImage(image,'tweet/images');
           if(name != ""){
@@ -100,7 +101,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   }
 
   List<Widget> loadTweet(List<Tweet>? tweets){
-    List<Widget> widgets =[SizedBox(height: 360,)];
+    List<Widget> widgets =[const SizedBox(height: 360,)];
     tweets?.forEach((element) {
       widgets.add(TweetWidget(tweet: element));
     });
@@ -122,11 +123,11 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                           if(snapshot.connectionState == ConnectionState.done){
                             return ListView(
                               controller: _scrollControllers[0],
-                                key: PageStorageKey<int>(1),
+                                key: const PageStorageKey<int>(1),
                                 children: loadTweet(snapshot.data)
                             );
                           }else {
-                            return Center(
+                            return const Center(
                               child: SpinKitPulse(
                                 color: Colors.blue,
                                 size: 25.0,
@@ -137,11 +138,6 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                     ),
 
                     AboutGroupView(controller: _scrollControllers[1],group: widget.group),
-                    // Container(
-                    //   child: Text(
-                    //       "tweet"
-                    //   ),
-                    // ),
                   ],
               ),
               ValueListenableBuilder<double>(
@@ -151,7 +147,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                       top: value,
                       left: 0,
                       right: 0,
-                      duration: Duration(milliseconds: 10),
+                      duration: const Duration(milliseconds: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -173,7 +169,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                 }else {
                                   return Container(
                                     height: 190,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                         image: DecorationImage(
                                             image: AssetImage(
                                                 "assets/images/black.jpg"
@@ -187,20 +183,20 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                           ),
                           Container(
                             width: double.infinity,
-                            color: Color.fromRGBO(22, 22, 26, 1.0),
-                            padding: EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 4),
+                            color: const Color.fromRGBO(22, 22, 26, 1.0),
+                            padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 4),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   widget.group.groupName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 32,
                                   ),
                                 ),
-                                SizedBox(height: 12,),
+                                const SizedBox(height: 12,),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -214,13 +210,13 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                             width: 30,
                                             avatars: [
                                               for (var n = 0; n < 3; n++)
-                                                AssetImage('assets/images/wall.jpg'),
+                                                const AssetImage('assets/images/wall.jpg'),
                                             ],
                                           ),
                                         ),
-                                        SizedBox(width: 4,),
+                                        const SizedBox(width: 4,),
                                         Text(
-                                         widget.group.groupMembers.length.toString() + " Members",
+                                         "${widget.group.groupMembers.length} Members",
                                           style: TextStyle(
                                               fontSize: 15,
                                               color: Colors.white.withOpacity(0.8)
@@ -231,16 +227,16 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                     Row(
                                       children: [
                                         Container(
-                                          padding: EdgeInsets.all(6),
+                                          padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(20),
                                               border: Border.all(width: 1, color: Colors.white)
                                           ),
-                                          child: Icon(Icons.share_outlined, size: 18,),
+                                          child: const Icon(Icons.share_outlined, size: 18,),
                                         ),
                                         //join in
                                         if(!widget.group.isJoined)...[
-                                          SizedBox(width: 8,),
+                                          const SizedBox(width: 8,),
                                           OutlinedButton(
                                             onPressed: () async{
                                               await DatabaseService().joinGroup(widget.group.groupIdAsString);
@@ -248,7 +244,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                             style: OutlinedButton.styleFrom(
                                               backgroundColor: Colors.white,
                                               foregroundColor: Colors.black,
-                                              side: BorderSide(
+                                              side: const BorderSide(
                                                 color: Colors.white, // Set the border color here
                                                 width: 1.0, // Set the border width here
                                               ),
@@ -290,7 +286,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                               unselectedLabelColor: Colors.white.withOpacity(0.6),
                               indicatorSize: TabBarIndicatorSize.label,
                               indicatorWeight: 3,
-                              tabs: [
+                              tabs: const [
                                 Text(
                                   "Trending",
                                   style: TextStyle(
@@ -324,8 +320,8 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                   builder: (context, value, child){
                     return Container(
                       height: 55,
-                      color: Color.fromRGBO(22, 22, 26, 1.0).withOpacity(value),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      color: const Color.fromRGBO(22, 22, 26, 1.0).withOpacity(value),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -343,10 +339,10 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                         color: Colors.white.withOpacity((0.4-value).clamp(0, 0.4)),
                                         borderRadius: BorderRadius.circular(17)
                                     ),
-                                    child: Icon(FontAwesomeIcons.arrowLeft, size: 19 ,color: Colors.white,)
+                                    child: const Icon(FontAwesomeIcons.arrowLeft, size: 19 ,color: Colors.white,)
                                 ),
                               ),
-                              SizedBox(width: 14,),
+                              const SizedBox(width: 14,),
                               Text(
                                 widget.group.groupName,
                                 style: TextStyle(
@@ -372,10 +368,10 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                         color: Colors.white.withOpacity((0.4-value).clamp(0, 0.4)),
                                         borderRadius: BorderRadius.circular(16)
                                     ),
-                                    child: Icon(FontAwesomeIcons.search, size: 19, color: Colors.white,)
+                                    child: const Icon(FontAwesomeIcons.search, size: 19, color: Colors.white,)
                                 ),
                               ),
-                              SizedBox(width: 20,),
+                              const SizedBox(width: 20,),
                               GestureDetector(
                                 onTap:()=> showMenu(),
                                 child: Container(
@@ -388,11 +384,11 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                     ),
                                     child: Stack(
                                       children: [
-                                        Center(child: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.white,)),
+                                        const Center(child: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.white,)),
                                         PopupMenuButton<String>(
                                           key: _menuKey,
                                           color: Colors.black,
-                                          icon: Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.transparent,),
+                                          icon: const Icon(FontAwesomeIcons.ellipsisVertical, size: 19, color: Colors.transparent,),
                                           enabled: false,
                                           onSelected: (value) async{
                                             if(widget.group.isJoined){
@@ -442,7 +438,7 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(50)
                     ),
-                    child: Icon(FontAwesomeIcons.featherPointed),
+                    child: const Icon(FontAwesomeIcons.featherPointed),
                   ),
                 )
               ),
@@ -470,12 +466,12 @@ class AboutGroupView extends StatelessWidget {
     return Container(
       child: SingleChildScrollView(
         controller: controller,
-        key: PageStorageKey<int>(2),
+        key: const PageStorageKey<int>(2),
         child: Column(
           children: [
-            SizedBox(height: 360,),
+            const SizedBox(height: 360,),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20,vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 16),
               decoration: BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
@@ -495,7 +491,7 @@ class AboutGroupView extends StatelessWidget {
                         color:Colors.white.withOpacity(0.9)
                     ),
                   ),
-                  SizedBox(height: 26,),
+                  const SizedBox(height: 26,),
                   //review group
                   Text(
                     group.review,
@@ -506,7 +502,7 @@ class AboutGroupView extends StatelessWidget {
 
                     ),
                   ),
-                  SizedBox(height: 18,),
+                  const SizedBox(height: 18,),
                   Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: Column(
@@ -515,7 +511,7 @@ class AboutGroupView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(CupertinoIcons.person_2_fill, color: Colors.white.withOpacity(0.5),),
-                            SizedBox(width: 16,),
+                            const SizedBox(width: 16,),
                             Expanded(
                               child: Text(
                                 "Only Community members can post, like, or reply.",
@@ -530,11 +526,11 @@ class AboutGroupView extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 18,),
+                        const SizedBox(height: 18,),
                         Row(
                           children: [
                             Icon(FontAwesomeIcons.earth,size: 21, color: Colors.white.withOpacity(0.5),),
-                            SizedBox(width: 16,),
+                            const SizedBox(width: 16,),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -558,15 +554,15 @@ class AboutGroupView extends StatelessWidget {
                             )
                           ],
                         ),
-                        SizedBox(height: 18,),
+                        const SizedBox(height: 18,),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(CupertinoIcons.calendar, color: Colors.white.withOpacity(0.5),),
-                            SizedBox(width: 16,),
+                            const SizedBox(width: 16,),
                             Container(
                               child: Text(
-                                "Create " +DateFormat('dd-MM-yyyy').format(group.createDate) +  " by " + group.groupOwner.myUser.username,
+                                "Create ${DateFormat('dd-MM-yyyy').format(group.createDate)} by ${group.groupOwner.myUser.username}",
                                 style:TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
@@ -583,7 +579,7 @@ class AboutGroupView extends StatelessWidget {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20,vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 16),
               decoration: BoxDecoration(
                   border: Border(
                       bottom: BorderSide(
@@ -603,7 +599,7 @@ class AboutGroupView extends StatelessWidget {
                         color:Colors.white.withOpacity(0.9)
                     ),
                   ),
-                  SizedBox(height: 26,),
+                  const SizedBox(height: 26,),
                   Text(
                     "Community rules are enforced by Community leaders, and are in addition to our Rules",
                     style: TextStyle(
@@ -613,7 +609,7 @@ class AboutGroupView extends StatelessWidget {
 
                     ),
                   ),
-                  SizedBox(height: 18,),
+                  const SizedBox(height: 18,),
                   Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: Column(
@@ -623,84 +619,89 @@ class AboutGroupView extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20,vertical: 16),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                          width: 0.2,
-                          color: Colors.white.withOpacity(0.5)
-                      )
-                  )
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Moderators",
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color:Colors.white.withOpacity(0.9)
-                    ),
-                  ),
-                  SizedBox(height: 26,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "14 Morderators",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color:Colors.white.withOpacity(0.7)
-                        ),
-                        softWrap: true,
+            // Container(
+            //   padding: EdgeInsets.symmetric(horizontal: 20,vertical: 16),
+            //   decoration: BoxDecoration(
+            //       border: Border(
+            //           bottom: BorderSide(
+            //               width: 0.2,
+            //               color: Colors.white.withOpacity(0.5)
+            //           )
+            //       )
+            //   ),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       Text(
+            //         "Moderators",
+            //         style: TextStyle(
+            //             fontSize: 20,
+            //             fontWeight: FontWeight.w600,
+            //             color:Colors.white.withOpacity(0.9)
+            //         ),
+            //       ),
+            //       SizedBox(height: 26,),
+            //       Row(
+            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //         children: [
+            //           Text(
+            //             "14 Morderators",
+            //             style: TextStyle(
+            //                 fontSize: 15,
+            //                 fontWeight: FontWeight.w400,
+            //                 color:Colors.white.withOpacity(0.7)
+            //             ),
+            //             softWrap: true,
+            //           ),
+            //           Icon(CupertinoIcons.chevron_right, color: Colors.white.withOpacity(0.8),),
+            //         ],
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            GestureDetector(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> Members(groupId: group.groupIdAsString)));
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(
+                            width: 0.2,
+                            color: Colors.white.withOpacity(0.5)
+                        )
+                    )
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Members",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color:Colors.white.withOpacity(0.9)
                       ),
-                      Icon(CupertinoIcons.chevron_right, color: Colors.white.withOpacity(0.8),),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                          width: 0.2,
-                          color: Colors.white.withOpacity(0.5)
-                      )
-                  )
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Members",
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color:Colors.white.withOpacity(0.9)
                     ),
-                  ),
-                  SizedBox(height: 26,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "${group.groupMembers.length} Community Members",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color:Colors.white.withOpacity(0.7)
+                    const SizedBox(height: 26,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${group.groupMembers.length} Community Members",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color:Colors.white.withOpacity(0.7)
+                          ),
+                          softWrap: true,
                         ),
-                        softWrap: true,
-                      ),
-                      Icon(CupertinoIcons.chevron_right, color: Colors.white.withOpacity(0.8),),
-                    ],
-                  ),
-                ],
+                        Icon(CupertinoIcons.chevron_right, color: Colors.white.withOpacity(0.8),),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -728,7 +729,7 @@ class AboutGroupView extends StatelessWidget {
                   color: Colors.blue.shade100.withOpacity(0.5)
               ),),
             ),
-            SizedBox(width: 16,),
+            const SizedBox(width: 16,),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -757,7 +758,7 @@ class AboutGroupView extends StatelessWidget {
           ],
         )
       );
-      rs.add(SizedBox(height: 18));
+      rs.add(const SizedBox(height: 18));
     }
     return rs.sublist(0, rs.length-1);
   }

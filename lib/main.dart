@@ -23,11 +23,12 @@ class MyApp extends StatelessWidget {
     return StreamProvider<UserAuth?>.value(
       value: AuthFirebaseService().user,
       initialData: null,
-      catchError: (_,__){},
+      catchError: (_,__){
+        return null;
+      },
       child: MaterialApp(
             theme: ThemeData(
               dividerColor: Colors.blue.shade50,
-                backgroundColor: Colors.black,
                 primaryColor: Colors.black,
                 bottomNavigationBarTheme: const BottomNavigationBarThemeData(
                   backgroundColor: Colors.black,
@@ -46,10 +47,9 @@ class MyApp extends StatelessWidget {
               textTheme: const TextTheme(
                 displayLarge: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)
               ),
-
             ),
             routes: GlobalVariable.routes,
-            home: SafeArea(
+            home: const SafeArea(
               child: Wrapper(),
             ),
           debugShowCheckedModeBanner: false,

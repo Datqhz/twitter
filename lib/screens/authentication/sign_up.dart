@@ -111,7 +111,7 @@ class SignUp extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => SignUpStep1()));
+                        MaterialPageRoute(builder: (context) => const SignUpStep1()));
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -126,7 +126,7 @@ class SignUp extends StatelessWidget {
                     "Create account",
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 12,
                 ),
                 Flexible(
@@ -138,11 +138,11 @@ class SignUp extends StatelessWidget {
                             color: Theme.of(context).dividerColor,
                             fontSize: 13.5),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 2,
                       ),
                       InkWell(
-                        child: Text(
+                        child: const Text(
                           "Term",
                           style: TextStyle(color: Colors.blue, fontSize: 13.5),
                         ),
@@ -157,7 +157,7 @@ class SignUp extends StatelessWidget {
                             fontSize: 13.5),
                       ),
                       InkWell(
-                        child: Text(
+                        child: const Text(
                           "Privacy Policy",
                           style: TextStyle(color: Colors.blue, fontSize: 13.5),
                         ),
@@ -172,7 +172,7 @@ class SignUp extends StatelessWidget {
                             fontSize: 13.5),
                       ),
                       InkWell(
-                        child: Text(
+                        child: const Text(
                           "Cookie Use",
                           style: TextStyle(color: Colors.blue, fontSize: 13.5),
                         ),
@@ -200,11 +200,11 @@ class SignUp extends StatelessWidget {
                       "Have an account already?",
                       style: TextStyle(color: Theme.of(context).dividerColor),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 2,
                     ),
                     InkWell(
-                      child: Text(
+                      child: const Text(
                         "Log in",
                         style: TextStyle(color: Colors.blue),
                       ),
@@ -244,7 +244,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
   DateTime? _selectedDate;
   final _formKey = GlobalKey<FormState>();
   bool _isValid = true;
-  late Timer _debounce = Timer(Duration(seconds: 2), (){});
+  late Timer _debounce = Timer(const Duration(seconds: 2), (){});
 
   @override
   void initState() {
@@ -274,12 +274,12 @@ class _SignUpStep1State extends State<SignUpStep1> {
     _flexController.dispose();
     _focusNodeName.dispose();
     _focusNodeFlex.dispose();
-    _debounce?.cancel();
+    _debounce.cancel();
     super.dispose();
   }
 
   void _validateInput(String value) {
-    if (_debounce != null && _debounce.isActive) {
+    if (_debounce.isActive) {
       _debounce.cancel();
     }
     late RegExp regex;
@@ -412,14 +412,14 @@ class _SignUpStep1State extends State<SignUpStep1> {
                         onChanged: (value) {
                           setState(() {
                             _isEmpty =false;
-                            _displayName = value!;
+                            _displayName = value;
                           });
                         },
                         // onSaved: (value) {
                         //   _displayName = value!;
                         // },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
                       TextFormField(
@@ -437,14 +437,14 @@ class _SignUpStep1State extends State<SignUpStep1> {
                                 color: Colors.red.shade800, // Màu viền khi được chọn
                               ),
                             ),
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                                 vertical: 4, horizontal: 8),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: Theme.of(context)
                                       .dividerColor), // Màu viền khi không được chọn
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: const OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: Color.fromRGBO(29, 161, 242, 1)), // Màu viền khi được chọn
                             ),
@@ -461,13 +461,13 @@ class _SignUpStep1State extends State<SignUpStep1> {
                             decoration: TextDecoration.none),
                         onChanged: (value) {
                           _validateInput(value);
-                          _info = value!;
+                          _info = value;
                         },
                         // onSaved: (value) {
                         //   _info = value!;
                         // },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
                       GestureDetector(
@@ -479,7 +479,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.only(left: 6),
                           alignment: Alignment.centerLeft,
                           width: MediaQuery.of(context).size.width,
                           height: 50,
@@ -495,7 +495,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                           ),
                           child: Text(
                             _selectedDate!=null?DateFormat('dd-MM-yyyy').format(_selectedDate!):"Date of birth",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.w400
@@ -529,7 +529,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                     _isFlexFocused?ElevatedButton(
                       onPressed: (){
                         _focusNodeFlex.unfocus();
-                        Future.delayed(Duration(milliseconds: 100), () {
+                        Future.delayed(const Duration(milliseconds: 100), () {
                           setState(() {
                             _isPhone = !_isPhone;
                             _flexController.text = "";
@@ -547,7 +547,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                       ),
                       child: Text(
                         _isPhone?"Use email instead":"Use phone instead",
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontWeight: FontWeight.w500,
                             color: Colors.white,
                             fontSize: 16
@@ -620,7 +620,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
 }
 
 class SignUpStep2 extends StatefulWidget {
-  SignUpStep2({super.key});
+  const SignUpStep2({super.key});
   @override
   State<SignUpStep2> createState() => _SignUpStep2State();
 }
@@ -662,7 +662,7 @@ class _SignUpStep2State extends State<SignUpStep2> {
     final String name = receivedData['name'];
     final String account = receivedData['info'];
     final DateTime birth  = receivedData['birth'];
-    print('account: ' + account);
+    print('account: $account');
     return _loading?const Loading():Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -794,7 +794,7 @@ class _SignUpStep2State extends State<SignUpStep2> {
                                 _loading = false;
                               });
                             }else{
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpSuccess()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>const SignUpSuccess()));
                             }
                           }
                         }: null,

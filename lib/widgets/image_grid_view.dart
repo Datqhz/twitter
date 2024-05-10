@@ -1,5 +1,4 @@
 
-import 'dart:typed_data';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../services/storage.dart';
@@ -23,14 +22,14 @@ class ImageGridView extends StatelessWidget {
     }
     List<Widget> results = [];
     if(imageLinks.length== 1){
-      return Container(
+      return SizedBox(
         width: double.infinity,
         child: FutureBuilder<String?>(
           future: Storage().getImageTweetURL(imageLinks[0]),
           builder: (context,snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError || snapshot.data == null) {
-                return Text("Error");
+                return const Text("Error");
               } else {
                 return Image(
                   fit: BoxFit.cover,
@@ -38,7 +37,7 @@ class ImageGridView extends StatelessWidget {
                 );
               }
             } else {
-              return Center(
+              return const Center(
                 child: SpinKitPulse(
                   color: Colors.blue,
                   size: 25.0,
@@ -50,9 +49,9 @@ class ImageGridView extends StatelessWidget {
       );
     }else {
       if(imageLinks.length%2 == 0) { // use it for num of images 2 and 4
-        imageLinks.forEach((element) {
+        for (var element in imageLinks) {
           results.add(buildImageItem(Storage().getImageTweetURL(element)));
-        });
+        }
       }
       else if (imageLinks.length %2 != 0){ // in case num of images equal 3
         results.add(buildImageItem(Storage().getImageTweetURL(imageLinks[0])));
@@ -62,7 +61,7 @@ class ImageGridView extends StatelessWidget {
         }
         results.add(GridView.count(
             primary: false,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             crossAxisSpacing: isSquare?2:6,
             mainAxisSpacing: isSquare?2:6,
@@ -73,7 +72,7 @@ class ImageGridView extends StatelessWidget {
       }
       return GridView.count(
           primary: false,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           crossAxisSpacing: isSquare?2:6,
           mainAxisSpacing: isSquare?2:6,

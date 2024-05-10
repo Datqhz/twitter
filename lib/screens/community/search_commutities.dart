@@ -17,9 +17,9 @@ class SearchCommutitiesScreen extends StatefulWidget {
 
 class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
   bool isShowX = false; // button clear text
-  Timer _debounce = Timer(Duration(seconds: 2), (){});
+  Timer _debounce = Timer(const Duration(seconds: 2), (){});
   late Future<List<Group>> futureGroups;
   DatabaseService databaseService = DatabaseService();
 
@@ -31,11 +31,11 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
   }
 
   void _loadGroupContainRegex(String value) {
-    if (_debounce != null && _debounce.isActive) {
+    if (_debounce.isActive) {
       _debounce.cancel();
     }
     _debounce = Timer(const Duration(seconds: 2), () {
-      print("my search: "  + value);
+      print("my search: $value");
       if(value.isNotEmpty){
         futureGroups = databaseService.getAllGroupContainS(value);
       }else {
@@ -49,11 +49,11 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
 
   List<Widget> buildGroupItem(List<Group> groups){
     List<Widget> rs = [];
-    groups.forEach((element) {
+    for (var element in groups) {
       rs.add(CommunitiesItem(group: element));
-    });
+    }
     rs.add(Container(
-      padding: EdgeInsets.only(top: 12, bottom: 12),
+      padding: const EdgeInsets.only(top: 12, bottom: 12),
       decoration: BoxDecoration(
           border: Border(
               top: BorderSide(
@@ -62,9 +62,9 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
               )
           )
       ),
-      child: Icon(CupertinoIcons.circle_fill, size: 5,),
+      child: const Icon(CupertinoIcons.circle_fill, size: 5,),
     ));
-    rs.add(SizedBox(height: 20));
+    rs.add(const SizedBox(height: 20));
     return rs;
   }
 
@@ -109,7 +109,7 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
                 _loadGroupContainRegex("");
               }:null,
               color: isShowX? Colors.white: Colors.transparent,
-              icon: Icon(CupertinoIcons.multiply)
+              icon: const Icon(CupertinoIcons.multiply)
           )
         ],
       ),

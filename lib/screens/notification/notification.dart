@@ -38,7 +38,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
   List<Widget> buildListNotification(){
     List<Widget> rs = [];
-    if(notificationList.length !=0){
+    if(notificationList.isNotEmpty){
       print("0");
       rs.add(const SizedBox(height: 50));
       for(MyNotification notification in notificationList){
@@ -49,8 +49,8 @@ class _NotificationPageState extends State<NotificationPage> {
         }
       }
       rs.add(Container(
-        padding: EdgeInsets.only(top: 12, bottom: 70),
-        child: Icon(CupertinoIcons.circle_fill, size: 5,),
+        padding: const EdgeInsets.only(top: 12, bottom: 70),
+        child: const Icon(CupertinoIcons.circle_fill, size: 5,),
       ));
     }else {
       print("1");
@@ -74,12 +74,24 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget build(BuildContext context) {
     return Stack(
           children: [
-            Container(
+            notificationList.isNotEmpty ? SizedBox(
               height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: buildListNotification(),
+                ),
+              ),
+            ): Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: const Text(
+                  "You don't have any notice.",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 36
+                  ),
                 ),
               ),
             ),
@@ -111,7 +123,7 @@ class NotifyItem extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (context)=>TweetView(tweet: notification.tweet)));
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.black,
           border: Border(
@@ -125,7 +137,7 @@ class NotifyItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon( notification.type == 2? CupertinoIcons.arrow_2_squarepath : CupertinoIcons.bell_fill, color: notification.type == 2 ? Colors.green: Colors.blue, size: 24,),
-            SizedBox(width: 12,),
+            const SizedBox(width: 12,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -149,7 +161,7 @@ class NotifyItem extends StatelessWidget {
                       },
                     )
                 ),
-                SizedBox(height: 6,),
+                const SizedBox(height: 6,),
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
@@ -158,24 +170,24 @@ class NotifyItem extends StatelessWidget {
                       fontWeight: FontWeight.w400
                     ),
                     children: [
-                      if(notification.type == 3) ...[TextSpan(
+                      if(notification.type == 3) ...[const TextSpan(
                         text: "New post notifications for ",
                       )],
                       TextSpan(
                         text: notification.tweet.user?.myUser.displayName,
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w600
                         ),
                       ),
-                      if(notification.type == 2) ...[TextSpan(
+                      if(notification.type == 2) ...[const TextSpan(
                         text: " reposted your post",
                       )]
                     ],
                   ),
                 ),
-                SizedBox(height: 6,),
+                const SizedBox(height: 6,),
                 Text(
                   "pic.twitter.com/kdjdjsv",
                   style: TextStyle(

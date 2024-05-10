@@ -17,13 +17,13 @@ class CommunitiesItem extends StatelessWidget {
         Navigator.push(context,MaterialPageRoute(builder: (context)=> GroupScreen(group: group)));
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: IntrinsicHeight(
           child: Row(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
+              SizedBox(
                 height: 90,
                 width: 90,
                 child: FutureBuilder<String?>(
@@ -49,7 +49,7 @@ class CommunitiesItem extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(width: 12,),
+              const SizedBox(width: 12,),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,9 +67,9 @@ class CommunitiesItem extends StatelessWidget {
                               fontSize: 15
                           ),
                         ),
-                        SizedBox(height: 4,),
+                        const SizedBox(height: 4,),
                         Text(
-                          group.groupMembers.length.toString() + " Members",
+                          "${group.groupMembers.length} Members",
                           style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontWeight: FontWeight.w400,
@@ -86,7 +86,7 @@ class CommunitiesItem extends StatelessWidget {
                         width: 36,
                         avatars: [
                           for (var n = 0; n < 5; n++)
-                            AssetImage('assets/images/wall.jpg'),
+                            const AssetImage('assets/images/wall.jpg'),
                         ],
                       ),
                     ),

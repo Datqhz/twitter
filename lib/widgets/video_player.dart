@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:twitter/shared/loading.dart';
 import 'package:video_player/video_player.dart';
 
 class Video extends StatefulWidget {
-  Video({required this.url});
+  const Video({super.key, required this.url});
   final String url;
   @override
   State<Video> createState() => _VideoState();
@@ -18,7 +16,7 @@ class _VideoState extends State<Video> {
   
   @override
   void initState() {
-    this.initState();
+    initState();
     _controller = VideoPlayerController.asset(
       widget.url
     )..initialize();

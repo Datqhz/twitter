@@ -1,4 +1,3 @@
-import 'package:avatar_stack/avatar_stack.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -21,20 +20,20 @@ class Community extends StatefulWidget {
 
 class _CommunityState extends State<Community> {
 
-  late ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController = ScrollController();
   double tempHeight = 0;
   bool isShow = true;
   late Future<List<Group>> listJoined;
 
   List<Widget> loadGroups(List<Group> groups){
-    List<Widget> rs = [SizedBox(height: 10,),
+    List<Widget> rs = [const SizedBox(height: 10,),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               "Discover new Communities",
               style: TextStyle(
                   color: Colors.white,
@@ -43,16 +42,16 @@ class _CommunityState extends State<Community> {
               ),
             ),
             GestureDetector(
-              child: Icon(CupertinoIcons.ellipsis_vertical, size: 14, color: Colors.white,),
+              child: const Icon(CupertinoIcons.ellipsis_vertical, size: 14, color: Colors.white,),
             )
           ],
         ),
       ),];
-    groups.forEach((element) {
+    for (var element in groups) {
       rs.add(CommunitiesItem(group: element));
-    });
+    }
     rs.add(Container(
-          padding: EdgeInsets.only(top: 12, bottom: 12),
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
           decoration: BoxDecoration(
               border: Border(
                   top: BorderSide(
@@ -61,14 +60,14 @@ class _CommunityState extends State<Community> {
                   )
               )
           ),
-          child: Icon(CupertinoIcons.circle_fill, size: 5,),
+          child: const Icon(CupertinoIcons.circle_fill, size: 5,),
         ));
-    rs.add(SizedBox(height: 50));
+    rs.add(const SizedBox(height: 50));
     return rs;
   }
   List<Widget> buildTweet(List<Tweet> tweets){
     List<Widget> rs = [];
-    print("num of tweet: " + tweets.length.toString());
+    print("num of tweet: ${tweets.length}");
     for (var element in tweets) {
       rs.add(TweetWidget(tweet: element));
     }
@@ -86,7 +85,7 @@ class _CommunityState extends State<Community> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.black,
-          border: Border.all(width: 1, color: Color.fromRGBO(40, 49, 63, 1.0))
+          border: Border.all(width: 1, color: const Color.fromRGBO(40, 49, 63, 1.0))
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -97,18 +96,18 @@ class _CommunityState extends State<Community> {
                   if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
                     return Image(image: NetworkImage(snapshot.data!), height: 50, width: double.infinity,fit: BoxFit.cover,);
                   }else {
-                    return SpinKitPulse(size: 10, color: Colors.blue,);
+                    return const SpinKitPulse(size: 10, color: Colors.blue,);
                   }
                 },
             ),
             Container(
               width: double.infinity,
               alignment: Alignment.center,
-              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-              color: Color.fromRGBO(22, 22, 26, 1.0),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+              color: const Color.fromRGBO(22, 22, 26, 1.0),
               child: Text(
                 group.groupName,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     fontSize: 15,
@@ -122,11 +121,11 @@ class _CommunityState extends State<Community> {
     );
   }
   List<Widget> buildGroupJoined(List<Group> groups){
-    List<Widget> rs = [SizedBox(width: 12,)];
-    groups.forEach((element) { 
+    List<Widget> rs = [const SizedBox(width: 12,)];
+    for (var element in groups) { 
       rs.add(groupItem(element));
-      rs.add(SizedBox(width: 12,));
-    });
+      rs.add(const SizedBox(width: 12,));
+    }
     return rs.sublist(0, rs.length-1);
   }
   @override
@@ -151,13 +150,13 @@ class _CommunityState extends State<Community> {
                   future: listJoined,
                   builder: (context, snapshot){
                     if(snapshot.connectionState == ConnectionState.done){
-                      if(snapshot.data?.length!=0){
+                      if(snapshot.data!.isNotEmpty){
                         return ListView(
                           children: [
                             Container(
                                 height: 103,
                                 width: double.infinity,
-                                padding: EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 decoration: BoxDecoration(
                                     border: Border(
                                         bottom: BorderSide(width: 0.15, color: Colors.white.withOpacity(0.5))
@@ -178,7 +177,7 @@ class _CommunityState extends State<Community> {
                                     ],
                                   );
                                 }else {
-                                  return SpinKitPulse(
+                                  return const SpinKitPulse(
                                     color: Colors.blue,
                                   );
                                 }
@@ -195,21 +194,21 @@ class _CommunityState extends State<Community> {
                                 children: loadGroups(snapshot.data!)
                               );
                             }else {
-                              return Center(child: SpinKitPulse(color: Colors.blue,));
+                              return const Center(child: SpinKitPulse(color: Colors.blue,));
                             }
                           },
                         );
                       }
                     }
                     else {
-                      return Center(child: SpinKitPulse(color: Colors.blue,),);
+                      return const Center(child: SpinKitPulse(color: Colors.blue,),);
                     }
                   },
                 ),
               ) ,
             ),
             AnimatedPositioned(
-                duration: Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 200),
                 top: tempHeight,
                 right: 0,
                 left: 0,

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +62,7 @@ class _MyAppBarState extends State<MyAppBar> {
             ElevatedButton(
               onPressed: () {
                 if(placeholder == "Search X"){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>SearchView()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>const SearchView()));
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -110,7 +109,7 @@ class _MyAppBarState extends State<MyAppBar> {
               children: [
                 GestureDetector(
                   onTap:(){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchCommutitiesScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchCommutitiesScreen()));
                   },
                   child: Icon(
                     CupertinoIcons.search,
@@ -123,7 +122,7 @@ class _MyAppBarState extends State<MyAppBar> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateCommunityScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const CreateCommunityScreen()));
                   },
                   child: Icon(
                     CupertinoIcons.person_add,
@@ -170,7 +169,7 @@ class _MyAppBarState extends State<MyAppBar> {
         color: Colors.black,
           border: Border(
               bottom: BorderSide(color: Theme.of(context).dividerColor, width: 0.3))),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Indexer(
         children: [
           Indexed(
@@ -182,26 +181,13 @@ class _MyAppBarState extends State<MyAppBar> {
                 width: 48,
                 child: Container(
                   //alignment: Alignment.centerLeft,
-                  height: 24,
-                  width: 24,
+                  height: 28,
+                  width: 28,
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Image.network(GlobalVariable.avatar),
-                  // child: FutureBuilder<String?>(
-                  //   future: GlobalVariable.avatar,
-                  //   builder: (context, snapshot){
-                  //     if (snapshot.connectionState == ConnectionState.done) {
-                  //       if (snapshot.hasError || snapshot.data == null) {
-                  //         return Text("Error");
-                  //       } else {
-                  //         return Image.network(snapshot.data!);
-                  //       }
-                  //     }
-                  //     return SizedBox(height: 1,);
-                  //   },
-                  // )
                 ),
               ),
               onTap: (){Scaffold.of(context).openDrawer();},

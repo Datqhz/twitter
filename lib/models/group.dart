@@ -1,6 +1,4 @@
 
-import 'package:intl/intl.dart';
-import 'package:twitter/models/user.dart';
 import 'package:twitter/models/user_info_with_follow.dart';
 
 class Group {

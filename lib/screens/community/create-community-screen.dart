@@ -23,10 +23,10 @@ class CreateCommunityScreen extends StatefulWidget {
 class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
 
 
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _desController = TextEditingController();
-  TextEditingController _ruleNameController = TextEditingController();
-  TextEditingController _ruleDesController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _desController = TextEditingController();
+  final TextEditingController _ruleNameController = TextEditingController();
+  final TextEditingController _ruleDesController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _formCommunitiesNameKey = GlobalKey<FormState>();
 
@@ -76,7 +76,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                     color: Colors.blue.shade100.withOpacity(0.5)
                 ),),
               ),
-              SizedBox(width: 16,),
+              const SizedBox(width: 16,),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,7 +234,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                           }
                       );
                     },
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.pen, color: Colors.blue, size: 20,
                     ),
                   ),
@@ -253,8 +253,8 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Your realy wanna remove rule has rule name \""+ value[i] + "\"?",
-                                      style: TextStyle(
+                                      "Your realy wanna remove rule has rule name \"${value[i]}\"?",
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,
                                           fontWeight: FontWeight.w500
@@ -307,7 +307,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                           }
                       );
                     },
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.trash, color: Colors.red, size: 20,
                     ),
                   )
@@ -329,8 +329,8 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
   }
   Widget userBrief(MyUser user){
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      margin: EdgeInsets.only(right: 6, bottom: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      margin: const EdgeInsets.only(right: 6, bottom: 4),
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.25),
           borderRadius: BorderRadius.circular(6)
@@ -370,13 +370,13 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                 },
               )
           ),
-          SizedBox(width: 8,),
+          const SizedBox(width: 8,),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 user.displayName,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w500
@@ -392,14 +392,14 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
               ),
             ],
           ),
-          SizedBox(width: 8,),
+          const SizedBox(width: 8,),
           GestureDetector(
             onTap: (){
               List<MyUser> temp = List.from(member.value);
               temp.remove(user);
               member.value = temp;
             },
-            child: Icon(
+            child: const Icon(
               CupertinoIcons.xmark,
               color: Colors.white,
               size: 20,
@@ -415,7 +415,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
@@ -427,7 +427,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
           ),
           child: AppBar(
             backgroundColor: Colors.black,
-            title: Text(
+            title: const Text(
               "Create community",
               style: TextStyle(
                   color: Colors.white,
@@ -511,22 +511,22 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                               duration: const Duration(seconds: 3),
                             ),
                           );
-                          print("error: " + e.toString());
+                          print("error: $e");
                         }
                       }
                     }
                   }
                 },
-                child: Text(
+                style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent
+                ),
+                child: const Text(
                   "Create",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500
                   ),
-                ),
-                style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent
                 ),
               )
             ],
@@ -560,7 +560,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                               height: 190,
                               decoration: BoxDecoration(
                                   image: DecorationImage(
-                                      image: FileImage(File(value!.path)),
+                                      image: FileImage(File(value.path)),
                                       fit: BoxFit.cover
                                   )
                               ),
@@ -568,7 +568,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                           }else {
                             return Container(
                               height: 190,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                   image: DecorationImage(
                                       image: AssetImage("assets/images/group.jpg"),
                                       fit: BoxFit.cover
@@ -588,7 +588,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                         color: Colors.black.withOpacity(0.4),
                       ),
                     ),
-                    Positioned(
+                    const Positioned(
                       top: 0,
                       bottom: 0,
                       right: 0,
@@ -604,9 +604,9 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 12,),
+              const SizedBox(height: 12,),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -653,7 +653,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                         },
                       ),
                     ),
-                    SizedBox(height: 16,),
+                    const SizedBox(height: 16,),
                     Text(
                       "Review",
                       style: TextStyle(
@@ -707,8 +707,8 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                             setState(() {
                             });
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: Icon(
                               CupertinoIcons.add,
                               color: Colors.white,
@@ -721,7 +721,7 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                     ValueListenableBuilder(
                         valueListenable: member,
                         builder: (context, value, child){
-                          print("value lenght: " + value.length.toString());
+                          print("value lenght: ${value.length}");
                           return Wrap(
                             children: buildListUserChoosed(value),
                           );
@@ -868,8 +868,8 @@ class _CreateCommunityScreenState extends State<CreateCommunityScreen> {
                                 }
                             );
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: Icon(
                               CupertinoIcons.add,
                               color: Colors.white,

@@ -1,13 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:twitter/shared/global_variable.dart';
 
 import '../models/tweet.dart';
 import '../services/storage.dart';
-import 'ImageGridView.dart';
+import 'image_grid_view.dart';
 
 class BriefTweet extends StatelessWidget {
   BriefTweet({super.key, required this.tweet});
@@ -27,12 +24,12 @@ class BriefTweet extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasError || snapshot.data == null) {
-                      return Text("Error");
+                      return const Text("Error");
                     } else {
                       return Image.network(snapshot.data!, fit: BoxFit.cover,);
                     }
                   }
-                  return SpinKitPulse(
+                  return const SpinKitPulse(
                     color: Colors.blue,
                     size: 50.0,
                   );
@@ -47,7 +44,7 @@ class BriefTweet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           color: Colors.black,
       ),
       child: Column(
@@ -72,7 +69,7 @@ class BriefTweet extends StatelessWidget {
                       if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
                         return Image.network(snapshot.data!);
                       }else {
-                        return SizedBox(height: 1,);
+                        return const SizedBox(height: 1,);
                       }
                     },
                   )
@@ -93,13 +90,13 @@ class BriefTweet extends StatelessWidget {
                           children: [
                             Text(
                               tweet.user!.myUser.displayName,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                   color: Colors.white
                               ),
                             ),
-                            SizedBox(width: 8,),
+                            const SizedBox(width: 8,),
                             Text(
                               tweet.user!.myUser.username,
                               style: TextStyle(
@@ -131,7 +128,7 @@ class BriefTweet extends StatelessWidget {
                         ),
                       ),
                     ],
-                    SizedBox(height: 4,),
+                    const SizedBox(height: 4,),
                     //Tweet content and media
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,7 +137,7 @@ class BriefTweet extends StatelessWidget {
                         if(tweet.content.isNotEmpty)...[
                           RichText(
                             text: TextSpan(
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white,
                               ),
@@ -148,7 +145,7 @@ class BriefTweet extends StatelessWidget {
                                 TextSpan(
                                   text: tweet.content.length>200? "${tweet.content.substring(0,200)}...": tweet.content,
                                 ),
-                                if(tweet.content.length>200)...[TextSpan(
+                                if(tweet.content.length>200)...[const TextSpan(
                                   text:  "Show more",
                                   style: TextStyle(
                                       color: Colors.blue,

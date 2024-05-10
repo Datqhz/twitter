@@ -16,14 +16,14 @@ class SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<SearchView> {
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
   bool isShowX = false; // button clear text
-  Timer _debounce = Timer(Duration(seconds: 2), (){});
+  Timer _debounce = Timer(const Duration(seconds: 2), (){});
   List<MyUser> listUser = [];
   DatabaseService databaseService = DatabaseService();
 
   void _loadUserContainRegex(String value) {
-    if (_debounce != null && _debounce.isActive) {
+    if (_debounce.isActive) {
       _debounce.cancel();
     }
     _debounce = Timer(const Duration(seconds: 2), () async{
@@ -37,10 +37,10 @@ class _SearchViewState extends State<SearchView> {
     for(MyUser user in listUser){
       result.add(
           Container(
-            margin: EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: 12),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   height: 40,
                   child: FutureBuilder<String?>(
                     future: Storage().downloadAvatarURL(user.avatarLink),
@@ -52,18 +52,18 @@ class _SearchViewState extends State<SearchView> {
                           radius: 20,
                         );
                       }else {
-                        return SizedBox(height: 0,);
+                        return const SizedBox(height: 0,);
                       }
                     }
                   ),
                 ),
-                SizedBox(width: 8,),
+                const SizedBox(width: 8,),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       user.displayName,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 15
@@ -93,7 +93,7 @@ class _SearchViewState extends State<SearchView> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
@@ -138,7 +138,7 @@ class _SearchViewState extends State<SearchView> {
                     });
                   }:null,
                   color: isShowX? Colors.white: Colors.transparent,
-                  icon: Icon(CupertinoIcons.multiply)
+                  icon: const Icon(CupertinoIcons.multiply)
               )
             ],
           ),

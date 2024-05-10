@@ -39,12 +39,12 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
   }
   List<Widget> buildListTweet(){
     List<Widget> items = [];
-    if(bookmarkTweets.length>0){
+    if(bookmarkTweets.isNotEmpty){
       for(Bookmark t in bookmarkTweets){
         items.add(TweetWidget(tweet: t.tweet));
       }
     }
-    items.add(SizedBox(height: 50,));
+    items.add(const SizedBox(height: 50,));
     return items;
   }
 
@@ -54,7 +54,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: Container(
           decoration: BoxDecoration(
               border: Border(
@@ -66,7 +66,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           ),
           child: AppBar(
             backgroundColor: Colors.black,
-            title: Text(
+            title: const Text(
               "Bookmarks",
               style: TextStyle(
                   color: Colors.white,
@@ -76,7 +76,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
             ),
             actions: <Widget>[
               PopupMenuButton<String>(
-                icon: Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white, size: 18,),
+                icon: const Icon(CupertinoIcons.ellipsis_vertical, color: Colors.white, size: 18,),
                 color: Colors.black,
                 onSelected: (value) async{
                   await DatabaseService().removeAllBookmark();
@@ -90,7 +90,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                       value: choice,
                       child: Text(
                         choice,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white
                         ),
                       ),
@@ -102,7 +102,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           ),
         ),
       ),
-      body: _isLoad? Loading():Container(
+      body: _isLoad? const Loading():SizedBox(
         height: MediaQuery
             .of(context)
             .size
@@ -112,7 +112,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   "Save posts for later",
                   style: TextStyle(
                       color: Colors.white,
@@ -120,7 +120,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                       fontWeight: FontWeight.w600
                   ),
                 ),
-                SizedBox(height: 10,),
+                const SizedBox(height: 10,),
                 Text(
                   "Bookmark posts to easily find them again in the future.",
                   style: TextStyle(

@@ -829,14 +829,13 @@ class _TweetActionState extends State<TweetAction> {
                         ),
                         // not yet
                         GestureDetector(
-                          onTap: widget.tweet.isRepost
+                          onTap: widget.isActive
                               ? () async {
                                   await DatabaseService()
                                       .undoRepost(widget.tweet.idAsString);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       // backgroundColor: Colors.transparent,
-
                                       behavior: SnackBarBehavior.floating,
                                       content: const Align(
                                           alignment: Alignment.center,
@@ -848,6 +847,10 @@ class _TweetActionState extends State<TweetAction> {
                                       duration: const Duration(seconds: 3),
                                     ),
                                   );
+                                  setState(() {
+                                    widget.isActive = !widget.isActive;
+                                    widget.tweet.isRepost = !widget.tweet.isRepost;
+                                  });
                                   Navigator.pop(context);
                                 }
                               : () async {
@@ -877,7 +880,6 @@ class _TweetActionState extends State<TweetAction> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       // backgroundColor: Colors.transparent,
-
                                       behavior: SnackBarBehavior.floating,
                                       content: const Align(
                                           alignment: Alignment.center,
@@ -889,6 +891,10 @@ class _TweetActionState extends State<TweetAction> {
                                       duration: const Duration(seconds: 3),
                                     ),
                                   );
+                                  setState(() {
+                                    widget.isActive = !widget.isActive;
+                                    widget.tweet.isRepost = !widget.tweet.isRepost;
+                                  });
                                   Navigator.pop(context);
                                 },
                           child: Container(
@@ -968,11 +974,25 @@ class _TweetActionState extends State<TweetAction> {
                 widget.number += 1;
               }
               widget.isActive = !widget.isActive;
+              widget.tweet.isLike = !widget.tweet.isLike;
             });
             break;
           case 4: //view
             break;
           case 5: //bookmark
+            if(widget.tweet.isBookmark) {
+              await DatabaseService().removeBookmarkTweet(widget.tweet.idAsString);
+            }else {
+              await DatabaseService().addBookmark(widget.tweet.idAsString);
+            }
+            setState(() {
+              if(widget.tweet.isBookmark){
+                widget.tweet.totalBookmark -=1;
+              }else {
+                widget.tweet.totalBookmark +=1;
+              }
+              widget.tweet.isBookmark= !widget.tweet.isBookmark;
+            });
             break;
           default: //share
             break;

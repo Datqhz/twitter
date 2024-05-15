@@ -8,13 +8,14 @@ import '../../services/storage.dart';
 import 'community-screen.dart';
 
 class CommunitiesItem extends StatelessWidget {
-  CommunitiesItem({super.key, required this.group});
+  CommunitiesItem({super.key, required this.group, required this.flag});
   Group group;
+  ValueNotifier<int> flag;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap:(){
-        Navigator.push(context,MaterialPageRoute(builder: (context)=> GroupScreen(group: group)));
+        Navigator.push(context,MaterialPageRoute(builder: (context)=> GroupScreen(group: group, flag: flag)));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

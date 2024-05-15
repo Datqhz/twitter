@@ -610,6 +610,42 @@ class DatabaseService{
         .toList();
     return result;
   }
+  Future <Follow?> getFollowInfo(String uid)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    Response response = await get(Uri.parse("$url/api/v1/follow/info/$uid"), headers: headers);
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      return null;
+    }
+    return Follow.fromJson(json.decode(response.body));
+  }
+  Future<bool> updateFollow(Follow follow)async{
+    var token = await extractToken();
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Authorization" :"Bearer ${token!}"
+    };
+    Response response = await put(Uri.parse("$url/api/v1/follow/${follow.idAsString}"),
+        headers: headers,
+        body: jsonEncode(<String, dynamic>{
+          "id": follow.idAsString,
+          "userFollowed": follow.userFollowed.myUser.uid,
+          "userFollow": follow.userFollow.myUser.uid,
+          "notify": follow.isNotify,
+          // Add any other data you want to send in the body
+        })
+    );
+    int statusCode = response.statusCode;
+    if(statusCode != 200){
+      print("error");
+      return false;
+    }
+    return true;
+  }
   Future<bool> followUid(String uid) async{
     var token = await extractToken();
     Map<String, String> headers = {

@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:twitter/models/follow.dart';
 import 'package:twitter/models/user_info_with_follow.dart';
 import 'package:twitter/screens/profile/edit-profile.dart';
 import 'package:twitter/screens/profile/follow_view.dart';
@@ -34,7 +35,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   List<Tweet> replyTweets = [];
   List<Tweet> likedTweets = [];
   List<Tweet> mediaTweets = [];
-  late MyUserWithFollow user;
+  late ValueNotifier<MyUserWithFollow> user;
+  late ValueNotifier<Follow?> follow;
+  ValueNotifier<int> flag = ValueNotifier(1);
   bool _isLoad = true;
   // late ScrollController scrollController;
   List<ScrollController> tabScrollControllers = List.generate(5, (index) => ScrollController());
@@ -80,13 +83,16 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
   }
   Future<void> fetchData()async{
     try{
-      user = await _databaseService.getUserInfoWithFollow(widget.uid);
+      user = ValueNotifier(await _databaseService.getUserInfoWithFollow(widget.uid));
+      print("step 1");
+        follow = ValueNotifier(await _databaseService.getFollowInfo(widget.uid));
+      print("step 2");
       tweets =  await _databaseService.getTweetOfUid(widget.uid);
       replyTweets =  await _databaseService.getReplyTweetOfUid(widget.uid);
       likedTweets =  await _databaseService.getLikedTweetByUid(widget.uid);
       mediaTweets =  await _databaseService.getMediaTweetOfUid(widget.uid);
-      avatarLink.value = await Storage().downloadAvatarURL(user.myUser.avatarLink);
-      wallLink.value = await Storage().downloadWallURL(user.myUser.wallLink);
+      avatarLink.value = await Storage().downloadAvatarURL(user.value.myUser.avatarLink);
+      wallLink.value = await Storage().downloadWallURL(user.value.myUser.wallLink);
       _isLoad = false;
       setState(() {
       });
@@ -224,20 +230,74 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                           ),
                                           const Expanded(child: SizedBox(height: 1,)),
                                           //notify option button
-                                          if(GlobalVariable.currentUser?.myUser.uid != widget.uid) ...[GestureDetector(
-                                            child: Container(
-                                                height: 38,
-                                                width: 38,
-                                                margin: const EdgeInsets.only(bottom: 4, right: 12),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    borderRadius: BorderRadius.circular(25),
-                                                    border: Border.all(color: Theme.of(context).dividerColor, width: 1)
+                                          if(GlobalVariable.currentUser?.myUser.uid != widget.uid && follow.value != null) ...[
+                                            ValueListenableBuilder(
+                                              valueListenable: follow!,
+                                              builder:  (context, value, child){
+                                                return GestureDetector(
+                                                  onTap: ()async{
+                                                    Follow? temp = Follow(
+                                                        idAsString: value!.idAsString,
+                                                        userFollow: value!.userFollow,
+                                                        userFollowed: value!.userFollowed,
+                                                        isNotify: !value!.isNotify);
+                                                    await DatabaseService().updateFollow(temp!);
+                                                    follow?.value = temp;
+                                                  },
+                                                  child: Container(
+                                                      height: 38,
+                                                      width: 38,
+                                                      margin: const EdgeInsets.only(bottom: 4, right: 12),
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.black,
+                                                          borderRadius: BorderRadius.circular(25),
+                                                          border: Border.all(color: Theme.of(context).dividerColor, width: 1)
+                                                      ),
+                                                      child: Icon(value?.isNotify == true ?CupertinoIcons.bell: CupertinoIcons.bell_slash, color: Colors.white, size: 16,)
+                                                  ),
+                                                );
+                                              },
+                                            ),],
+                                          if(GlobalVariable.currentUser?.myUser.uid != widget.uid)...[
+                                            ValueListenableBuilder(
+                                            valueListenable: user,
+                                            builder: (context, value, child){
+                                              return OutlinedButton(
+                                                onPressed: ()async{
+                                                  if(value.isFollow){
+                                                    await DatabaseService().unfollowUid(value.myUser.uid);
+                                                    value.numOfFollowed-=1;
+                                                  }else {
+                                                    await DatabaseService().followUid(value.myUser.uid);
+                                                    value.numOfFollowed+=1;
+                                                  }
+                                                  await DatabaseService().getUserInfo();
+                                                  MyUserWithFollow temp = MyUserWithFollow(
+                                                      myUser: value.myUser,
+                                                      numOfFollowed: value.numOfFollowed,
+                                                      numOfFollowing: value.numOfFollowing,
+                                                      isFollow: !value.isFollow);
+                                                  user.value = temp;
+                                                },
+                                                style: OutlinedButton.styleFrom(
+                                                  backgroundColor: Colors.black,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                  side: BorderSide(
+                                                    color: Theme.of(context).dividerColor, // Set the border color here
+                                                    width: 1.0, // Set the border width here
+                                                  ),
+                                                  shape:RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(20.0), // Set the border radius here
+                                                  ),
                                                 ),
-                                                child: Icon(user.isFollow == true ?CupertinoIcons.bell: CupertinoIcons.bell_slash, color: Colors.white, size: 16,)
-                                            ),
-                                          ),],
-                                          ValueListenableBuilder(
+                                                child: Text(
+                                                    value.isFollow ? "Unfollow":"Follow"
+                                                ),
+                                              );
+                                            },
+                                          )],
+                                          if(GlobalVariable.currentUser?.myUser.uid == widget.uid)...[ValueListenableBuilder(
                                             valueListenable: wallLink,
                                             builder: (context, value, child){
                                               return OutlinedButton(
@@ -261,7 +321,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                                 ),
                                               );
                                             },
-                                          )
+                                          )]
+
                                         ],
                                       ),
                                     ),
@@ -270,7 +331,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        user.myUser.displayName,
+                                        user.value.myUser.displayName,
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 22,
@@ -283,7 +344,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 14),
                                       child: Text(
-                                        user.myUser.username,
+                                        user.value.myUser.username,
                                         style: const TextStyle(
                                           color: Color.fromRGBO(170, 184, 194, 1),
                                           fontSize: 14,
@@ -303,7 +364,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                           const Icon(CupertinoIcons.calendar, size: 14, color: Color.fromRGBO(170, 184, 194, 1),),
                                           const SizedBox(width: 8,),
                                           Text(
-                                            "Joined ${DateFormat.yMMMM("en_US").format(user.myUser.createDate)}",
+                                            "Joined ${DateFormat.yMMMM("en_US").format(user.value.myUser.createDate)}",
                                             style: const TextStyle(
                                               color: Color.fromRGBO(170, 184, 194, 1),
                                               fontSize: 14,
@@ -319,17 +380,22 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                       padding: const EdgeInsets.symmetric(horizontal: 14),
                                       child: Row(
                                         children: [
-                                          Text(
-                                            user.numOfFollowing.toString(),
-                                            style: const TextStyle(
-                                              color: Colors.white ,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                          ValueListenableBuilder(
+                                            valueListenable: user,
+                                            builder: (context, value, child){
+                                              return Text(
+                                                user.value.numOfFollowing.toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.white ,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              );
+                                            },
                                           ),
                                           GestureDetector(
                                             onTap: (){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: true,)));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: user.value.myUser.uid, isFollowing: true,)));
                                             },
                                             child: const Text(
                                               " Following",
@@ -341,18 +407,23 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                             ),
                                           ),
                                           const SizedBox(width: 8,),
-                                          Text(
-                                            user.numOfFollowed.toString(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                          ValueListenableBuilder(
+                                            valueListenable: user,
+                                            builder: (context, value, child){
+                                              return Text(
+                                                user.value.numOfFollowed.toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.white ,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              );
+                                            },
                                           ),
                                           const SizedBox(width: 8,),
                                           GestureDetector(
                                             onTap: (){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: GlobalVariable.currentUser!.myUser.uid, isFollowing: false)));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>FollowView(uid: user.value.myUser.uid, isFollowing: false)));
                                             },
                                             child: const Text(
                                               "Followers",
@@ -396,7 +467,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                     );
                   },
                 ),
-
                 //button appbar
                 ValueListenableBuilder(
                   valueListenable: showAppbar,
@@ -431,7 +501,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin{
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          user.myUser.displayName,
+                                          user.value.myUser.displayName,
                                           style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,

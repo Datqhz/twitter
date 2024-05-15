@@ -10,7 +10,6 @@ import '../../services/database_service.dart';
 
 class SearchCommutitiesScreen extends StatefulWidget {
   const SearchCommutitiesScreen({super.key});
-
   @override
   State<SearchCommutitiesScreen> createState() => _SearchCommutitiesScreenState();
 }
@@ -50,7 +49,7 @@ class _SearchCommutitiesScreenState extends State<SearchCommutitiesScreen> {
   List<Widget> buildGroupItem(List<Group> groups){
     List<Widget> rs = [];
     for (var element in groups) {
-      rs.add(CommunitiesItem(group: element));
+      rs.add(CommunitiesItem(group: element, flag: ValueNotifier(1),));
     }
     rs.add(Container(
       padding: const EdgeInsets.only(top: 12, bottom: 12),

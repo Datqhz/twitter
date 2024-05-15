@@ -94,6 +94,7 @@ class _MyAppBarState extends State<MyAppBar> {
   }
 
   Widget _appBarCommunities() {
+
     return Container(
       padding: const EdgeInsets.only(left: 48),
       height: 48.1,

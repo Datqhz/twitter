@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:twitter/screens/profile/profile.dart';
 import 'package:twitter/services/database_service.dart';
 
 import '../../models/follow.dart';
@@ -117,105 +118,110 @@ class FollowItem extends StatelessWidget {
     }else {
       _isFollow.value = follow.userFollowed.isFollow;
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        border: Border(
-          bottom: BorderSide(
-            width: 0.2,
-            color: Colors.white.withOpacity(0.5)
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>Profile(uid: !followers? follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid )));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border(
+            bottom: BorderSide(
+              width: 0.2,
+              color: Colors.white.withOpacity(0.5)
+            )
           )
-        )
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                height: 40,
-                child: FutureBuilder<String?>(
-                    future: Storage().downloadAvatarURL(!followers?follow.userFollowed.myUser.avatarLink:follow.userFollow.myUser.avatarLink),
-                    builder: (context, snapshot) {
-                      if(snapshot.connectionState == ConnectionState.done){
-                        return CircleAvatar(
-                          backgroundImage: NetworkImage(snapshot.data!),
-                          backgroundColor: Colors.black ,
-                          radius: 20,
-                        );
-                      }else {
-                        return const SizedBox(height: 0,);
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  height: 40,
+                  child: FutureBuilder<String?>(
+                      future: Storage().downloadAvatarURL(!followers?follow.userFollowed.myUser.avatarLink:follow.userFollow.myUser.avatarLink),
+                      builder: (context, snapshot) {
+                        if(snapshot.connectionState == ConnectionState.done){
+                          return CircleAvatar(
+                            backgroundImage: NetworkImage(snapshot.data!),
+                            backgroundColor: Colors.black ,
+                            radius: 20,
+                          );
+                        }else {
+                          return const SizedBox(height: 0,);
+                        }
                       }
-                    }
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8,),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    !followers?follow.userFollowed.myUser.displayName:follow.userFollow.myUser.displayName,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    !followers?follow.userFollowed.myUser.username:follow.userFollow.myUser.username,
-                    style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontWeight: FontWeight.w400,
-                        fontSize: 15
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  )
-                ],
-              ),
-            ],
-          ),
-          ValueListenableBuilder(
-              valueListenable: _isFollow,
-              builder: (context, value, child){
-                return SizedBox(
-                  height: 30,
-                  child: TextButton(
-                    onPressed: ()async{
-                      if(_isFollow.value){
-                        await DatabaseService().unfollowUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
-                      }else {
-                        await DatabaseService().followUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
-                      }
-                      await DatabaseService().getUserInfo();
-                      _isFollow.value = !_isFollow.value;
-                    },
-                    style: TextButton.styleFrom(
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500
+                const SizedBox(width: 8,),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      !followers?follow.userFollowed.myUser.displayName:follow.userFollow.myUser.displayName,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15
                       ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                        backgroundColor: value?Colors.black:Colors.white,
-                        foregroundColor: value?Colors.white:Colors.black,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: BorderSide(
-                              width: 0.8,
-                              color: Theme.of(context).dividerColor
-                            )
-                        )
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Text(
-                        value?"Following":"Follow"
+                    Text(
+                      !followers?follow.userFollowed.myUser.username:follow.userFollow.myUser.username,
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.6),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 15
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  ],
+                ),
+              ],
+            ),
+            ValueListenableBuilder(
+                valueListenable: _isFollow,
+                builder: (context, value, child){
+                  return SizedBox(
+                    height: 30,
+                    child: TextButton(
+                      onPressed: ()async{
+                        if(_isFollow.value){
+                          await DatabaseService().unfollowUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
+                        }else {
+                          await DatabaseService().followUid(!followers?follow.userFollowed.myUser.uid:follow.userFollow.myUser.uid);
+                        }
+                        await DatabaseService().getUserInfo();
+                        _isFollow.value = !_isFollow.value;
+                      },
+                      style: TextButton.styleFrom(
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500
+                        ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                          backgroundColor: value?Colors.black:Colors.white,
+                          foregroundColor: value?Colors.white:Colors.black,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: BorderSide(
+                                width: 0.8,
+                                color: Theme.of(context).dividerColor
+                              )
+                          )
+                      ),
+                      child: Text(
+                          value?"Following":"Follow"
+                      ),
                     ),
-                  ),
-                );
-              }
-          )
+                  );
+                }
+            )
 
-        ],
+          ],
+        ),
       ),
     );
   }

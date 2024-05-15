@@ -24,6 +24,7 @@ class _CommunityState extends State<Community> {
   double tempHeight = 0;
   bool isShow = true;
   late Future<List<Group>> listJoined;
+  ValueNotifier<int> reload  = ValueNotifier(1);
 
   List<Widget> loadGroups(List<Group> groups){
     List<Widget> rs = [const SizedBox(height: 10,),
@@ -48,7 +49,7 @@ class _CommunityState extends State<Community> {
         ),
       ),];
     for (var element in groups) {
-      rs.add(CommunitiesItem(group: element));
+      rs.add(CommunitiesItem(group: element, flag: reload,));
     }
     rs.add(Container(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
@@ -76,7 +77,7 @@ class _CommunityState extends State<Community> {
   Widget groupItem(Group group){
     return GestureDetector(
       onTap: (){
-        Navigator.push(context,MaterialPageRoute(builder: (context)=>GroupScreen(group: group)));
+        Navigator.push(context,MaterialPageRoute(builder: (context)=>GroupScreen(group: group, flag: reload)));
       },
       child: Container(
         clipBehavior: Clip.antiAlias,
@@ -137,85 +138,91 @@ class _CommunityState extends State<Community> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-          children: [
-            Container(
-              padding: EdgeInsets.only(top: 50 + tempHeight),
-              height: double.infinity,
-              child: NotificationListener<ScrollEndNotification>(
-                onNotification: (ScrollEndNotification scrollEnd){
-                  return true;
-                },
-                child: FutureBuilder(
-                  future: listJoined,
-                  builder: (context, snapshot){
-                    if(snapshot.connectionState == ConnectionState.done){
-                      if(snapshot.data!.isNotEmpty){
-                        return ListView(
-                          children: [
-                            Container(
-                                height: 103,
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(width: 0.15, color: Colors.white.withOpacity(0.5))
-                                    )
+    return ValueListenableBuilder(
+        valueListenable: reload,
+        builder: (context, value, child){
+          listJoined =DatabaseService().getGroupJoined();
+          return Stack(
+              children: [
+                Container(
+                  padding: EdgeInsets.only(top: 50 + tempHeight),
+                  height: double.infinity,
+                  child: NotificationListener<ScrollEndNotification>(
+                    onNotification: (ScrollEndNotification scrollEnd){
+                      return true;
+                    },
+                    child: FutureBuilder(
+                      future: listJoined,
+                      builder: (context, snapshot){
+                        if(snapshot.connectionState == ConnectionState.done){
+                          if(snapshot.data!.isNotEmpty){
+                            return ListView(
+                              children: [
+                                Container(
+                                  height: 103,
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                      border: Border(
+                                          bottom: BorderSide(width: 0.15, color: Colors.white.withOpacity(0.5))
+                                      )
+                                  ),
+                                  child: ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: buildGroupJoined(snapshot.data!),
+                                  ),
                                 ),
-                                child: ListView(
-                                  scrollDirection: Axis.horizontal,
-                                  children: buildGroupJoined(snapshot.data!),
+                                FutureBuilder(
+                                  future: DatabaseService().getTweetOfGroupJoined(),
+                                  builder: (context, snapshot){
+                                    if(snapshot.connectionState == ConnectionState.done&& snapshot.hasData){
+                                      return Column(
+                                        children: [
+                                          ...buildTweet(snapshot.data!)
+                                        ],
+                                      );
+                                    }else {
+                                      return const SpinKitPulse(
+                                        color: Colors.blue,
+                                      );
+                                    }
+                                  },
                                 ),
-                              ),
-                            FutureBuilder(
-                              future: DatabaseService().getTweetOfGroupJoined(),
+                              ],
+                            );
+                          }else{
+                            return FutureBuilder(
+                              future: DatabaseService().getAllGroup(),
                               builder: (context, snapshot){
-                                if(snapshot.connectionState == ConnectionState.done&& snapshot.hasData){
-                                  return Column(
-                                    children: [
-                                      ...buildTweet(snapshot.data!)
-                                    ],
+                                if(snapshot.hasData && snapshot.connectionState == ConnectionState.done){
+                                  return ListView(
+                                      children: loadGroups(snapshot.data!)
                                   );
                                 }else {
-                                  return const SpinKitPulse(
-                                    color: Colors.blue,
-                                  );
+                                  return const Center(child: SpinKitPulse(color: Colors.blue,));
                                 }
                               },
-                            ),
-                          ],
-                        );
-                      }else{
-                        return FutureBuilder(
-                          future: DatabaseService().getAllGroup(),
-                          builder: (context, snapshot){
-                            if(snapshot.hasData && snapshot.connectionState == ConnectionState.done){
-                              return ListView(
-                                children: loadGroups(snapshot.data!)
-                              );
-                            }else {
-                              return const Center(child: SpinKitPulse(color: Colors.blue,));
-                            }
-                          },
-                        );
-                      }
-                    }
-                    else {
-                      return const Center(child: SpinKitPulse(color: Colors.blue,),);
-                    }
-                  },
+                            );
+                          }
+                        }
+                        else {
+                          return const Center(child: SpinKitPulse(color: Colors.blue,),);
+                        }
+                      },
+                    ),
+                  ) ,
                 ),
-              ) ,
-            ),
-            AnimatedPositioned(
-                duration: const Duration(milliseconds: 200),
-                top: tempHeight,
-                right: 0,
-                left: 0,
-                child: MyAppBar(currentPage: 2)
-            ),
-          ]
-      );
+                AnimatedPositioned(
+                    duration: const Duration(milliseconds: 200),
+                    top: tempHeight,
+                    right: 0,
+                    left: 0,
+                    child: MyAppBar(currentPage: 2)
+                ),
+              ]
+          );
+        },
+    );
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,9 @@ import '../../services/storage.dart';
 import '../home/post_tweet.dart';
 
 class GroupScreen extends StatefulWidget {
-  GroupScreen({super.key, required this.group});
+  GroupScreen({super.key, required this.group, required this.flag});
   Group group;
+  ValueNotifier<int> flag;
 
   @override
   State<GroupScreen> createState() => _GroupScreenState();
@@ -31,7 +34,6 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
   final List<ScrollController> _scrollControllers = List.generate(2, (index) => ScrollController());
 
   final GlobalKey _menuKey = GlobalKey();
-
   void showMenu() {
     dynamic popUpMenuState = _menuKey.currentState;
     popUpMenuState.showButtonMenu();
@@ -240,6 +242,10 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                           OutlinedButton(
                                             onPressed: () async{
                                               await DatabaseService().joinGroup(widget.group.groupIdAsString);
+                                              setState(() {
+                                                widget.group.isJoined = !widget.group.isJoined;
+                                                widget.flag.value = widget.flag.value +1;
+                                              });
                                             },
                                             style: OutlinedButton.styleFrom(
                                               backgroundColor: Colors.white,
@@ -393,9 +399,17 @@ class _GroupScreenState extends State<GroupScreen> with SingleTickerProviderStat
                                           onSelected: (value) async{
                                             if(widget.group.isJoined){
                                                 await DatabaseService().leaveGroup(widget.group.groupIdAsString);
+                                                setState(() {
+                                                  widget.group.isJoined = !widget.group.isJoined;
+                                                  widget.flag.value = widget.flag.value +1;
+                                                });
                                                 Navigator.pop(context);
                                             }else {
                                                 await DatabaseService().joinGroup(widget.group.groupIdAsString);
+                                                setState(() {
+                                                  widget.group.isJoined = !widget.group.isJoined;
+                                                  widget.flag.value = widget.flag.value +1;
+                                                });
                                             }
                                           },
                                           itemBuilder: (BuildContext context) {

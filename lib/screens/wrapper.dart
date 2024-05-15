@@ -5,11 +5,11 @@ import 'package:twitter/screens/authentication/sign_in.dart';
 import '../auth/user_auth.dart';
 
 class Wrapper extends StatelessWidget {
-  const Wrapper({super.key});
+  Wrapper({super.key});
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserAuth?>(context);
 /*    print(user);*/
-    return user==null? const SignIn() : const AuthNavigation();
+    return user==null? SignIn() : AuthNavigation();
   }
 }

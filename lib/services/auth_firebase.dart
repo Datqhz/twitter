@@ -27,8 +27,11 @@ class AuthFirebaseService{
       User? user = result.user;
       await FirebaseDatabase(uid: user!.uid).updateUserData(myUser, birth);
       await DatabaseService().saveUserInfo(myUser, tempAuth);
+
+      return _userFromFirebase(user!);
     }catch(e){
       print(e.toString());
+      return null;
     }
   }
 

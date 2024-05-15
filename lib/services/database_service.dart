@@ -14,7 +14,7 @@ import '../models/tweet.dart';
 import '../models/user.dart';
 
 class DatabaseService{
-  String url = 'http://192.168.1.19:8080';
+  String url = 'http://192.168.1.8:8080';
   Future<String> extractTokenAndAccessSecureResource() async {
     var token = await extractToken();
     return await accessSecureResource(token);

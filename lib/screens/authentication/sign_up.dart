@@ -5,6 +5,7 @@ import 'package:flutter_holo_date_picker/date_picker_theme.dart';
 import 'package:flutter_holo_date_picker/widget/date_picker_widget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:twitter/screens/authentication/sign_in.dart';
 import 'package:twitter/services/auth_firebase.dart';
 
 import '../../models/user.dart';
@@ -857,7 +858,8 @@ class SignUpSuccess extends StatelessWidget {
                 const SizedBox(height: 30,),
                 ElevatedButton(
                   onPressed: (){
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (route)=>false);
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>const SignInStep1()), (route)=>false);
+
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

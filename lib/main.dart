@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
             routes: GlobalVariable.routes,
-            home: const SafeArea(
+            home: SafeArea(
               child: Wrapper(),
             ),
           debugShowCheckedModeBanner: false,
